@@ -22,7 +22,7 @@
 	<artifactId>cy-community-detection</artifactId>
 	<version>1.0.0</version>
 	<packaging>bundle</packaging>
-	<name>CyCommunityDetection</name>
+	<name>Community Detection</name>
 
 	<repositories>
 		<repository>
@@ -186,9 +186,21 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.cytoscape</groupId>
+			<artifactId>swing-application-api</artifactId>
+			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
 			<version>${osgi.api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.logging</groupId>
+			<artifactId>pax-logging-api</artifactId>
+			<version>1.5.2</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 	

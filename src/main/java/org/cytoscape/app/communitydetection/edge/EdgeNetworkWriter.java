@@ -1,0 +1,71 @@
+package org.cytoscape.app.communitydetection.edge;
+
+import java.io.IOException;
+import java.io.OutputStream;
+
+import org.cytoscape.app.communitydetection.util.AppUtils;
+import org.cytoscape.io.write.CyWriter;
+import org.cytoscape.model.CyEdge;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyRow;
+import org.cytoscape.work.TaskMonitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class EdgeNetworkWriter implements CyWriter {
+
+	private final static Logger logger = LoggerFactory.getLogger(EdgeNetworkWriter.class);
+
+	private final OutputStream outStream;
+	private final CyNetwork network;
+
+	public EdgeNetworkWriter(OutputStream outStream, CyNetwork network) {
+		this.outStream = outStream;
+		this.network = network;
+	}
+
+	@Override
+	public void run(TaskMonitor taskMonitor) throws Exception {
+
+		for (CyEdge edge : network.getEdgeList()) {
+			String s = edge.getSource().getSUID().toString() + "\t" + edge.getTarget().getSUID().toString() + "\t"
+					+ getInteractionFromEdgeTable(network, edge) + "\n";
+			outStream.write(s.getBytes());
+		}
+	}
+
+	@Override
+	public void cancel() {
+		if (outStream == null) {
+			return;
+		}
+		try {
+			outStream.close();
+		} catch (IOException e) {
+			logger.error("Could not close Outputstream for EdgeNetworkWriter.", e);
+		}
+	}
+
+	private final static String getSharedNameFromNodeTable(final CyNetwork network, final CyNode node) {
+		final CyRow row = network.getTable(CyNode.class, CyNetwork.DEFAULT_ATTRS).getRow(node.getSUID());
+		if (row != null) {
+			final Object o = row.getRaw(AppUtils.SHARED_NAME_COL);
+			if ((o != null) && (o instanceof String)) {
+				return String.valueOf(o);
+			}
+		}
+		return "";
+	}
+
+	private final static String getInteractionFromEdgeTable(final CyNetwork network, final CyEdge edge) {
+		final CyRow row = network.getTable(CyEdge.class, CyNetwork.DEFAULT_ATTRS).getRow(edge.getSUID());
+		if (row != null) {
+			final Object o = row.getRaw(AppUtils.SHARED_INTERACTION);
+			if ((o != null) && (o instanceof String)) {
+				return String.valueOf(o);
+			}
+		}
+		return "";
+	}
+}

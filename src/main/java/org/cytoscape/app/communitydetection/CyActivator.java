@@ -5,27 +5,32 @@ import static org.cytoscape.work.ServiceProperties.MENU_GRAVITY;
 import static org.cytoscape.work.ServiceProperties.PREFERRED_MENU;
 import static org.cytoscape.work.ServiceProperties.TITLE;
 
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.util.Properties;
 
-import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.group.CyGroupManager;
+import org.cytoscape.app.communitydetection.cx.CxReaderTask;
+import org.cytoscape.app.communitydetection.cx.CxReaderWriterTaskFactory;
+import org.cytoscape.app.communitydetection.cx.CxWriterTask;
+import org.cytoscape.app.communitydetection.edge.EdgeNetworkWriterFactory;
+import org.cytoscape.app.communitydetection.edge.EdgeReaderTask;
+import org.cytoscape.app.communitydetection.edge.EdgeReaderWriterTaskFactory;
+import org.cytoscape.app.communitydetection.edge.EdgeWriterTask;
+import org.cytoscape.io.BasicCyFileFilter;
 import org.cytoscape.io.DataCategory;
-import org.cytoscape.io.internal.cx_reader.CytoscapeCxFileFilter;
+import org.cytoscape.io.read.InputStreamTaskFactory;
 import org.cytoscape.io.util.StreamUtil;
+import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.model.CyNetworkManager;
-import org.cytoscape.model.CyNetworkTableManager;
 import org.cytoscape.service.util.AbstractCyActivator;
-import org.cytoscape.view.model.CyNetworkViewFactory;
-import org.cytoscape.view.model.CyNetworkViewManager;
-import org.cytoscape.view.vizmap.VisualMappingManager;
+import org.cytoscape.work.swing.DialogTaskManager;
 import org.osgi.framework.BundleContext;
 
 public class CyActivator extends AbstractCyActivator {
 
-	private static final String MENU = "Apps.MyApps";
-	private static final String MENU_ITEM = "Community Detection";
+	private static final String MENU = "Community Detection";
+	private static final String WRITE_CX_MENU_ITEM = "Export Network to CX";
+	private static final String READ_CX_MENU_ITEM = "Import Network from CX";
+	private static final String WRITE_EDGE_MENU_ITEM = "Export Network to Edge List";
+	private static final String READ_EDGE_MENU_ITEM = "Import Network from Edge List";
 
 	public CyActivator() {
 		super();
@@ -34,64 +39,64 @@ public class CyActivator extends AbstractCyActivator {
 	@Override
 	public void start(BundleContext bc) throws Exception {
 
+		setupEdgeServices(bc);
+
+		CyNetworkManager networkManager = getService(bc, CyNetworkManager.class);
+		DialogTaskManager dialogManager = getService(bc, DialogTaskManager.class);
+
+		// Setting up CX IO service listeners
+		CxReaderWriterTaskFactory cxTaskFactory = CxReaderWriterTaskFactory.getInstance();
+		registerServiceListener(bc, cxTaskFactory, "addReaderFactory", "removeReaderFactory",
+				InputStreamTaskFactory.class);
+		registerServiceListener(bc, cxTaskFactory, "addWriterFactory", "removeWriterFactory",
+				CyNetworkViewWriterFactory.class);
+
+		// Registering CX writing service
+		Properties cxWriterTaskProps = new Properties();
+		cxWriterTaskProps.setProperty(PREFERRED_MENU, MENU);
+		cxWriterTaskProps.setProperty(MENU_GRAVITY, "1.0");
+		cxWriterTaskProps.setProperty(TITLE, WRITE_CX_MENU_ITEM);
+		registerAllServices(bc, new CxWriterTask(), cxWriterTaskProps);
+
+		// Registering CX reading service
+		Properties cxReaderTaskProps = new Properties();
+		cxReaderTaskProps.setProperty(PREFERRED_MENU, MENU);
+		cxReaderTaskProps.setProperty(MENU_GRAVITY, "1.0");
+		cxReaderTaskProps.setProperty(TITLE, READ_CX_MENU_ITEM);
+		registerAllServices(bc, new CxReaderTask(networkManager, dialogManager), cxReaderTaskProps);
+
+		// Setting up EdgeList IO service listeners
+		EdgeReaderWriterTaskFactory edgeTaskFactory = EdgeReaderWriterTaskFactory.getInstance();
+		registerServiceListener(bc, edgeTaskFactory, "addReaderFactory", "removeReaderFactory",
+				InputStreamTaskFactory.class);
+		registerServiceListener(bc, edgeTaskFactory, "addWriterFactory", "removeWriterFactory",
+				CyNetworkViewWriterFactory.class);
+
+		// Registering Edge writing service
+		Properties edgeWriterTaskProps = new Properties();
+		edgeWriterTaskProps.setProperty(PREFERRED_MENU, MENU);
+		edgeWriterTaskProps.setProperty(MENU_GRAVITY, "1.0");
+		edgeWriterTaskProps.setProperty(TITLE, WRITE_EDGE_MENU_ITEM);
+		registerAllServices(bc, new EdgeWriterTask(), edgeWriterTaskProps);
+
+		// Registering Edge reading service
+		Properties edgeReaderTaskProps = new Properties();
+		edgeReaderTaskProps.setProperty(PREFERRED_MENU, MENU);
+		edgeReaderTaskProps.setProperty(MENU_GRAVITY, "1.0");
+		edgeReaderTaskProps.setProperty(TITLE, READ_EDGE_MENU_ITEM);
+		registerAllServices(bc, new EdgeReaderTask(networkManager, dialogManager), edgeReaderTaskProps);
+
+	}
+
+	private void setupEdgeServices(BundleContext bc) {
 		final StreamUtil streamUtil = getService(bc, StreamUtil.class);
+		final BasicCyFileFilter edgeFilter = new BasicCyFileFilter(new String[] {}, new String[] { "application/text" },
+				"Adjacency List", DataCategory.NETWORK, streamUtil);
+		final EdgeNetworkWriterFactory edgeNetworkWriterFactory = new EdgeNetworkWriterFactory(edgeFilter);
 
-		final CytoscapeCxFileFilter cx_filter = new CytoscapeCxFileFilter(new String[] { "cx" },
-				new String[] { "application/json" }, "CX JSON", DataCategory.NETWORK, streamUtil);
-
-		// Writer:
-		final VisualMappingManager visual_mapping_manager = getService(bc, VisualMappingManager.class);
-		final CyApplicationManager application_manager = getService(bc, CyApplicationManager.class);
-		final CyNetworkViewManager networkview_manager = getService(bc, CyNetworkViewManager.class);
-		final CyNetworkManager network_manager = getService(bc, CyNetworkManager.class);
-		final CyGroupManager group_manager = getService(bc, CyGroupManager.class);
-		final CyNetworkTableManager table_manager = getService(bc, CyNetworkTableManager.class);
-		getService(bc, CyNetworkViewFactory.class);
-		final OutputStream outputstream = new FileOutputStream("file.cx");
-		final CommunityDetectionWriterFactory networkWriterFactory = new CommunityDetectionWriterFactory(cx_filter,
-				visual_mapping_manager, application_manager, networkview_manager, network_manager, group_manager,
-				table_manager, outputstream);
-
-		final Properties cxWriterFactoryProperties = new Properties();
-
-		cxWriterFactoryProperties.put(ID, "cxNetworkWriterFactory");
-		cxWriterFactoryProperties.setProperty(MENU_GRAVITY, "1.0");
-		cxWriterFactoryProperties.setProperty(PREFERRED_MENU, MENU);
-		cxWriterFactoryProperties.setProperty(TITLE, MENU_ITEM);
-
-		// registerService(bc, networkWriterFactory, NetworkViewTaskFactory.class,
-		// cxWriterFactoryProperties);
-		registerAllServices(bc, networkWriterFactory, cxWriterFactoryProperties);
-
-		/*
-		 * final CyLayoutAlgorithmManager layoutManager = getService(bc,
-		 * CyLayoutAlgorithmManager.class); getService(bc, CyNetworkFactory.class);
-		 * getService(bc, CyRootNetworkManager.class); getService(bc,
-		 * RenderingEngineManager.class); getService(bc, VisualStyleFactory.class);
-		 * getService(bc, CyGroupFactory.class); new CytoscapeCxFileFilter(new String[]
-		 * { "cx" }, new String[] { "application/json" }, "CX JSON",
-		 * DataCategory.NETWORK, streamUtil);
-		 *
-		 * getService(bc, VisualMappingFunctionFactory.class,
-		 * "(mapping.type=continuous)"); getService(bc,
-		 * VisualMappingFunctionFactory.class, "(mapping.type=discrete)");
-		 * getService(bc, VisualMappingFunctionFactory.class,
-		 * "(mapping.type=passthrough)");
-		 *
-		 * final CytoscapeCxNetworkReaderFactory cx_reader_factory = new
-		 * CytoscapeCxNetworkReaderFactory(cxfilter, application_manager,
-		 * network_factory, network_manager, root_network_manager,
-		 * visual_mapping_manager, visual_style_factory, group_factory,
-		 * rendering_engine_manager, network_view_factory, vmfFactoryC, vmfFactoryD,
-		 * vmfFactoryP, layoutManager); final Properties reader_factory_properties = new
-		 * Properties();
-		 *
-		 * // This is the unique identifier for this reader. 3rd party developer // can
-		 * use this service by using this ID. reader_factory_properties.put(ID,
-		 * "cytoscapeCxNetworkReaderFactory"); registerService(bc, cx_reader_factory,
-		 * InputStreamTaskFactory.class, reader_factory_properties);
-		 */
-
+		final Properties edgeNetworkWriterProperties = new Properties();
+		edgeNetworkWriterProperties.put(ID, "edgeNetworkWriterFactory");
+		registerAllServices(bc, edgeNetworkWriterFactory, edgeNetworkWriterProperties);
 	}
 
 }
