@@ -72,7 +72,7 @@ public class EdgeReaderTask extends AbstractTaskFactory {
 			@Override
 			public void run(TaskMonitor taskMonitor) throws Exception {
 				FileInputStream inStream = new FileInputStream(
-						"C:\\Workspace\\Cytoscape\\cy-community-detection\\test.json");
+						"C:\\Workspace\\Cytoscape\\cy-community-detection\\test\\test.json");
 				InputStreamTaskFactory readerFactory = CxReaderWriterTaskFactory.getInstance().getCxReaderFactory();
 				TaskIterator iterator = readerFactory.createTaskIterator(inStream, null);
 

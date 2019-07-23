@@ -29,8 +29,7 @@ public class EdgeNetworkWriter implements CyWriter {
 	public void run(TaskMonitor taskMonitor) throws Exception {
 
 		for (CyEdge edge : network.getEdgeList()) {
-			String s = edge.getSource().getSUID().toString() + "\t" + edge.getTarget().getSUID().toString() + "\t"
-					+ getInteractionFromEdgeTable(network, edge) + "\n";
+			String s = edge.getSource().getSUID().toString() + "\t" + edge.getTarget().getSUID().toString() + "\n";
 			outStream.write(s.getBytes());
 		}
 	}

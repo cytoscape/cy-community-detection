@@ -1,7 +1,8 @@
 package org.cytoscape.app.communitydetection.edge;
 
-import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
 
+import org.cytoscape.app.communitydetection.rest.CDRestClient;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.io.write.CyWriter;
 import org.cytoscape.model.CyNetwork;
@@ -23,12 +24,14 @@ public class EdgeWriterTask implements NetworkTaskFactory {
 
 			@Override
 			public void run(TaskMonitor taskMonitor) throws Exception {
-				FileOutputStream outStream = new FileOutputStream(
-						"C:\\Workspace\\Cytoscape\\cy-community-detection\\testEdgeList.txt");
+				//FileOutputStream outStream = new FileOutputStream(
+				//		"C:\\Workspace\\Cytoscape\\cy-community-detection\\test\\testEdgeList.txt");
+				ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 				CyNetworkViewWriterFactory writerFactory = EdgeReaderWriterTaskFactory.getInstance()
 						.getCxWriterFactory();
 				writer = writerFactory.createWriter(outStream, network);
 				writer.run(taskMonitor);
+				CDRestClient.getInstance().postEdgeList(outStream.toString());
 			}
 		};
 		return wrapper;
