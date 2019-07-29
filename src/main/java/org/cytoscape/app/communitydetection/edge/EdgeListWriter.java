@@ -13,14 +13,14 @@ import org.cytoscape.work.TaskMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EdgeNetworkWriter implements CyWriter {
+public class EdgeListWriter implements CyWriter {
 
-	private final static Logger logger = LoggerFactory.getLogger(EdgeNetworkWriter.class);
+	private final static Logger logger = LoggerFactory.getLogger(EdgeListWriter.class);
 
 	private final OutputStream outStream;
 	private final CyNetwork network;
 
-	public EdgeNetworkWriter(OutputStream outStream, CyNetwork network) {
+	public EdgeListWriter(OutputStream outStream, CyNetwork network) {
 		this.outStream = outStream;
 		this.network = network;
 	}

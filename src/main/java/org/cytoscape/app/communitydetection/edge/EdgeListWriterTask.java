@@ -11,11 +11,11 @@ import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
 
-public class EdgeWriterTask implements NetworkTaskFactory {
+public class EdgeListWriterTask implements NetworkTaskFactory {
 
 	private CyWriter writer;
 
-	public EdgeWriterTask() {
+	public EdgeListWriterTask() {
 	}
 
 	private AbstractTask getTaskWrapper(CyNetwork network) {
@@ -24,11 +24,9 @@ public class EdgeWriterTask implements NetworkTaskFactory {
 
 			@Override
 			public void run(TaskMonitor taskMonitor) throws Exception {
-				//FileOutputStream outStream = new FileOutputStream(
-				//		"C:\\Workspace\\Cytoscape\\cy-community-detection\\test\\testEdgeList.txt");
 				ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-				CyNetworkViewWriterFactory writerFactory = EdgeReaderWriterTaskFactory.getInstance()
-						.getCxWriterFactory();
+				CyNetworkViewWriterFactory writerFactory = EdgeListReaderWriterTaskFactory.getInstance()
+						.getEdgeListWriterFactory();
 				writer = writerFactory.createWriter(outStream, network);
 				writer.run(taskMonitor);
 				CDRestClient.getInstance().postEdgeList(outStream.toString());

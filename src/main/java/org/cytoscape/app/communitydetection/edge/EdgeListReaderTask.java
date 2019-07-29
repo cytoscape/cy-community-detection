@@ -19,14 +19,14 @@ import org.cytoscape.work.TaskObserver;
 import org.cytoscape.work.swing.DialogTaskManager;
 import org.cytoscape.work.util.ListSingleSelection;
 
-public class EdgeReaderTask extends AbstractTaskFactory {
+public class EdgeListReaderTask extends AbstractTaskFactory {
 
 	private final CyNetworkManager networkManager;
 	private final DialogTaskManager dialogManager;
 
 	private AbstractCyNetworkReader reader;
 
-	public EdgeReaderTask(CyNetworkManager networkManager, DialogTaskManager dialogManager) {
+	public EdgeListReaderTask(CyNetworkManager networkManager, DialogTaskManager dialogManager) {
 		this.networkManager = networkManager;
 		this.dialogManager = dialogManager;
 	}
@@ -72,8 +72,8 @@ public class EdgeReaderTask extends AbstractTaskFactory {
 			@Override
 			public void run(TaskMonitor taskMonitor) throws Exception {
 				FileInputStream inStream = new FileInputStream(
-						"C:\\Workspace\\Cytoscape\\cy-community-detection\\test\\test.json");
-				InputStreamTaskFactory readerFactory = CxReaderWriterTaskFactory.getInstance().getCxReaderFactory();
+						"C:\\Workspace\\Cytoscape\\cy-community-detection\\test\\edge_list.txt");
+				InputStreamTaskFactory readerFactory = EdgeListReaderWriterTaskFactory.getInstance().getEdgeListReaderFactory();
 				TaskIterator iterator = readerFactory.createTaskIterator(inStream, null);
 
 				reader = (AbstractCyNetworkReader) iterator.next();

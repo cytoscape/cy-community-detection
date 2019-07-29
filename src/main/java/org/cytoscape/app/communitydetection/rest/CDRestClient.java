@@ -1,8 +1,13 @@
 package org.cytoscape.app.communitydetection.rest;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -10,7 +15,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.json.simple.JSONObject;
+
+import com.google.gson.JsonObject;
 
 public class CDRestClient {
 
@@ -28,27 +34,35 @@ public class CDRestClient {
 		return SingletonHelper.INSTANCE;
 	}
 
-	@SuppressWarnings("unchecked")
 	public void postEdgeList(String edgeList) throws ClientProtocolException, IOException {
 
-		JSONObject jsonInput = new JSONObject();
-		jsonInput.put("algorithm", "infomap");
-		jsonInput.put("undirected", "undirected");
-		jsonInput.put("edge_list", edgeList);
-		StringEntity se = new StringEntity(jsonInput.toJSONString());
-
+		JsonObject jsonInput = new JsonObject();
+		jsonInput.addProperty("algorithm", "infomap");
+		jsonInput.addProperty("type", "undirected");
+		jsonInput.addProperty("edge_list", edgeList);
+		System.out.println(edgeList);
+		StringEntity se = new StringEntity(jsonInput.toString());
 		HttpPost postRequest = new HttpPost("http://127.0.0.1:5000/cd");
-		postRequest.addHeader("accept", "application/json");
+		postRequest.addHeader("Content-Type", "application/json");
 		postRequest.setEntity(se);
 
 		HttpResponse httpResponse = client.execute(postRequest);
-		BufferedReader rd = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent()));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent()));
 		StringBuffer response = new StringBuffer();
 		String temp;
-		while ((temp = rd.readLine()) != null) {
+		while ((temp = reader.readLine()) != null) {
+
 			response.append(temp);
 		}
-		System.out.println(response.toString());
+		FileOutputStream outStream = new FileOutputStream(
+				"C:\\Workspace\\Cytoscape\\cy-community-detection\\test\\edge_list.txt");
+		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outStream));
+		List<String> responseEdgeList = Arrays.asList(response.toString().replace('"', ' ').trim().split(";"));
+		for (String edge : responseEdgeList) {
+			writer.write(edge.replace(',', '\t'));
+			writer.newLine();
+		}
+		writer.close();
 	}
 
 }

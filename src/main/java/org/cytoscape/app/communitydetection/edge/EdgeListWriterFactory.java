@@ -8,11 +8,11 @@ import org.cytoscape.io.write.CyWriter;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.view.model.CyNetworkView;
 
-public class EdgeNetworkWriterFactory implements CyNetworkViewWriterFactory {
+public class EdgeListWriterFactory implements CyNetworkViewWriterFactory {
 
 	private final CyFileFilter fileFilter;
 
-	public EdgeNetworkWriterFactory(CyFileFilter fileFilter) {
+	public EdgeListWriterFactory(CyFileFilter fileFilter) {
 		this.fileFilter = fileFilter;
 	}
 
@@ -23,12 +23,12 @@ public class EdgeNetworkWriterFactory implements CyNetworkViewWriterFactory {
 
 	@Override
 	public CyWriter createWriter(OutputStream os, CyNetworkView view) {
-		return new EdgeNetworkWriter(os, view.getModel());
+		return new EdgeListWriter(os, view.getModel());
 	}
 
 	@Override
 	public CyWriter createWriter(OutputStream os, CyNetwork network) {
-		return new EdgeNetworkWriter(os, network);
+		return new EdgeListWriter(os, network);
 	}
 
 }

@@ -10,10 +10,10 @@ import java.util.Properties;
 import org.cytoscape.app.communitydetection.cx.CxReaderTask;
 import org.cytoscape.app.communitydetection.cx.CxReaderWriterTaskFactory;
 import org.cytoscape.app.communitydetection.cx.CxWriterTask;
-import org.cytoscape.app.communitydetection.edge.EdgeNetworkWriterFactory;
-import org.cytoscape.app.communitydetection.edge.EdgeReaderTask;
-import org.cytoscape.app.communitydetection.edge.EdgeReaderWriterTaskFactory;
-import org.cytoscape.app.communitydetection.edge.EdgeWriterTask;
+import org.cytoscape.app.communitydetection.edge.EdgeListWriterFactory;
+import org.cytoscape.app.communitydetection.edge.EdgeListReaderTask;
+import org.cytoscape.app.communitydetection.edge.EdgeListReaderWriterTaskFactory;
+import org.cytoscape.app.communitydetection.edge.EdgeListWriterTask;
 import org.cytoscape.io.BasicCyFileFilter;
 import org.cytoscape.io.DataCategory;
 import org.cytoscape.io.read.InputStreamTaskFactory;
@@ -39,7 +39,7 @@ public class CyActivator extends AbstractCyActivator {
 	@Override
 	public void start(BundleContext bc) throws Exception {
 
-		setupEdgeServices(bc);
+		setupEdgeListIOServices(bc);
 
 		CyNetworkManager networkManager = getService(bc, CyNetworkManager.class);
 		DialogTaskManager dialogManager = getService(bc, DialogTaskManager.class);
@@ -66,7 +66,7 @@ public class CyActivator extends AbstractCyActivator {
 		registerAllServices(bc, new CxReaderTask(networkManager, dialogManager), cxReaderTaskProps);
 
 		// Setting up EdgeList IO service listeners
-		EdgeReaderWriterTaskFactory edgeTaskFactory = EdgeReaderWriterTaskFactory.getInstance();
+		EdgeListReaderWriterTaskFactory edgeTaskFactory = EdgeListReaderWriterTaskFactory.getInstance();
 		registerServiceListener(bc, edgeTaskFactory, "addReaderFactory", "removeReaderFactory",
 				InputStreamTaskFactory.class);
 		registerServiceListener(bc, edgeTaskFactory, "addWriterFactory", "removeWriterFactory",
@@ -77,26 +77,30 @@ public class CyActivator extends AbstractCyActivator {
 		edgeWriterTaskProps.setProperty(PREFERRED_MENU, MENU);
 		edgeWriterTaskProps.setProperty(MENU_GRAVITY, "1.0");
 		edgeWriterTaskProps.setProperty(TITLE, WRITE_EDGE_MENU_ITEM);
-		registerAllServices(bc, new EdgeWriterTask(), edgeWriterTaskProps);
+		registerAllServices(bc, new EdgeListWriterTask(), edgeWriterTaskProps);
 
 		// Registering Edge reading service
 		Properties edgeReaderTaskProps = new Properties();
 		edgeReaderTaskProps.setProperty(PREFERRED_MENU, MENU);
 		edgeReaderTaskProps.setProperty(MENU_GRAVITY, "1.0");
 		edgeReaderTaskProps.setProperty(TITLE, READ_EDGE_MENU_ITEM);
-		registerAllServices(bc, new EdgeReaderTask(networkManager, dialogManager), edgeReaderTaskProps);
+		registerAllServices(bc, new EdgeListReaderTask(networkManager, dialogManager), edgeReaderTaskProps);
 
 	}
 
-	private void setupEdgeServices(BundleContext bc) {
+	private void setupEdgeListIOServices(BundleContext bc) {
 		final StreamUtil streamUtil = getService(bc, StreamUtil.class);
 		final BasicCyFileFilter edgeFilter = new BasicCyFileFilter(new String[] {}, new String[] { "application/text" },
 				"Adjacency List", DataCategory.NETWORK, streamUtil);
-		final EdgeNetworkWriterFactory edgeNetworkWriterFactory = new EdgeNetworkWriterFactory(edgeFilter);
+		final EdgeListWriterFactory edgeNetworkWriterFactory = new EdgeListWriterFactory(edgeFilter);
 
-		final Properties edgeNetworkWriterProperties = new Properties();
-		edgeNetworkWriterProperties.put(ID, "edgeNetworkWriterFactory");
-		registerAllServices(bc, edgeNetworkWriterFactory, edgeNetworkWriterProperties);
+		final Properties edgeListWriterProperties = new Properties();
+		edgeListWriterProperties.put(ID, "edgeListNetworkWriterFactory");
+		registerAllServices(bc, edgeNetworkWriterFactory, edgeListWriterProperties);
+		
+		final Properties edgeListReaderProperties = new Properties();
+		edgeListReaderProperties.put(ID, "edgeListReaderFactory");
+		//registerAllServices(bc, )
 	}
 
 }

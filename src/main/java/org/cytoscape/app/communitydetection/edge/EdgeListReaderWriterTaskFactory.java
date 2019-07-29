@@ -5,34 +5,34 @@ import java.util.Map;
 import org.cytoscape.io.read.InputStreamTaskFactory;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 
-public class EdgeReaderWriterTaskFactory {
+public class EdgeListReaderWriterTaskFactory {
 
 	// ID of the CX writer service
-	private static final String EDGE_READER_ID = "cdEdgeReaderFactory";
-	private static final String EDGE_WRITER_ID = "edgeNetworkWriterFactory";
+	private static final String EDGE_READER_ID = "edgeListReaderFactory";
+	private static final String EDGE_WRITER_ID = "edgeListNetworkWriterFactory";
 	private static final String ID_TAG = "id";
 
 	private CyNetworkViewWriterFactory writerFactory;
 	private InputStreamTaskFactory readerFactory;
 
 
-	private EdgeReaderWriterTaskFactory() {
+	private EdgeListReaderWriterTaskFactory() {
 	}
 
 	private static class SingletonHelper {
 
-		private static final EdgeReaderWriterTaskFactory INSTANCE = new EdgeReaderWriterTaskFactory();
+		private static final EdgeListReaderWriterTaskFactory INSTANCE = new EdgeListReaderWriterTaskFactory();
 	}
 
-	public static EdgeReaderWriterTaskFactory getInstance() {
+	public static EdgeListReaderWriterTaskFactory getInstance() {
 		return SingletonHelper.INSTANCE;
 	}
 
-	public InputStreamTaskFactory getCxReaderFactory() {
+	public InputStreamTaskFactory getEdgeListReaderFactory() {
 		return readerFactory;
 	}
 
-	public CyNetworkViewWriterFactory getCxWriterFactory() {
+	public CyNetworkViewWriterFactory getEdgeListWriterFactory() {
 		return writerFactory;
 	}
 
