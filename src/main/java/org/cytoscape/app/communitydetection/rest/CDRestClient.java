@@ -40,7 +40,6 @@ public class CDRestClient {
 		jsonInput.addProperty("algorithm", "infomap");
 		jsonInput.addProperty("type", "undirected");
 		jsonInput.addProperty("edge_list", edgeList);
-		System.out.println(edgeList);
 		StringEntity se = new StringEntity(jsonInput.toString());
 		HttpPost postRequest = new HttpPost("http://127.0.0.1:5000/cd");
 		postRequest.addHeader("Content-Type", "application/json");

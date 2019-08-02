@@ -4,7 +4,6 @@ import java.io.FileInputStream;
 
 import javax.swing.SwingUtilities;
 
-import org.cytoscape.app.communitydetection.cx.CxReaderWriterTaskFactory;
 import org.cytoscape.io.read.AbstractCyNetworkReader;
 import org.cytoscape.io.read.InputStreamTaskFactory;
 import org.cytoscape.model.CyNetwork;
@@ -73,8 +72,9 @@ public class EdgeListReaderTask extends AbstractTaskFactory {
 			public void run(TaskMonitor taskMonitor) throws Exception {
 				FileInputStream inStream = new FileInputStream(
 						"C:\\Workspace\\Cytoscape\\cy-community-detection\\test\\edge_list.txt");
-				InputStreamTaskFactory readerFactory = EdgeListReaderWriterTaskFactory.getInstance().getEdgeListReaderFactory();
-				TaskIterator iterator = readerFactory.createTaskIterator(inStream, null);
+				InputStreamTaskFactory readerFactory = EdgeListReaderWriterTaskFactory.getInstance()
+						.getEdgeListReaderFactory();
+				TaskIterator iterator = readerFactory.createTaskIterator(inStream, "BioPlex_Root");
 
 				reader = (AbstractCyNetworkReader) iterator.next();
 				reader.setRootNetworkList(new ListSingleSelection<String>());

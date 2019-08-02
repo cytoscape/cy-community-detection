@@ -9,7 +9,7 @@ public class EdgeListReaderWriterTaskFactory {
 
 	// ID of the CX writer service
 	private static final String EDGE_READER_ID = "edgeListReaderFactory";
-	private static final String EDGE_WRITER_ID = "edgeListNetworkWriterFactory";
+	private static final String EDGE_WRITER_ID = "edgeListWriterFactory";
 	private static final String ID_TAG = "id";
 
 	private CyNetworkViewWriterFactory writerFactory;
