@@ -1,4 +1,4 @@
-package org.cytoscape.app.communitydetection.edge;
+package org.cytoscape.app.communitydetection.edgelist.reader;
 
 import java.io.InputStream;
 
@@ -7,9 +7,11 @@ import org.cytoscape.io.read.AbstractInputStreamTaskFactory;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
+import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.vizmap.VisualMappingManager;
+import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskIterator;
 
 /**
@@ -24,11 +26,14 @@ public class EdgeListReaderFactory extends AbstractInputStreamTaskFactory {
 	private final CyNetworkViewManager cyNetworkViewManager;
 	private final CyRootNetworkManager cyRootNetworkManager;
 	private final VisualMappingManager visualMappingManager;
+	private final CyLayoutAlgorithmManager layoutManager;
+	private final SynchronousTaskManager<?> syncTaskManager;
 
 	public EdgeListReaderFactory(CyFileFilter filter, CyNetworkViewFactory cyNetworkViewFactory,
 			CyNetworkFactory cyNetworkFactory, final CyNetworkManager cyNetworkManager,
 			final CyNetworkViewManager cyNetworkViewManager, CyRootNetworkManager cyRootNetworkManager,
-			final VisualMappingManager visualMappingManager) {
+			final VisualMappingManager visualMappingManager, final CyLayoutAlgorithmManager layoutManager,
+			SynchronousTaskManager<?> syncTaskManager) {
 		super(filter);
 		this.cyNetworkManager = cyNetworkManager;
 		this.cyRootNetworkManager = cyRootNetworkManager;
@@ -36,11 +41,15 @@ public class EdgeListReaderFactory extends AbstractInputStreamTaskFactory {
 		this.cyNetworkViewManager = cyNetworkViewManager;
 		this.cyNetworkViewFactory = cyNetworkViewFactory;
 		this.visualMappingManager = visualMappingManager;
+		this.layoutManager = layoutManager;
+		this.syncTaskManager = syncTaskManager;
 	}
 
 	@Override
 	public TaskIterator createTaskIterator(InputStream inputStream, String collectionName) {
+		
 		return new TaskIterator(new EdgeListReader(inputStream, cyNetworkViewFactory, cyNetworkFactory,
-				cyNetworkManager, cyNetworkViewManager, cyRootNetworkManager, visualMappingManager, collectionName));
+				cyNetworkManager, cyNetworkViewManager, cyRootNetworkManager, visualMappingManager, layoutManager,
+				syncTaskManager, collectionName));
 	}
 }

@@ -16,7 +16,6 @@ import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskObserver;
 import org.cytoscape.work.swing.DialogTaskManager;
-import org.cytoscape.work.util.ListSingleSelection;
 
 public class CxReaderTask extends AbstractTaskFactory {
 
@@ -72,11 +71,10 @@ public class CxReaderTask extends AbstractTaskFactory {
 			public void run(TaskMonitor taskMonitor) throws Exception {
 				FileInputStream inStream = new FileInputStream(
 						"C:\\Workspace\\Cytoscape\\cy-community-detection\\test\\test.json");
-				InputStreamTaskFactory readerFactory = CxReaderWriterTaskFactory.getInstance().getCxReaderFactory();
+				InputStreamTaskFactory readerFactory = CxTaskFactory.getInstance().getCxReaderFactory();
 				TaskIterator iterator = readerFactory.createTaskIterator(inStream, null);
 
 				reader = (AbstractCyNetworkReader) iterator.next();
-				reader.setRootNetworkList(new ListSingleSelection<String>());
 				iterator.append(reader);
 				execute(iterator);
 				for (CyNetwork net : reader.getNetworks()) {

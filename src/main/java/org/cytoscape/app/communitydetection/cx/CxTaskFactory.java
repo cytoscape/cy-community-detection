@@ -5,7 +5,7 @@ import java.util.Map;
 import org.cytoscape.io.read.InputStreamTaskFactory;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 
-public class CxReaderWriterTaskFactory {
+public class CxTaskFactory {
 
 	// ID of the CX writer service
 	private static final String CX_READER_ID = "cytoscapeCxNetworkReaderFactory";
@@ -16,15 +16,15 @@ public class CxReaderWriterTaskFactory {
 	private InputStreamTaskFactory readerFactory;
 
 
-	private CxReaderWriterTaskFactory() {
+	private CxTaskFactory() {
 	}
 
 	private static class SingletonHelper {
 
-		private static final CxReaderWriterTaskFactory INSTANCE = new CxReaderWriterTaskFactory();
+		private static final CxTaskFactory INSTANCE = new CxTaskFactory();
 	}
 
-	public static CxReaderWriterTaskFactory getInstance() {
+	public static CxTaskFactory getInstance() {
 		return SingletonHelper.INSTANCE;
 	}
 

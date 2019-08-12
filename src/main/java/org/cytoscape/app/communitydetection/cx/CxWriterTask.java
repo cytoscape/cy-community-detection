@@ -24,13 +24,11 @@ public class CxWriterTask implements NetworkTaskFactory {
 
 			@Override
 			public void run(TaskMonitor taskMonitor) throws Exception {
-				// FileOutputStream outStream = new FileOutputStream(
-				// "C:\\Workspace\\Cytoscape\\cy-community-detection\\test\\test.json");
 				ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-				CyNetworkViewWriterFactory writerFactory = CxReaderWriterTaskFactory.getInstance().getCxWriterFactory();
+				CyNetworkViewWriterFactory writerFactory = CxTaskFactory.getInstance().getCxWriterFactory();
 				writer = writerFactory.createWriter(outStream, network);
 				writer.run(taskMonitor);
-				CDRestClient.getInstance().postEdgeList(outStream.toString());
+				//CDRestClient.getInstance().postEdgeList(outStream.toString());
 			}
 		};
 		return wrapper;

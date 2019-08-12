@@ -7,14 +7,11 @@ import static org.cytoscape.work.ServiceProperties.TITLE;
 
 import java.util.Properties;
 
-import org.cytoscape.app.communitydetection.cx.CxReaderTask;
-import org.cytoscape.app.communitydetection.cx.CxReaderWriterTaskFactory;
-import org.cytoscape.app.communitydetection.cx.CxWriterTask;
-import org.cytoscape.app.communitydetection.edge.EdgeListReaderFactory;
-import org.cytoscape.app.communitydetection.edge.EdgeListReaderTask;
-import org.cytoscape.app.communitydetection.edge.EdgeListReaderWriterTaskFactory;
-import org.cytoscape.app.communitydetection.edge.EdgeListWriterFactory;
-import org.cytoscape.app.communitydetection.edge.EdgeListWriterTask;
+import org.cytoscape.app.communitydetection.cx.CxTaskFactory;
+import org.cytoscape.app.communitydetection.edgelist.EdgeListTaskFactory;
+import org.cytoscape.app.communitydetection.edgelist.EdgeListTaskListenerFactory;
+import org.cytoscape.app.communitydetection.edgelist.reader.EdgeListReaderFactory;
+import org.cytoscape.app.communitydetection.edgelist.writer.EdgeListWriterFactory;
 import org.cytoscape.io.BasicCyFileFilter;
 import org.cytoscape.io.DataCategory;
 import org.cytoscape.io.read.InputStreamTaskFactory;
@@ -24,10 +21,11 @@ import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.service.util.AbstractCyActivator;
+import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.vizmap.VisualMappingManager;
-import org.cytoscape.work.swing.DialogTaskManager;
+import org.cytoscape.work.SynchronousTaskManager;
 import org.osgi.framework.BundleContext;
 
 public class CyActivator extends AbstractCyActivator {
@@ -35,8 +33,8 @@ public class CyActivator extends AbstractCyActivator {
 	private static final String MENU = "Community Detection";
 	private static final String WRITE_CX_MENU_ITEM = "Export Network to CX";
 	private static final String READ_CX_MENU_ITEM = "Import Network from CX";
-	private static final String WRITE_EDGE_MENU_ITEM = "Export Network to Edge List";
-	private static final String READ_EDGE_MENU_ITEM = "Import Network from Edge List";
+	private static final String MENU_ITEM_LOUVAIN = "Louvain";
+	private static final String MENU_ITEM_INFOMAP = "Infomap";
 
 	public CyActivator() {
 		super();
@@ -45,11 +43,11 @@ public class CyActivator extends AbstractCyActivator {
 	@Override
 	public void start(BundleContext bc) throws Exception {
 
-		CyNetworkManager networkManager = getService(bc, CyNetworkManager.class);
-		DialogTaskManager dialogManager = getService(bc, DialogTaskManager.class);
+		final SynchronousTaskManager<?> syncTaskManager = getService(bc, SynchronousTaskManager.class);
+		final CyRootNetworkManager rootNetworkManager = getService(bc, CyRootNetworkManager.class);
 
 		// Setting up CX IO service listeners
-		CxReaderWriterTaskFactory cxTaskFactory = CxReaderWriterTaskFactory.getInstance();
+		CxTaskFactory cxTaskFactory = CxTaskFactory.getInstance();
 		registerServiceListener(bc, cxTaskFactory, "addReaderFactory", "removeReaderFactory",
 				InputStreamTaskFactory.class);
 		registerServiceListener(bc, cxTaskFactory, "addWriterFactory", "removeWriterFactory",
@@ -60,32 +58,30 @@ public class CyActivator extends AbstractCyActivator {
 		cxWriterTaskProps.setProperty(PREFERRED_MENU, MENU);
 		cxWriterTaskProps.setProperty(MENU_GRAVITY, "1.0");
 		cxWriterTaskProps.setProperty(TITLE, WRITE_CX_MENU_ITEM);
-		registerAllServices(bc, new CxWriterTask(), cxWriterTaskProps);
+		// registerAllServices(bc, new CxWriterTask(), cxWriterTaskProps);
 
 		// Registering CX reading service
 		Properties cxReaderTaskProps = new Properties();
 		cxReaderTaskProps.setProperty(PREFERRED_MENU, MENU);
 		cxReaderTaskProps.setProperty(MENU_GRAVITY, "1.0");
 		cxReaderTaskProps.setProperty(TITLE, READ_CX_MENU_ITEM);
-		registerAllServices(bc, new CxReaderTask(networkManager, dialogManager), cxReaderTaskProps);
+		// registerAllServices(bc, new CxReaderTask(networkManager, dialogManager),
+		// cxReaderTaskProps);
 
 		// Setting up Edge List I/O services
 		setupEdgeListIOServices(bc);
 
-		// Registering Edge writing service
-		Properties edgeWriterTaskProps = new Properties();
-		edgeWriterTaskProps.setProperty(PREFERRED_MENU, MENU);
-		edgeWriterTaskProps.setProperty(MENU_GRAVITY, "1.0");
-		edgeWriterTaskProps.setProperty(TITLE, WRITE_EDGE_MENU_ITEM);
-		registerAllServices(bc, new EdgeListWriterTask(), edgeWriterTaskProps);
+		// Registering Edge List services
+		Properties edgeListWriterTaskProps = new Properties();
+		edgeListWriterTaskProps.setProperty(PREFERRED_MENU, MENU);
+		edgeListWriterTaskProps.setProperty(MENU_GRAVITY, "1.0");
+		edgeListWriterTaskProps.setProperty(TITLE, MENU_ITEM_LOUVAIN);
+		registerAllServices(bc, new EdgeListTaskFactory(rootNetworkManager, syncTaskManager, MENU_ITEM_LOUVAIN.toLowerCase()),
+				edgeListWriterTaskProps);
 
-		// Registering Edge reading service
-		Properties edgeReaderTaskProps = new Properties();
-		edgeReaderTaskProps.setProperty(PREFERRED_MENU, MENU);
-		edgeReaderTaskProps.setProperty(MENU_GRAVITY, "1.0");
-		edgeReaderTaskProps.setProperty(TITLE, READ_EDGE_MENU_ITEM);
-		registerAllServices(bc, new EdgeListReaderTask(networkManager, dialogManager), edgeReaderTaskProps);
-
+		edgeListWriterTaskProps.replace(TITLE, MENU_ITEM_INFOMAP);
+		registerAllServices(bc, new EdgeListTaskFactory(rootNetworkManager, syncTaskManager, MENU_ITEM_INFOMAP.toLowerCase()),
+				edgeListWriterTaskProps);
 	}
 
 	private void setupEdgeListIOServices(BundleContext bc) {
@@ -96,6 +92,8 @@ public class CyActivator extends AbstractCyActivator {
 		final CyNetworkViewManager networkViewManager = getService(bc, CyNetworkViewManager.class);
 		final CyRootNetworkManager rootNetworkManager = getService(bc, CyRootNetworkManager.class);
 		final VisualMappingManager visualMappingManager = getService(bc, VisualMappingManager.class);
+		final CyLayoutAlgorithmManager layoutAlgorithmManager = getService(bc, CyLayoutAlgorithmManager.class);
+		final SynchronousTaskManager<?> syncTaskManager = getService(bc, SynchronousTaskManager.class);
 
 		final StreamUtil streamUtil = getService(bc, StreamUtil.class);
 
@@ -110,10 +108,11 @@ public class CyActivator extends AbstractCyActivator {
 		final Properties edgeListReaderProperties = new Properties();
 		edgeListReaderProperties.put(ID, "edgeListReaderFactory");
 		final EdgeListReaderFactory edgeListReaderFactory = new EdgeListReaderFactory(edgeFilter, networkViewFactory,
-				networkFactory, networkManager, networkViewManager, rootNetworkManager, visualMappingManager);
+				networkFactory, networkManager, networkViewManager, rootNetworkManager, visualMappingManager,
+				layoutAlgorithmManager, syncTaskManager);
 		registerAllServices(bc, edgeListReaderFactory, edgeListReaderProperties);
 
-		EdgeListReaderWriterTaskFactory edgeTaskFactory = EdgeListReaderWriterTaskFactory.getInstance();
+		EdgeListTaskListenerFactory edgeTaskFactory = EdgeListTaskListenerFactory.getInstance();
 		registerServiceListener(bc, edgeTaskFactory, "addReaderFactory", "removeReaderFactory",
 				InputStreamTaskFactory.class);
 		registerServiceListener(bc, edgeTaskFactory, "addWriterFactory", "removeWriterFactory",

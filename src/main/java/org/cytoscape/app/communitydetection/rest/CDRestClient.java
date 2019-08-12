@@ -1,30 +1,26 @@
 package org.cytoscape.app.communitydetection.rest;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.Arrays;
-import java.util.List;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.HttpClientBuilder;
 
-import com.google.gson.JsonObject;
+import com.google.gson.Gson;
 
 public class CDRestClient {
-
-	HttpClient client;
-
-	private CDRestClient() {
-		client = HttpClientBuilder.create().build();
-	}
 
 	private static class SingletonHelper {
 		private static final CDRestClient INSTANCE = new CDRestClient();
@@ -34,34 +30,57 @@ public class CDRestClient {
 		return SingletonHelper.INSTANCE;
 	}
 
-	public void postEdgeList(String edgeList) throws ClientProtocolException, IOException {
+	public String postEdgeList(String algorithm, String graphDirected, String rootNetwork,
+			ByteArrayOutputStream outStream) throws Exception {
 
-		JsonObject jsonInput = new JsonObject();
-		jsonInput.addProperty("algorithm", "infomap");
-		jsonInput.addProperty("type", "undirected");
-		jsonInput.addProperty("edge_list", edgeList);
-		StringEntity se = new StringEntity(jsonInput.toString());
-		HttpPost postRequest = new HttpPost("http://127.0.0.1:5000/cd");
-		postRequest.addHeader("Content-Type", "application/json");
-		postRequest.setEntity(se);
+		File tmpFile = File.createTempFile("edgeList", ".txt");
+		outStream.writeTo(new FileOutputStream(tmpFile));
+		FileBody sbFile = new FileBody(tmpFile, ContentType.TEXT_PLAIN);
+		StringBody sbAlgorithm = new StringBody(algorithm, ContentType.TEXT_PLAIN);
+		StringBody sbDirected = new StringBody(graphDirected, ContentType.TEXT_PLAIN);
+		StringBody sbRoot = new StringBody(rootNetwork, ContentType.TEXT_PLAIN);
 
-		HttpResponse httpResponse = client.execute(postRequest);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent()));
-		StringBuffer response = new StringBuffer();
-		String temp;
-		while ((temp = reader.readLine()) != null) {
+		HttpEntity multiPartBody = MultipartEntityBuilder.create().setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
+				.addPart("algorithm", sbAlgorithm).addPart("edgefile", sbFile).addPart("graphdirected", sbDirected)
+				.addPart("rootnetwork", sbRoot).build();
 
-			response.append(temp);
+		HttpClient client = HttpClientBuilder.create().build();
+		HttpPost postRequest = new HttpPost("http://ddot-stage.ucsd.edu/communitydetection/cd/v1");
+		postRequest.setEntity(multiPartBody);
+		HttpResponse httpPostResponse = null;
+		for (int count = 0; count < 3; count++) {
+			httpPostResponse = client.execute(postRequest);
+			if (202 == httpPostResponse.getStatusLine().getStatusCode()) {
+				break;
+			}
 		}
-		FileOutputStream outStream = new FileOutputStream(
-				"C:\\Workspace\\Cytoscape\\cy-community-detection\\test\\edge_list.txt");
-		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outStream));
-		List<String> responseEdgeList = Arrays.asList(response.toString().replace('"', ' ').trim().split(";"));
-		for (String edge : responseEdgeList) {
-			writer.write(edge.replace(',', '\t'));
-			writer.newLine();
+		tmpFile.delete();
+		if (202 != httpPostResponse.getStatusLine().getStatusCode()) {
+			throw new Exception(httpPostResponse.getStatusLine().getReasonPhrase());
 		}
-		writer.close();
+		return httpPostResponse.getFirstHeader("Location").getValue();
 	}
 
+	public Result getEdgeList(String resultURI) throws Exception {
+		Result cdResult = null;
+		int waitTime = 50;
+		HttpClient client = HttpClientBuilder.create().build();
+		for (int count = 0; count < 20; count++) {
+			Thread.sleep(waitTime);
+			waitTime += waitTime;
+			HttpResponse httpGetResponse = client.execute(new HttpGet(resultURI));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(httpGetResponse.getEntity().getContent()));
+			cdResult = new Gson().fromJson(reader, Result.class);
+			if (cdResult.getStatus().equals("done")) {
+				break;
+			}
+			if (cdResult.getStatus().equals("error")) {
+				throw new Exception(cdResult.getEdgeList());
+			}
+		}
+		if (!cdResult.getStatus().equals("done")) {
+			throw new Exception(cdResult.getEdgeList());
+		}
+		return cdResult;
+	}
 }

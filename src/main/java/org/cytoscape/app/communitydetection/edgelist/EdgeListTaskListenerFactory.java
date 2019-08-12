@@ -1,11 +1,11 @@
-package org.cytoscape.app.communitydetection.edge;
+package org.cytoscape.app.communitydetection.edgelist;
 
 import java.util.Map;
 
 import org.cytoscape.io.read.InputStreamTaskFactory;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 
-public class EdgeListReaderWriterTaskFactory {
+public class EdgeListTaskListenerFactory {
 
 	// ID of the CX writer service
 	private static final String EDGE_READER_ID = "edgeListReaderFactory";
@@ -16,15 +16,15 @@ public class EdgeListReaderWriterTaskFactory {
 	private InputStreamTaskFactory readerFactory;
 
 
-	private EdgeListReaderWriterTaskFactory() {
+	private EdgeListTaskListenerFactory() {
 	}
 
 	private static class SingletonHelper {
 
-		private static final EdgeListReaderWriterTaskFactory INSTANCE = new EdgeListReaderWriterTaskFactory();
+		private static final EdgeListTaskListenerFactory INSTANCE = new EdgeListTaskListenerFactory();
 	}
 
-	public static EdgeListReaderWriterTaskFactory getInstance() {
+	public static EdgeListTaskListenerFactory getInstance() {
 		return SingletonHelper.INSTANCE;
 	}
 
