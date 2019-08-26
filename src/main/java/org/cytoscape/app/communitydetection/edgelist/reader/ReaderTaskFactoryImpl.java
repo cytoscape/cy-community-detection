@@ -7,6 +7,7 @@ import org.cytoscape.io.read.AbstractInputStreamTaskFactory;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
+import org.cytoscape.session.CyNetworkNaming;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
@@ -18,7 +19,7 @@ import org.cytoscape.work.TaskIterator;
  * Factory for Edge List reader objects.
  * 
  */
-public class EdgeListReaderFactory extends AbstractInputStreamTaskFactory {
+public class ReaderTaskFactoryImpl extends AbstractInputStreamTaskFactory {
 
 	private final CyNetworkViewFactory cyNetworkViewFactory;
 	private final CyNetworkFactory cyNetworkFactory;
@@ -28,12 +29,15 @@ public class EdgeListReaderFactory extends AbstractInputStreamTaskFactory {
 	private final VisualMappingManager visualMappingManager;
 	private final CyLayoutAlgorithmManager layoutManager;
 	private final SynchronousTaskManager<?> syncTaskManager;
+	private final CyNetworkNaming networkNaming;
 
-	public EdgeListReaderFactory(CyFileFilter filter, CyNetworkViewFactory cyNetworkViewFactory,
+	private ReaderTask readerTask;
+
+	public ReaderTaskFactoryImpl(CyFileFilter filter, CyNetworkViewFactory cyNetworkViewFactory,
 			CyNetworkFactory cyNetworkFactory, final CyNetworkManager cyNetworkManager,
 			final CyNetworkViewManager cyNetworkViewManager, CyRootNetworkManager cyRootNetworkManager,
 			final VisualMappingManager visualMappingManager, final CyLayoutAlgorithmManager layoutManager,
-			SynchronousTaskManager<?> syncTaskManager) {
+			SynchronousTaskManager<?> syncTaskManager, CyNetworkNaming networkNaming) {
 		super(filter);
 		this.cyNetworkManager = cyNetworkManager;
 		this.cyRootNetworkManager = cyRootNetworkManager;
@@ -43,13 +47,18 @@ public class EdgeListReaderFactory extends AbstractInputStreamTaskFactory {
 		this.visualMappingManager = visualMappingManager;
 		this.layoutManager = layoutManager;
 		this.syncTaskManager = syncTaskManager;
+		this.networkNaming = networkNaming;
+	}
+
+	public TaskIterator createTaskIterator(InputStream inputStream, String collectionName, Long originalNetSUID) {
+		readerTask = new ReaderTask(inputStream, cyNetworkViewFactory, cyNetworkFactory, cyNetworkManager,
+				cyNetworkViewManager, cyRootNetworkManager, visualMappingManager, layoutManager, syncTaskManager,
+				networkNaming, originalNetSUID);
+		return this.createTaskIterator(inputStream, collectionName);
 	}
 
 	@Override
 	public TaskIterator createTaskIterator(InputStream inputStream, String collectionName) {
-		
-		return new TaskIterator(new EdgeListReader(inputStream, cyNetworkViewFactory, cyNetworkFactory,
-				cyNetworkManager, cyNetworkViewManager, cyRootNetworkManager, visualMappingManager, layoutManager,
-				syncTaskManager, collectionName));
+		return new TaskIterator(readerTask);
 	}
 }

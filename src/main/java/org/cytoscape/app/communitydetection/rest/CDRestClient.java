@@ -17,10 +17,14 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.cytoscape.work.TaskMonitor;
 
 import com.google.gson.Gson;
 
 public class CDRestClient {
+
+	private CDRestClient() {
+	}
 
 	private static class SingletonHelper {
 		private static final CDRestClient INSTANCE = new CDRestClient();
@@ -30,15 +34,15 @@ public class CDRestClient {
 		return SingletonHelper.INSTANCE;
 	}
 
-	public String postEdgeList(String algorithm, String graphDirected, String rootNetwork,
-			ByteArrayOutputStream outStream) throws Exception {
+	public String postEdgeList(String algorithm, String graphDirected, ByteArrayOutputStream outStream)
+			throws Exception {
 
 		File tmpFile = File.createTempFile("edgeList", ".txt");
 		outStream.writeTo(new FileOutputStream(tmpFile));
 		FileBody sbFile = new FileBody(tmpFile, ContentType.TEXT_PLAIN);
 		StringBody sbAlgorithm = new StringBody(algorithm, ContentType.TEXT_PLAIN);
 		StringBody sbDirected = new StringBody(graphDirected, ContentType.TEXT_PLAIN);
-		StringBody sbRoot = new StringBody(rootNetwork, ContentType.TEXT_PLAIN);
+		StringBody sbRoot = new StringBody("Root", ContentType.TEXT_PLAIN);
 
 		HttpEntity multiPartBody = MultipartEntityBuilder.create().setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
 				.addPart("algorithm", sbAlgorithm).addPart("edgefile", sbFile).addPart("graphdirected", sbDirected)
@@ -61,13 +65,13 @@ public class CDRestClient {
 		return httpPostResponse.getFirstHeader("Location").getValue();
 	}
 
-	public Result getEdgeList(String resultURI) throws Exception {
+	public Result getEdgeList(String resultURI, TaskMonitor taskMonitor) throws Exception {
 		Result cdResult = null;
-		int waitTime = 50;
+		int waitTime = 1000;
+		int retryCount = 100;
 		HttpClient client = HttpClientBuilder.create().build();
-		for (int count = 0; count < 20; count++) {
+		for (int count = 0; count < retryCount; count++) {
 			Thread.sleep(waitTime);
-			waitTime += waitTime;
 			HttpResponse httpGetResponse = client.execute(new HttpGet(resultURI));
 			BufferedReader reader = new BufferedReader(new InputStreamReader(httpGetResponse.getEntity().getContent()));
 			cdResult = new Gson().fromJson(reader, Result.class);
@@ -77,6 +81,8 @@ public class CDRestClient {
 			if (cdResult.getStatus().equals("error")) {
 				throw new Exception(cdResult.getEdgeList());
 			}
+			float progressRatio = retryCount;
+			taskMonitor.setProgress(0.1 + (0.8 * (float) (count + 1)) / progressRatio);
 		}
 		if (!cdResult.getStatus().equals("done")) {
 			throw new Exception(cdResult.getEdgeList());
