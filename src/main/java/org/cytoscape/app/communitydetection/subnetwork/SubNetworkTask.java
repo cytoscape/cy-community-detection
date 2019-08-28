@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.cytoscape.app.communitydetection.hierarchy.HierarchyHelper;
 import org.cytoscape.app.communitydetection.util.AppUtils;
-import org.cytoscape.app.communitydetection.util.HierarchyHelper;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;

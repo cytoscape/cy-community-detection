@@ -1,13 +1,13 @@
-package org.cytoscape.app.communitydetection.edgelist;
+package org.cytoscape.app.communitydetection.hierarchy;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
-import org.cytoscape.app.communitydetection.edgelist.reader.ReaderTask;
-import org.cytoscape.app.communitydetection.edgelist.reader.ReaderTaskFactoryImpl;
-import org.cytoscape.app.communitydetection.edgelist.writer.WriterTaskFactoryImpl;
-import org.cytoscape.app.communitydetection.rest.CDRestClient_Java;
+import org.cytoscape.app.communitydetection.edgelist.ReaderTask;
+import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactoryImpl;
+import org.cytoscape.app.communitydetection.edgelist.WriterTaskFactoryImpl;
+import org.cytoscape.app.communitydetection.rest.CDRestClient;
 import org.cytoscape.io.write.CyWriter;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.work.AbstractTask;
@@ -36,17 +36,19 @@ public class HierarchyTask extends AbstractTask {
 				.getEdgeListWriterFactory();
 		CyWriter writer = writerFactory.createWriter(outStream, network, attribute);
 		writer.run(taskMonitor);
-		String resultURI = CDRestClient_Java.getInstance().postEdgeList(algorithm, false, outStream.toString());
+		String resultURI = CDRestClient.getInstance().postCDData(algorithm, false, outStream.toString());
 		taskMonitor.setProgress(0.1);
 		if (cancelled) {
 			return;
 		}
 		taskMonitor.setStatusMessage("Network exported, retrieving the hierarchy");
-		CommunityDetectionResult cdResult = CDRestClient_Java.getInstance().getEdgeList(resultURI, taskMonitor);
+		CommunityDetectionResult cdResult = CDRestClient.getInstance().getCDResult(resultURI, taskMonitor, 0.1f, 0.8f,
+				150);
 		if (cancelled) {
 			return;
 		}
-		InputStream inStream = new ByteArrayInputStream(cdResult.getResult().trim().replace(';', '\n').getBytes());
+		InputStream inStream = new ByteArrayInputStream(
+				cdResult.getResult().asText().trim().replace(';', '\n').getBytes());
 		taskMonitor.setProgress(0.9);
 		taskMonitor.setStatusMessage("Received heirarchy, creating a new network");
 		ReaderTaskFactoryImpl readerFactory = (ReaderTaskFactoryImpl) TaskListenerFactory.getInstance()
@@ -64,7 +66,7 @@ public class HierarchyTask extends AbstractTask {
 
 	@Override
 	public void cancel() {
-		CDRestClient_Java.getInstance().setTaskCanceled(true);
+		CDRestClient.getInstance().setTaskCanceled(true);
 		super.cancel();
 	}
 

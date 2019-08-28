@@ -1,4 +1,4 @@
-package org.cytoscape.app.communitydetection.edgelist.writer;
+package org.cytoscape.app.communitydetection.edgelist;
 
 import java.io.IOException;
 import java.io.OutputStream;

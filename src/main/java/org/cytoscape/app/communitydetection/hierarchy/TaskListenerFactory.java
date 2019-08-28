@@ -1,4 +1,4 @@
-package org.cytoscape.app.communitydetection.edgelist;
+package org.cytoscape.app.communitydetection.hierarchy;
 
 import java.util.Map;
 

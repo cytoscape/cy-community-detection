@@ -8,12 +8,14 @@ import static org.cytoscape.work.ServiceProperties.TITLE;
 import java.util.Properties;
 
 import org.cytoscape.app.communitydetection.cx.CxTaskFactory;
-import org.cytoscape.app.communitydetection.edgelist.TaskExecutor;
-import org.cytoscape.app.communitydetection.edgelist.TaskListenerFactory;
-import org.cytoscape.app.communitydetection.edgelist.reader.ReaderTaskFactoryImpl;
-import org.cytoscape.app.communitydetection.edgelist.writer.WriterTaskFactoryImpl;
-import org.cytoscape.app.communitydetection.subnetwork.CommunityContextMenu;
+import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactoryImpl;
+import org.cytoscape.app.communitydetection.edgelist.WriterTaskFactoryImpl;
+import org.cytoscape.app.communitydetection.hierarchy.HierarchyTaskFactoryImpl;
+import org.cytoscape.app.communitydetection.hierarchy.TaskListenerFactory;
+import org.cytoscape.app.communitydetection.subnetwork.SubNetworkContextMenu;
 import org.cytoscape.app.communitydetection.subnetwork.SubNetworkTaskFactoryImpl;
+import org.cytoscape.app.communitydetection.termmap.TermMappingContextMenu;
+import org.cytoscape.app.communitydetection.termmap.TermMappingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CyNodeViewContextMenuFactory;
@@ -85,30 +87,40 @@ public class CyActivator extends AbstractCyActivator {
 		registerServiceListener(bc, edgeTaskFactory, "addWriterFactory", "removeWriterFactory",
 				CyNetworkViewWriterFactory.class);
 
+		Properties taskExecProps = new Properties();
+		taskExecProps.setProperty(MENU_GRAVITY, "1.0");
 		// Registering Edge List services
-		for (String key : AppUtils.ALGORITHMS.keySet()) {
-			Properties taskExecProps = new Properties();
-			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.MENU + "." + AppUtils.ALGORITHMS.get(key));
-			taskExecProps.setProperty(MENU_GRAVITY, "1.0");
+		for (String key : AppUtils.HIERARCHY_ALGORITHMS.keySet()) {
+			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.MENU + "." + AppUtils.HIERARCHY_ALGORITHMS.get(key));
 			taskExecProps.setProperty(TITLE, "(none)");
-			registerAllServices(bc, new TaskExecutor(key, AppUtils.TYPE_NONE), taskExecProps);
+			registerAllServices(bc, new HierarchyTaskFactoryImpl(key, AppUtils.TYPE_NONE), taskExecProps);
 
-			taskExecProps = new Properties();
-			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.MENU + "." + AppUtils.ALGORITHMS.get(key));
-			taskExecProps.setProperty(MENU_GRAVITY, "1.0");
+			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.MENU + "." + AppUtils.HIERARCHY_ALGORITHMS.get(key));
 			taskExecProps.setProperty(TITLE, "Weighted");
-			registerAllServices(bc, new TaskExecutor(key, AppUtils.TYPE_WEIGHTED), taskExecProps);
+			registerAllServices(bc, new HierarchyTaskFactoryImpl(key, AppUtils.TYPE_WEIGHTED), taskExecProps);
+		}
+		for (String key : AppUtils.TERM_MAPPING_ALGORITHMS.keySet()) {
+			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.MENU);
+			taskExecProps.setProperty(TITLE, AppUtils.TERM_MAPPING_ALGORITHMS.get(key));
+			registerAllServices(bc, new TermMappingTaskFactoryImpl(key, false), taskExecProps);
 		}
 
-		SubNetworkTaskFactoryImpl factoryImpl = new SubNetworkTaskFactoryImpl(rootNetworkManager, networkManager,
-				networkViewManager, networkViewFactory, visualMappingManager, layoutAlgorithmManager, syncTaskManager,
-				networkNaming);
-		registerAllServices(bc, factoryImpl);
-
-		CyNodeViewContextMenuFactory contextMenu = new CommunityContextMenu(applicationManager, factoryImpl);
 		Properties contextMenuProps = new Properties();
 		contextMenuProps.put(PREFERRED_MENU, AppUtils.MENU);
-		registerAllServices(bc, contextMenu, contextMenuProps);
+		SubNetworkTaskFactoryImpl subnetworkfactoryImpl = new SubNetworkTaskFactoryImpl(rootNetworkManager,
+				networkManager, networkViewManager, networkViewFactory, visualMappingManager, layoutAlgorithmManager,
+				syncTaskManager, networkNaming);
+		CyNodeViewContextMenuFactory subNetworkContextMenu = new SubNetworkContextMenu(applicationManager,
+				subnetworkfactoryImpl);
+		registerAllServices(bc, subnetworkfactoryImpl);
+		registerAllServices(bc, subNetworkContextMenu, contextMenuProps);
+		for (String key : AppUtils.TERM_MAPPING_ALGORITHMS.keySet()) {
+			TermMappingTaskFactoryImpl mappingFactoryImpl = new TermMappingTaskFactoryImpl(key, true);
+			CyNodeViewContextMenuFactory termMappingContextMenu = new TermMappingContextMenu(applicationManager,
+					syncTaskManager, mappingFactoryImpl, key);
+			registerAllServices(bc, mappingFactoryImpl);
+			registerAllServices(bc, termMappingContextMenu, contextMenuProps);
+		}
 	}
 
 }

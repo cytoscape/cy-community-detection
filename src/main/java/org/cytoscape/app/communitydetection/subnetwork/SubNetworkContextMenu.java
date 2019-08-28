@@ -16,12 +16,12 @@ import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 
-public class CommunityContextMenu implements ActionListener, CyNodeViewContextMenuFactory {
+public class SubNetworkContextMenu implements ActionListener, CyNodeViewContextMenuFactory {
 
 	private final CyApplicationManager applicationManager;
 	private final SubNetworkTaskFactoryImpl factoryImpl;
 
-	public CommunityContextMenu(CyApplicationManager applicationManager, SubNetworkTaskFactoryImpl factoryImpl) {
+	public SubNetworkContextMenu(CyApplicationManager applicationManager, SubNetworkTaskFactoryImpl factoryImpl) {
 		this.applicationManager = applicationManager;
 		this.factoryImpl = factoryImpl;
 	}

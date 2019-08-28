@@ -16,6 +16,8 @@ public class AppUtils {
 	public final static String COLUMN_SUID = "SUID";
 	public final static String COLUMN_CD_MEMBER_LIST = "CD_MemberList";
 	public final static String COLUMN_CD_ORIGINAL_NETWORK = "CD_OriginalNetwork";
+	public final static String COLUMN_CD_COMMUNITY_NAME = "CD_CommunityName";
+	public final static String COLUMN_CD_ANNOTATED_MEMBERS = "CD_AnnotatedMembers";
 
 	public final static Pattern SPLIT_PATTERN = Pattern.compile(",");
 	public final static String CD_MEMBER_LIST_DELIMITER = " ";
@@ -23,10 +25,16 @@ public class AppUtils {
 	public final static String TYPE_NONE = "none";
 	public final static String TYPE_WEIGHTED = "weighted";
 
-	public final static Map<String, String> ALGORITHMS = new HashMap<String, String>() {
+	public final static Map<String, String> HIERARCHY_ALGORITHMS = new HashMap<String, String>() {
 		{
 			put("louvain", "Louvain");
 			put("infomap", "InfoMap");
+		}
+	};
+
+	public final static Map<String, String> TERM_MAPPING_ALGORITHMS = new HashMap<String, String>() {
+		{
+			put("gprofilersingletermv2", "GProfiler term Mapping");
 		}
 	};
 }

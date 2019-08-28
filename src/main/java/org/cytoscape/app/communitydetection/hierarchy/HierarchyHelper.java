@@ -1,4 +1,4 @@
-package org.cytoscape.app.communitydetection.util;
+package org.cytoscape.app.communitydetection.hierarchy;
 
 import java.util.HashMap;
 import java.util.HashSet;

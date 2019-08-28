@@ -1,4 +1,4 @@
-package org.cytoscape.app.communitydetection.edgelist.reader;
+package org.cytoscape.app.communitydetection.edgelist;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -10,8 +10,8 @@ import java.util.Set;
 
 import javax.swing.JOptionPane;
 
+import org.cytoscape.app.communitydetection.hierarchy.HierarchyHelper;
 import org.cytoscape.app.communitydetection.util.AppUtils;
-import org.cytoscape.app.communitydetection.util.HierarchyHelper;
 import org.cytoscape.io.read.AbstractCyNetworkReader;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
@@ -116,6 +116,12 @@ public class ReaderTask extends AbstractCyNetworkReader {
 		}
 		if (newNetwork.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_MEMBER_LIST) == null) {
 			newNetwork.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_MEMBER_LIST, String.class, false, null);
+		}
+		if (newNetwork.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_COMMUNITY_NAME) == null) {
+			newNetwork.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_COMMUNITY_NAME, String.class, false, null);
+		}
+		if (newNetwork.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_ANNOTATED_MEMBERS) == null) {
+			newNetwork.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_ANNOTATED_MEMBERS, String.class, false, null);
 		}
 
 		Map<Long, CyNode> nMap = new HashMap<Long, CyNode>();

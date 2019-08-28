@@ -1,4 +1,4 @@
-package org.cytoscape.app.communitydetection.edgelist;
+package org.cytoscape.app.communitydetection.hierarchy;
 
 import javax.swing.JOptionPane;
 
@@ -7,12 +7,12 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.task.NetworkTaskFactory;
 import org.cytoscape.work.TaskIterator;
 
-public class TaskExecutor implements NetworkTaskFactory {
+public class HierarchyTaskFactoryImpl implements NetworkTaskFactory {
 
 	private final String algorithm;
 	private final String type;
 
-	public TaskExecutor(String algorithm, String type) {
+	public HierarchyTaskFactoryImpl(String algorithm, String type) {
 		this.algorithm = algorithm;
 		this.type = type;
 	}

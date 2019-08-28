@@ -13,6 +13,8 @@
 		<junit.version>4.12</junit.version>
 		<cytoscape.api.version>3.7.0</cytoscape.api.version>
 		<osgi.api.version>4.2.0</osgi.api.version>
+		<jackson.version>2.9.9</jackson.version>
+		<jackson-databind.version>2.9.9.3</jackson-databind.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -234,7 +236,17 @@
 		<dependency>
 			<groupId>org.ndexbio.communitydetection.rest.model</groupId>
 			<artifactId>communitydetection-rest-model</artifactId>
-			<version>0.1.0</version>
+			<version>0.4.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson-databind.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.jaxrs</groupId>
+			<artifactId>jackson-jaxrs-base</artifactId>
+			<version>${jackson.version}</version>
 		</dependency>
 	</dependencies>
 

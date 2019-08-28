@@ -1,4 +1,4 @@
-package org.cytoscape.app.communitydetection.edgelist.reader;
+package org.cytoscape.app.communitydetection.edgelist;
 
 import java.io.InputStream;
 
