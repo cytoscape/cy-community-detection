@@ -1,19 +1,22 @@
 package org.cytoscape.app.communitydetection.subnetwork;
 
-import org.cytoscape.model.CyNetwork;
+import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.session.CyNetworkNaming;
-import org.cytoscape.task.NetworkTaskFactory;
+import org.cytoscape.task.AbstractNodeViewTaskFactory;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
+import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.view.model.View;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskIterator;
 
-public class SubNetworkTaskFactoryImpl implements NetworkTaskFactory {
+public class SubNetworkTaskFactoryImpl extends AbstractNodeViewTaskFactory {
 
 	private final CyRootNetworkManager rootNetworkManager;
 	private final CyNetworkManager networkManager;
@@ -23,8 +26,6 @@ public class SubNetworkTaskFactoryImpl implements NetworkTaskFactory {
 	private final CyLayoutAlgorithmManager layoutManager;
 	private final SynchronousTaskManager<?> syncTaskManager;
 	private final CyNetworkNaming networkNaming;
-
-	private SubNetworkTask newSubNetworkTask;
 
 	public SubNetworkTaskFactoryImpl(CyRootNetworkManager rootNetworkManager, CyNetworkManager networkManager,
 			CyNetworkViewManager networkViewManager, CyNetworkViewFactory networkViewFactory,
@@ -40,20 +41,22 @@ public class SubNetworkTaskFactoryImpl implements NetworkTaskFactory {
 		this.networkNaming = networkNaming;
 	}
 
-	public void createTaskIterator(CyNetwork network, CyNode selectedNode) {
-		newSubNetworkTask = new SubNetworkTask(rootNetworkManager, networkManager, networkViewManager,
-				networkViewFactory, visualMappingManager, layoutManager, syncTaskManager, networkNaming, network,
-				selectedNode);
-		syncTaskManager.execute(this.createTaskIterator(network));
+	@Override
+	public TaskIterator createTaskIterator(View<CyNode> nodeView, CyNetworkView networkView) {
+		return new TaskIterator(
+				new SubNetworkTask(rootNetworkManager, networkManager, networkViewManager, networkViewFactory,
+						visualMappingManager, layoutManager, syncTaskManager, networkNaming, networkView.getModel()));
 	}
 
 	@Override
-	public TaskIterator createTaskIterator(CyNetwork network) {
-		return new TaskIterator(newSubNetworkTask);
-	}
-
-	@Override
-	public boolean isReady(CyNetwork network) {
-		return (network != null);
+	public boolean isReady(View<CyNode> nodeView, CyNetworkView networkView) {
+		if (networkView != null && networkView.getModel() != null && networkView.getModel().getDefaultNetworkTable()
+				.getColumn(AppUtils.COLUMN_CD_ORIGINAL_NETWORK) == null) {
+			return false;
+		}
+		if (CyTableUtil.getSelectedNodes(networkView.getModel()).size() != 1) {
+			return false;
+		}
+		return super.isReady(nodeView, networkView);
 	}
 }

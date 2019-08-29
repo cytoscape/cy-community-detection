@@ -31,14 +31,8 @@ public class TermMappingTask extends AbstractTask {
 
 		taskMonitor.setTitle("Community Detection: Term Mapping");
 		taskMonitor.setProgress(0.0);
-		if (network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_MEMBER_LIST) == null) {
-			taskMonitor.setStatusMessage("Not applicable for this network.");
-			Thread.sleep(3000);
-			taskMonitor.setProgress(1.0);
-			return;
-		}
-
 		taskMonitor.setStatusMessage("Running " + AppUtils.TERM_MAPPING_ALGORITHMS.get(algorithm));
+
 		if (network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_COMMUNITY_NAME) == null) {
 			network.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_COMMUNITY_NAME, String.class, false, null);
 		}
@@ -49,6 +43,9 @@ public class TermMappingTask extends AbstractTask {
 		List<CyNode> selectedNodes;
 		if (isContextMenu) {
 			selectedNodes = CyTableUtil.getSelectedNodes(network);
+			if (selectedNodes.size() == 0) {
+				return;
+			}
 		} else {
 			selectedNodes = network.getNodeList();
 		}

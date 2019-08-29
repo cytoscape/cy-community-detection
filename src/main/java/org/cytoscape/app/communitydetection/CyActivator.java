@@ -1,6 +1,10 @@
 package org.cytoscape.app.communitydetection;
 
+import static org.cytoscape.application.swing.ActionEnableSupport.ENABLE_FOR_SELECTED_NODES;
+import static org.cytoscape.work.ServiceProperties.ENABLE_FOR;
 import static org.cytoscape.work.ServiceProperties.ID;
+import static org.cytoscape.work.ServiceProperties.IN_CONTEXT_MENU;
+import static org.cytoscape.work.ServiceProperties.IN_MENU_BAR;
 import static org.cytoscape.work.ServiceProperties.MENU_GRAVITY;
 import static org.cytoscape.work.ServiceProperties.PREFERRED_MENU;
 import static org.cytoscape.work.ServiceProperties.TITLE;
@@ -12,13 +16,11 @@ import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.edgelist.WriterTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.hierarchy.HierarchyTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.hierarchy.TaskListenerFactory;
-import org.cytoscape.app.communitydetection.subnetwork.SubNetworkContextMenu;
 import org.cytoscape.app.communitydetection.subnetwork.SubNetworkTaskFactoryImpl;
-import org.cytoscape.app.communitydetection.termmap.TermMappingContextMenu;
-import org.cytoscape.app.communitydetection.termmap.TermMappingTaskFactoryImpl;
+import org.cytoscape.app.communitydetection.termmap.NetworkTermMappingTaskFactoryImpl;
+import org.cytoscape.app.communitydetection.termmap.NodeTermMappingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.application.swing.CyNodeViewContextMenuFactory;
 import org.cytoscape.io.BasicCyFileFilter;
 import org.cytoscape.io.DataCategory;
 import org.cytoscape.io.read.InputStreamTaskFactory;
@@ -102,24 +104,22 @@ public class CyActivator extends AbstractCyActivator {
 		for (String key : AppUtils.TERM_MAPPING_ALGORITHMS.keySet()) {
 			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.MENU);
 			taskExecProps.setProperty(TITLE, AppUtils.TERM_MAPPING_ALGORITHMS.get(key));
-			registerAllServices(bc, new TermMappingTaskFactoryImpl(key, false), taskExecProps);
+			registerAllServices(bc, new NetworkTermMappingTaskFactoryImpl(key), taskExecProps);
 		}
 
 		Properties contextMenuProps = new Properties();
-		contextMenuProps.put(PREFERRED_MENU, AppUtils.MENU);
+		contextMenuProps.setProperty(PREFERRED_MENU, AppUtils.MENU);
+		contextMenuProps.setProperty(ENABLE_FOR, ENABLE_FOR_SELECTED_NODES);
+		contextMenuProps.setProperty(TITLE, "Create new Network from Selected Node");
+		contextMenuProps.put(IN_MENU_BAR, false);
+		contextMenuProps.put(IN_CONTEXT_MENU, true);
 		SubNetworkTaskFactoryImpl subnetworkfactoryImpl = new SubNetworkTaskFactoryImpl(rootNetworkManager,
 				networkManager, networkViewManager, networkViewFactory, visualMappingManager, layoutAlgorithmManager,
 				syncTaskManager, networkNaming);
-		CyNodeViewContextMenuFactory subNetworkContextMenu = new SubNetworkContextMenu(applicationManager,
-				subnetworkfactoryImpl);
-		registerAllServices(bc, subnetworkfactoryImpl);
-		registerAllServices(bc, subNetworkContextMenu, contextMenuProps);
+		registerAllServices(bc, subnetworkfactoryImpl, contextMenuProps);
 		for (String key : AppUtils.TERM_MAPPING_ALGORITHMS.keySet()) {
-			TermMappingTaskFactoryImpl mappingFactoryImpl = new TermMappingTaskFactoryImpl(key, true);
-			CyNodeViewContextMenuFactory termMappingContextMenu = new TermMappingContextMenu(applicationManager,
-					syncTaskManager, mappingFactoryImpl, key);
-			registerAllServices(bc, mappingFactoryImpl);
-			registerAllServices(bc, termMappingContextMenu, contextMenuProps);
+			contextMenuProps.setProperty(TITLE, AppUtils.TERM_MAPPING_ALGORITHMS.get(key));
+			registerAllServices(bc, new NodeTermMappingTaskFactoryImpl(key), contextMenuProps);
 		}
 	}
 

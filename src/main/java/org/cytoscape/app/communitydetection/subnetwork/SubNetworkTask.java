@@ -15,6 +15,7 @@ import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
+import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.model.VirtualColumnInfo;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.model.subnetwork.CySubNetwork;
@@ -43,13 +44,11 @@ public class SubNetworkTask extends AbstractTask {
 	private final CyNetworkNaming networkNaming;
 
 	private final CyNetwork hierarchyNetwork;
-	private final CyNode communityNode;
 
 	public SubNetworkTask(CyRootNetworkManager rootNetworkManager, CyNetworkManager networkManager,
 			CyNetworkViewManager networkViewManager, CyNetworkViewFactory networkViewFactory,
 			VisualMappingManager visualMappingManager, CyLayoutAlgorithmManager layoutManager,
-			SynchronousTaskManager<?> syncTaskManager, CyNetworkNaming networkNaming, CyNetwork hierarchyNetwork,
-			CyNode communityNode) {
+			SynchronousTaskManager<?> syncTaskManager, CyNetworkNaming networkNaming, CyNetwork hierarchyNetwork) {
 		this.rootNetworkManager = rootNetworkManager;
 		this.networkManager = networkManager;
 		this.networkViewManager = networkViewManager;
@@ -59,16 +58,19 @@ public class SubNetworkTask extends AbstractTask {
 		this.syncTaskManager = syncTaskManager;
 		this.networkNaming = networkNaming;
 		this.hierarchyNetwork = hierarchyNetwork;
-		this.communityNode = communityNode;
 	}
 
 	@Override
 	public void run(TaskMonitor taskMonitor) throws Exception {
+		if (CyTableUtil.getSelectedNodes(hierarchyNetwork).size() != 1) {
+			return;
+		}
 		taskMonitor.setTitle("Community Detection: Creating Subnetwork");
 		taskMonitor.setProgress(0.0);
 		Long originalNetworkSUID = hierarchyNetwork.getRow(hierarchyNetwork).get(AppUtils.COLUMN_CD_ORIGINAL_NETWORK,
 				Long.class);
 		CyNetwork originalNetwork = networkManager.getNetwork(originalNetworkSUID);
+		CyNode communityNode = CyTableUtil.getSelectedNodes(hierarchyNetwork).get(0);
 		Set<CyNode> leafNodes = getMemberList(originalNetwork, communityNode);
 		Set<CyEdge> connectingEdges = getEdges(originalNetwork, leafNodes);
 		taskMonitor.setProgress(0.2);
