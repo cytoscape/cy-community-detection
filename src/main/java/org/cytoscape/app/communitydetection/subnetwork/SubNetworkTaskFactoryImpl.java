@@ -7,6 +7,7 @@ import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.session.CyNetworkNaming;
 import org.cytoscape.task.AbstractNodeViewTaskFactory;
+import org.cytoscape.task.NetworkViewTaskFactory;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
@@ -16,7 +17,7 @@ import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskIterator;
 
-public class SubNetworkTaskFactoryImpl extends AbstractNodeViewTaskFactory {
+public class SubNetworkTaskFactoryImpl extends AbstractNodeViewTaskFactory implements NetworkViewTaskFactory {
 
 	private final CyRootNetworkManager rootNetworkManager;
 	private final CyNetworkManager networkManager;
@@ -42,21 +43,34 @@ public class SubNetworkTaskFactoryImpl extends AbstractNodeViewTaskFactory {
 	}
 
 	@Override
-	public TaskIterator createTaskIterator(View<CyNode> nodeView, CyNetworkView networkView) {
+	public TaskIterator createTaskIterator(CyNetworkView networkView) {
 		return new TaskIterator(
 				new SubNetworkTask(rootNetworkManager, networkManager, networkViewManager, networkViewFactory,
 						visualMappingManager, layoutManager, syncTaskManager, networkNaming, networkView.getModel()));
 	}
 
 	@Override
+	public boolean isReady(CyNetworkView networkView) {
+		if (networkView != null && networkView.getModel() != null) {
+			if (CyTableUtil.getSelectedNodes(networkView.getModel()).size() != 1) {
+				return false;
+			}
+			if (networkView.getModel().getDefaultNetworkTable()
+					.getColumn(AppUtils.COLUMN_CD_ORIGINAL_NETWORK) == null) {
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public TaskIterator createTaskIterator(View<CyNode> nodeView, CyNetworkView networkView) {
+		return this.createTaskIterator(networkView);
+	}
+
+	@Override
 	public boolean isReady(View<CyNode> nodeView, CyNetworkView networkView) {
-		if (networkView != null && networkView.getModel() != null && networkView.getModel().getDefaultNetworkTable()
-				.getColumn(AppUtils.COLUMN_CD_ORIGINAL_NETWORK) == null) {
-			return false;
-		}
-		if (CyTableUtil.getSelectedNodes(networkView.getModel()).size() != 1) {
-			return false;
-		}
-		return super.isReady(nodeView, networkView);
+		return this.isReady(networkView);
 	}
 }

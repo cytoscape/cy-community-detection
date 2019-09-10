@@ -117,11 +117,22 @@ public class ReaderTask extends AbstractCyNetworkReader {
 		if (newNetwork.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_MEMBER_LIST) == null) {
 			newNetwork.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_MEMBER_LIST, String.class, false, null);
 		}
+		if (newNetwork.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_MEMBER_LIST_SIZE) == null) {
+			newNetwork.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_MEMBER_LIST_SIZE, Integer.class, false, 0);
+		}
+		if (newNetwork.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_MEMBER_LIST_LOG_SIZE) == null) {
+			newNetwork.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_MEMBER_LIST_LOG_SIZE, Double.class, false,
+					0.0);
+		}
 		if (newNetwork.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_COMMUNITY_NAME) == null) {
 			newNetwork.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_COMMUNITY_NAME, String.class, false, null);
 		}
 		if (newNetwork.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_ANNOTATED_MEMBERS) == null) {
-			newNetwork.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_ANNOTATED_MEMBERS, String.class, false, null);
+			newNetwork.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_ANNOTATED_MEMBERS, String.class, false,
+					null);
+		}
+		if (newNetwork.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_LABELED) == null) {
+			newNetwork.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_LABELED, Boolean.class, true, false);
 		}
 
 		Map<Long, CyNode> nMap = new HashMap<Long, CyNode>();
@@ -131,12 +142,13 @@ public class ReaderTask extends AbstractCyNetworkReader {
 		while ((line = br.readLine()) != null) {
 			if (line.trim().length() <= 0)
 				continue;
-			final String[] parts = line.split(",");
+			final String[] parts = line.split(AppUtils.EDGE_LIST_SPLIT_PATTERN);
 			if (parts.length >= 3) {
 				long sourceSUID = Long.parseLong(parts[0]);
 				long targetSUID = Long.parseLong(parts[1]);
+				String[] interaction = parts[parts.length - 1].split("-");
 
-				if (originalNetwork.getNode(sourceSUID) == null) {
+				if (interaction[0].equalsIgnoreCase("c")) {
 					CyNode sourceNode = nMap.get(sourceSUID);
 					if (sourceNode == null) {
 						sourceNode = newNetwork.addNode();
@@ -145,7 +157,7 @@ public class ReaderTask extends AbstractCyNetworkReader {
 						nMap.put(sourceSUID, sourceNode);
 					}
 				}
-				if (originalNetwork.getNode(targetSUID) == null) {
+				if (interaction[1].equalsIgnoreCase("c")) {
 					CyNode targetNode = nMap.get(targetSUID);
 					if (targetNode == null) {
 						targetNode = newNetwork.addNode();
@@ -191,14 +203,20 @@ public class ReaderTask extends AbstractCyNetworkReader {
 			StringBuffer memberList = new StringBuffer();
 			for (CyNode memberNode : memberNodes) {
 				if (memberList.length() > 0) {
-					memberList.append(AppUtils.CD_MEMBER_LIST_DELIMITER);
+					memberList.append(" ");
 				}
 				String name = originalNetwork.getRow(memberNode).get(CyNetwork.NAME, String.class);
 				memberList.append(name);
 			}
 			if (memberList != null) {
 				network.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST, memberList.toString());
+				network.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST_SIZE, memberNodes.size());
+				network.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST_LOG_SIZE, log2(memberNodes.size()));
 			}
 		}
+	}
+
+	private double log2(double x) {
+		return (Math.log(x) / Math.log(2));
 	}
 }

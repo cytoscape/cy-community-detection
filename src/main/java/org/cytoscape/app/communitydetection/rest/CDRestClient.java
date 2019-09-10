@@ -6,6 +6,7 @@ import java.net.InetAddress;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -15,13 +16,14 @@ import org.cytoscape.work.TaskMonitor;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionRequest;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionResult;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionResultStatus;
+import org.ndexbio.communitydetection.rest.model.Task;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.TextNode;
 
 public class CDRestClient {
 
-	private final static int RETRY_COUNT = 100;
+	private final static String URI = "http://ddot-stage.ucsd.edu/cd/communitydetection/v1";
 
 	private final ObjectMapper mapper;
 	private boolean isTaskCanceled;
@@ -39,6 +41,12 @@ public class CDRestClient {
 		return SingletonHelper.INSTANCE;
 	}
 
+	private CloseableHttpClient getClient(int timeout) {
+		RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout * 1000)
+				.setConnectionRequestTimeout(timeout * 1000).setSocketTimeout(timeout * 1000).build();
+		return HttpClientBuilder.create().setDefaultRequestConfig(config).build();
+	}
+
 	public String postCDData(String algorithm, Boolean graphDirected, String data) throws Exception {
 
 		CommunityDetectionRequest request = new CommunityDetectionRequest();
@@ -48,11 +56,8 @@ public class CDRestClient {
 		request.setIpAddress(InetAddress.getLocalHost().getHostAddress());
 		StringEntity body = new StringEntity(mapper.writeValueAsString(request));
 
-		int timeout = 10;
-		RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout * 1000)
-				.setConnectionRequestTimeout(timeout * 1000).setSocketTimeout(timeout * 1000).build();
-		CloseableHttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
-		HttpPost postRequest = new HttpPost("http://ddot-stage.ucsd.edu/cd/communitydetection/v1");
+		CloseableHttpClient client = getClient(10);
+		HttpPost postRequest = new HttpPost(URI);
 		postRequest.addHeader("accept", "application/json");
 		postRequest.addHeader("Content-Type", "application/json");
 		postRequest.setEntity(body);
@@ -65,60 +70,75 @@ public class CDRestClient {
 			}
 		}
 		if (202 != httpPostResponse.getStatusLine().getStatusCode()) {
-			throw new Exception(httpPostResponse.getStatusLine().getReasonPhrase());
+			throw new Exception("Error: " + httpPostResponse.getStatusLine().getStatusCode());
 		}
-		return httpPostResponse.getFirstHeader("Location").getValue();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(httpPostResponse.getEntity().getContent()));
+		Task serviceTask = mapper.readValue(reader, Task.class);
+		System.out.println("Task ID: " + serviceTask.getId());
+		return serviceTask.getId();
 	}
 
-	public CommunityDetectionResult getCDResult(String resultURI, Integer totalRuntime) throws Exception {
+	public void deleteTask(String taskId) throws Exception {
+		CloseableHttpClient client = getClient(10);
+		HttpResponse deleteResponse = client.execute(new HttpDelete(URI + "/" + taskId));
+		if (200 != deleteResponse.getStatusLine().getStatusCode()) {
+			System.out.println("Could not delete task: " + taskId);
+		}
+	}
+
+	public CommunityDetectionResult getCDResult(String taskId, Integer totalRuntime) throws Exception {
 		CommunityDetectionResult cdResult = null;
-		int timeout = totalRuntime;
-		int waitTime = totalRuntime * 1000 / RETRY_COUNT;
-		RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout * 1000)
-				.setConnectionRequestTimeout(timeout * 1000).setSocketTimeout(timeout * 1000).build();
-		CloseableHttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
-		for (int count = 0; count < RETRY_COUNT; count++) {
+		int waitTime = 1000;
+		CloseableHttpClient client = getClient(totalRuntime);
+		for (int count = 0; count < totalRuntime; count++) {
 			Thread.sleep(waitTime);
-			HttpResponse httpGetResponse = client.execute(new HttpGet(resultURI));
+			if (isTaskCanceled) {
+				deleteTask(taskId);
+				break;
+			}
+			HttpResponse httpGetResponse = client.execute(new HttpGet(URI + "/" + taskId));
 			BufferedReader reader = new BufferedReader(new InputStreamReader(httpGetResponse.getEntity().getContent()));
 			cdResult = mapper.readValue(reader, CommunityDetectionResult.class);
-			if (cdResult.getStatus().equals(CommunityDetectionResultStatus.COMPLETE_STATUS) || isTaskCanceled) {
+			if (cdResult.getStatus().equals(CommunityDetectionResultStatus.COMPLETE_STATUS)) {
 				break;
 			}
 			if (cdResult.getStatus().equals(CommunityDetectionResultStatus.FAILED_STATUS)) {
-				throw new Exception(cdResult.getMessage());
+				throw new Exception("Error fetching the result!");
 			}
 		}
-		if (!cdResult.getStatus().equals(CommunityDetectionResultStatus.COMPLETE_STATUS)) {
-			throw new Exception(cdResult.getMessage());
+		if (cdResult != null
+				&& !(cdResult.getStatus().equals(CommunityDetectionResultStatus.COMPLETE_STATUS) || isTaskCanceled)) {
+			throw new Exception("Request timed out!");
 		}
 		return cdResult;
 	}
 
-	public CommunityDetectionResult getCDResult(String resultURI, TaskMonitor taskMonitor, Float currentProgress,
+	public CommunityDetectionResult getCDResult(String taskId, TaskMonitor taskMonitor, Float currentProgress,
 			Float totalProgress, Integer totalRuntime) throws Exception {
 		CommunityDetectionResult cdResult = null;
-		int timeout = totalRuntime;
-		int waitTime = totalRuntime * 1000 / RETRY_COUNT;
-		RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout * 1000)
-				.setConnectionRequestTimeout(timeout * 1000).setSocketTimeout(timeout * 1000).build();
-		CloseableHttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
-		for (int count = 0; count < RETRY_COUNT; count++) {
+		int waitTime = 1000;
+		CloseableHttpClient client = getClient(totalRuntime);
+		for (int count = 0; count < totalRuntime; count++) {
 			Thread.sleep(waitTime);
-			HttpResponse httpGetResponse = client.execute(new HttpGet(resultURI));
+			if (isTaskCanceled) {
+				deleteTask(taskId);
+				break;
+			}
+			HttpResponse httpGetResponse = client.execute(new HttpGet(URI + "/" + taskId));
 			BufferedReader reader = new BufferedReader(new InputStreamReader(httpGetResponse.getEntity().getContent()));
 			cdResult = mapper.readValue(reader, CommunityDetectionResult.class);
-			if (cdResult.getStatus().equals(CommunityDetectionResultStatus.COMPLETE_STATUS) || isTaskCanceled) {
+			if (cdResult.getStatus().equals(CommunityDetectionResultStatus.COMPLETE_STATUS)) {
 				break;
 			}
 			if (cdResult.getStatus().equals(CommunityDetectionResultStatus.FAILED_STATUS)) {
-				throw new Exception(cdResult.getMessage());
+				throw new Exception("Error fetching the result!");
 			}
-			float progressRatio = RETRY_COUNT;
+			float progressRatio = totalRuntime;
 			taskMonitor.setProgress(currentProgress + (totalProgress * (float) (count + 1)) / progressRatio);
 		}
-		if (!cdResult.getStatus().equals(CommunityDetectionResultStatus.COMPLETE_STATUS)) {
-			throw new Exception(cdResult.getMessage());
+		if (cdResult != null
+				&& !(cdResult.getStatus().equals(CommunityDetectionResultStatus.COMPLETE_STATUS) || isTaskCanceled)) {
+			throw new Exception("Request timed out!");
 		}
 		return cdResult;
 	}

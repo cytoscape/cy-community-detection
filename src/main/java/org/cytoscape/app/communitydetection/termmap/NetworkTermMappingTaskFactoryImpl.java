@@ -20,8 +20,7 @@ public class NetworkTermMappingTaskFactoryImpl implements NetworkTaskFactory {
 
 	@Override
 	public boolean isReady(CyNetwork network) {
-		if (network != null
-				&& network.getDefaultNetworkTable().getColumn(AppUtils.COLUMN_CD_ORIGINAL_NETWORK) == null) {
+		if (network != null && network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_MEMBER_LIST) == null) {
 			return false;
 		}
 		return network != null;

@@ -29,6 +29,9 @@ public class HierarchyTask extends AbstractTask {
 
 	@Override
 	public void run(TaskMonitor taskMonitor) throws Exception {
+		if (attribute == null) {
+			return;
+		}
 		taskMonitor.setTitle("Community Detection: Creating Hierarchy Network");
 		taskMonitor.setStatusMessage("Exporting the network");
 		ByteArrayOutputStream outStream = new ByteArrayOutputStream();
@@ -37,20 +40,22 @@ public class HierarchyTask extends AbstractTask {
 		CyWriter writer = writerFactory.createWriter(outStream, network, attribute);
 		writer.run(taskMonitor);
 		String resultURI = CDRestClient.getInstance().postCDData(algorithm, false, outStream.toString());
-		taskMonitor.setProgress(0.1);
 		if (cancelled) {
+			CDRestClient.getInstance().setTaskCanceled(false);
 			return;
 		}
+		taskMonitor.setProgress(0.1);
 		taskMonitor.setStatusMessage("Network exported, retrieving the hierarchy");
 		CommunityDetectionResult cdResult = CDRestClient.getInstance().getCDResult(resultURI, taskMonitor, 0.1f, 0.8f,
-				150);
+				1800);
 		if (cancelled) {
+			CDRestClient.getInstance().setTaskCanceled(false);
 			return;
 		}
 		InputStream inStream = new ByteArrayInputStream(
 				cdResult.getResult().asText().trim().replace(';', '\n').getBytes());
 		taskMonitor.setProgress(0.9);
-		taskMonitor.setStatusMessage("Received heirarchy, creating a new network");
+		taskMonitor.setStatusMessage("Received hierarchy, creating a new network");
 		ReaderTaskFactoryImpl readerFactory = (ReaderTaskFactoryImpl) TaskListenerFactory.getInstance()
 				.getEdgeListReaderFactory();
 		TaskIterator iterator = readerFactory.createTaskIterator(inStream, null, network.getSUID());

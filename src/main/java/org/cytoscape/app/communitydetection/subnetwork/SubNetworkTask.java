@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.swing.JOptionPane;
+
 import org.cytoscape.app.communitydetection.hierarchy.HierarchyHelper;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.model.CyColumn;
@@ -73,6 +75,9 @@ public class SubNetworkTask extends AbstractTask {
 		CyNode communityNode = CyTableUtil.getSelectedNodes(hierarchyNetwork).get(0);
 		Set<CyNode> leafNodes = getMemberList(originalNetwork, communityNode);
 		Set<CyEdge> connectingEdges = getEdges(originalNetwork, leafNodes);
+		if (cancelled) {
+			return;
+		}
 		taskMonitor.setProgress(0.2);
 
 		CySubNetwork newNetwork = rootNetworkManager.getRootNetwork(originalNetwork).addSubNetwork();
@@ -88,6 +93,9 @@ public class SubNetworkTask extends AbstractTask {
 		addColumns(originalNetwork.getTable(CyNetwork.class, CyNetwork.LOCAL_ATTRS),
 				newNetwork.getTable(CyNetwork.class, CyNetwork.LOCAL_ATTRS));
 		taskMonitor.setProgress(0.4);
+		if (cancelled) {
+			return;
+		}
 
 		for (final CyNode node : leafNodes) {
 			newNetwork.addNode(node);
@@ -101,6 +109,9 @@ public class SubNetworkTask extends AbstractTask {
 		}
 		networkManager.addNetwork(newNetwork);
 		taskMonitor.setProgress(0.7);
+		if (cancelled) {
+			return;
+		}
 
 		CyNetworkView originalNetworkView = null;
 		for (CyNetworkView netView : networkViewManager.getNetworkViews(originalNetwork)) {
@@ -130,7 +141,7 @@ public class SubNetworkTask extends AbstractTask {
 		return edgeList;
 	}
 
-	private Set<CyNode> getMemberList(CyNetwork originalNetwork, CyNode selectedNode) throws Exception {
+	private Set<CyNode> getMemberList(CyNetwork originalNetwork, CyNode selectedNode) {
 		Set<CyNode> leafNodes = HierarchyHelper.getInstance().getMemberList(hierarchyNetwork, selectedNode);
 		if (leafNodes == null) {
 			leafNodes = new HashSet<CyNode>();
@@ -138,7 +149,8 @@ public class SubNetworkTask extends AbstractTask {
 					.get(AppUtils.COLUMN_CD_MEMBER_LIST, String.class).split(AppUtils.CD_MEMBER_LIST_DELIMITER));
 			if (memberList == null) {
 				// TODO create the whole list again
-				throw new Exception(AppUtils.COLUMN_CD_MEMBER_LIST + " does not exist!");
+				JOptionPane.showMessageDialog(null, AppUtils.COLUMN_CD_MEMBER_LIST + " does not exist!");
+				cancel();
 			}
 			for (CyNode node : originalNetwork.getNodeList()) {
 				if (memberList.contains(originalNetwork.getRow(node).get(CyNetwork.NAME, String.class))) {

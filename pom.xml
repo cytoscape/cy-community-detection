@@ -148,11 +148,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.cytoscape</groupId>
-			<artifactId>cx-support</artifactId>
-			<version>${cytoscape.api.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.cytoscape</groupId>
 			<artifactId>model-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 		</dependency>

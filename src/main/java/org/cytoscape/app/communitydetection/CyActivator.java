@@ -11,7 +11,6 @@ import static org.cytoscape.work.ServiceProperties.TITLE;
 
 import java.util.Properties;
 
-import org.cytoscape.app.communitydetection.cx.CxTaskFactory;
 import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.edgelist.WriterTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.hierarchy.HierarchyTaskFactoryImpl;
@@ -20,7 +19,6 @@ import org.cytoscape.app.communitydetection.subnetwork.SubNetworkTaskFactoryImpl
 import org.cytoscape.app.communitydetection.termmap.NetworkTermMappingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.termmap.NodeTermMappingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.util.AppUtils;
-import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.io.BasicCyFileFilter;
 import org.cytoscape.io.DataCategory;
 import org.cytoscape.io.read.InputStreamTaskFactory;
@@ -47,7 +45,6 @@ public class CyActivator extends AbstractCyActivator {
 	@Override
 	public void start(BundleContext bc) throws Exception {
 
-		final CyApplicationManager applicationManager = getService(bc, CyApplicationManager.class);
 		final CyNetworkFactory networkFactory = getService(bc, CyNetworkFactory.class);
 		final CyNetworkViewFactory networkViewFactory = getService(bc, CyNetworkViewFactory.class);
 		final CyNetworkManager networkManager = getService(bc, CyNetworkManager.class);
@@ -57,13 +54,6 @@ public class CyActivator extends AbstractCyActivator {
 		final CyLayoutAlgorithmManager layoutAlgorithmManager = getService(bc, CyLayoutAlgorithmManager.class);
 		final SynchronousTaskManager<?> syncTaskManager = getService(bc, SynchronousTaskManager.class);
 		final CyNetworkNaming networkNaming = getService(bc, CyNetworkNaming.class);
-
-		// Setting up CX IO service listeners
-		CxTaskFactory cxTaskFactory = CxTaskFactory.getInstance();
-		registerServiceListener(bc, cxTaskFactory, "addReaderFactory", "removeReaderFactory",
-				InputStreamTaskFactory.class);
-		registerServiceListener(bc, cxTaskFactory, "addWriterFactory", "removeWriterFactory",
-				CyNetworkViewWriterFactory.class);
 
 		// Setting up Edge List I/O services
 		final StreamUtil streamUtil = getService(bc, StreamUtil.class);
@@ -93,24 +83,24 @@ public class CyActivator extends AbstractCyActivator {
 		taskExecProps.setProperty(MENU_GRAVITY, "1.0");
 		// Registering Edge List services
 		for (String key : AppUtils.HIERARCHY_ALGORITHMS.keySet()) {
-			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.MENU + "." + AppUtils.HIERARCHY_ALGORITHMS.get(key));
-			taskExecProps.setProperty(TITLE, "(none)");
+			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU + "." + AppUtils.HIERARCHY_ALGORITHMS.get(key));
+			taskExecProps.setProperty(TITLE, AppUtils.TYPE_NONE_VALUE);
 			registerAllServices(bc, new HierarchyTaskFactoryImpl(key, AppUtils.TYPE_NONE), taskExecProps);
 
-			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.MENU + "." + AppUtils.HIERARCHY_ALGORITHMS.get(key));
+			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU + "." + AppUtils.HIERARCHY_ALGORITHMS.get(key));
 			taskExecProps.setProperty(TITLE, "Weighted");
 			registerAllServices(bc, new HierarchyTaskFactoryImpl(key, AppUtils.TYPE_WEIGHTED), taskExecProps);
 		}
 		for (String key : AppUtils.TERM_MAPPING_ALGORITHMS.keySet()) {
-			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.MENU);
+			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
 			taskExecProps.setProperty(TITLE, AppUtils.TERM_MAPPING_ALGORITHMS.get(key));
 			registerAllServices(bc, new NetworkTermMappingTaskFactoryImpl(key), taskExecProps);
 		}
 
 		Properties contextMenuProps = new Properties();
-		contextMenuProps.setProperty(PREFERRED_MENU, AppUtils.MENU);
+		contextMenuProps.setProperty(PREFERRED_MENU, AppUtils.CONTEXT_MENU);
 		contextMenuProps.setProperty(ENABLE_FOR, ENABLE_FOR_SELECTED_NODES);
-		contextMenuProps.setProperty(TITLE, "Create new Network from Selected Node");
+		contextMenuProps.setProperty(TITLE, "View Interactions for this Community");
 		contextMenuProps.put(IN_MENU_BAR, false);
 		contextMenuProps.put(IN_CONTEXT_MENU, true);
 		SubNetworkTaskFactoryImpl subnetworkfactoryImpl = new SubNetworkTaskFactoryImpl(rootNetworkManager,
