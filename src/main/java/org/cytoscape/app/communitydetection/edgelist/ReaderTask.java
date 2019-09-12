@@ -165,20 +165,14 @@ public class ReaderTask extends AbstractCyNetworkReader {
 						newNetwork.getRow(targetNode).set(CyNetwork.NAME, targetName);
 						nMap.put(targetSUID, targetNode);
 					}
+					CyEdge edge = newNetwork.addEdge(nMap.get(sourceSUID), targetNode, true);
+					newNetwork.getRow(edge).set(CyEdge.INTERACTION, parts[parts.length - 1]);
+					HierarchyHelper.getInstance().addChildNode(nMap.get(sourceSUID), targetNode);
 				} else {
 					HierarchyHelper.getInstance().addMemberNode(originalNetwork.getNode(targetSUID));
+					HierarchyHelper.getInstance().addChildNode(nMap.get(sourceSUID),
+							originalNetwork.getNode(targetSUID));
 				}
-				if (nMap.get(sourceSUID) != null) {
-					if (nMap.get(targetSUID) != null) {
-						final CyEdge edge = newNetwork.addEdge(nMap.get(sourceSUID), nMap.get(targetSUID), true);
-						newNetwork.getRow(edge).set(CyEdge.INTERACTION, parts[parts.length - 1]);
-						HierarchyHelper.getInstance().addChildNode(nMap.get(sourceSUID), nMap.get(targetSUID));
-					} else {
-						HierarchyHelper.getInstance().addChildNode(nMap.get(sourceSUID),
-								originalNetwork.getNode(targetSUID));
-					}
-				}
-
 			} else {
 				JOptionPane.showMessageDialog(null, "Incorrect number of columns!");
 			}
