@@ -6,11 +6,15 @@ import java.io.OutputStream;
 import org.cytoscape.io.write.CyWriter;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.work.TaskMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Creates output stream from the edge list of the selected interaction network.
+ * Implements {@link CyWriter}.
+ *
+ */
 public class WriterTask implements CyWriter {
 
 	private final static Logger logger = LoggerFactory.getLogger(WriterTask.class);
@@ -19,6 +23,11 @@ public class WriterTask implements CyWriter {
 	private final CyNetwork network;
 	private final String attribute;
 
+	/**
+	 * @param outStream
+	 * @param network
+	 * @param attribute
+	 */
 	public WriterTask(OutputStream outStream, CyNetwork network, String attribute) {
 		this.outStream = outStream;
 		this.network = network;
@@ -33,11 +42,11 @@ public class WriterTask implements CyWriter {
 				outStream.write(s.getBytes());
 			}
 		} else {
-			if (!CyTableUtil.getColumnNames(network.getDefaultEdgeTable()).contains(attribute)) {
-				System.out.println(attribute);
-				throw new Exception(attribute + " is not a valid column in edge table.");
-			}
 			for (CyEdge edge : network.getEdgeList()) {
+				if ((Double) network.getRow(edge).get(attribute, getColumnType()) < 0) {
+					throw new Exception(attribute
+							+ " contains negative values. Please select an attribute with non-negative values");
+				}
 				String s = edge.getSource().getSUID().toString() + "\t" + edge.getTarget().getSUID().toString() + "\t"
 						+ network.getRow(edge).get(attribute, getColumnType()) + "\n";
 				outStream.write(s.getBytes());

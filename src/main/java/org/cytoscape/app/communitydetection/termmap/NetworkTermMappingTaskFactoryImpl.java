@@ -5,6 +5,11 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.task.NetworkTaskFactory;
 import org.cytoscape.work.TaskIterator;
 
+/**
+ * {@link NetworkTaskFactory} implementation to create {@link TermMappingTask}
+ * for Menu Bar.
+ *
+ */
 public class NetworkTermMappingTaskFactoryImpl implements NetworkTaskFactory {
 
 	private final String algorithm;

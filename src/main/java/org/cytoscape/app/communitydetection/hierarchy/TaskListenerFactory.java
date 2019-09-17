@@ -2,10 +2,17 @@ package org.cytoscape.app.communitydetection.hierarchy;
 
 import java.util.Map;
 
+import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactoryImpl;
+import org.cytoscape.app.communitydetection.edgelist.WriterTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.io.read.InputStreamTaskFactory;
 import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 
+/**
+ * Creates service listeners for {@link ReaderTaskFactoryImpl} and
+ * {@link WriterTaskFactoryImpl}.
+ *
+ */
 public class TaskListenerFactory {
 
 	private static final String ID_TAG = "id";

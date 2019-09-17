@@ -21,6 +21,10 @@ import org.ndexbio.communitydetection.rest.model.Task;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.TextNode;
 
+/**
+ * REST API client for CD service. Implements GET, POST and DELETE.
+ *
+ */
 public class CDRestClient {
 
 	private final static String URI = "http://ddot-stage.ucsd.edu/cd/communitydetection/v1";

@@ -14,6 +14,10 @@ import org.ndexbio.communitydetection.rest.model.CommunityDetectionResult;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/**
+ * Task to run a term mapping algorithm on the selected network or nodes.
+ *
+ */
 public class TermMappingTask extends AbstractTask {
 
 	private final String algorithm;

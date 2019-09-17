@@ -17,6 +17,11 @@ import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskIterator;
 
+/**
+ * Implementation of {@link NetworkViewTaskFactory} and
+ * {@link AbstractNodeViewTaskFactory} to create {@link SubNetworkTask}.
+ *
+ */
 public class SubNetworkTaskFactoryImpl extends AbstractNodeViewTaskFactory implements NetworkViewTaskFactory {
 
 	private final CyRootNetworkManager rootNetworkManager;

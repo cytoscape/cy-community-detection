@@ -32,6 +32,11 @@ import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
 
+/**
+ * Task to create a hierarchy network from an edge list received in form of
+ * input stream. Implements {@link AbstractCyNetworkReader}.
+ *
+ */
 public class ReaderTask extends AbstractCyNetworkReader {
 
 	private final CyNetworkManager networkManager;
@@ -59,6 +64,11 @@ public class ReaderTask extends AbstractCyNetworkReader {
 		this.originalNetwork = networkManager.getNetwork(originalNetworkSUID);
 	}
 
+	/**
+	 * Overrides AbstractCyNetworkReader's method to create the same visual style as
+	 * that of the original interaction network.
+	 *
+	 */
 	@Override
 	public CyNetworkView buildCyNetworkView(CyNetwork network) {
 		CyNetworkView originalNetworkView = null;
@@ -106,6 +116,12 @@ public class ReaderTask extends AbstractCyNetworkReader {
 		getNetworks()[0].getRow(getNetworks()[0]).set(CyNetwork.NAME, name);
 	}
 
+	/**
+	 * Creates the hierarchy network and populates all of its tables.
+	 * 
+	 * @param taskMonitor
+	 * @throws Exception
+	 */
 	private final void loadNetwork(TaskMonitor taskMonitor) throws Exception {
 
 		CyNetwork newNetwork = cyNetworkFactory.createNetwork();
@@ -191,9 +207,14 @@ public class ReaderTask extends AbstractCyNetworkReader {
 		createMemberList(newNetwork);
 	}
 
-	private void createMemberList(CyNetwork network) {
-		for (CyNode node : network.getNodeList()) {
-			Set<CyNode> memberNodes = HierarchyHelper.getInstance().getMemberList(network, node);
+	/**
+	 * Creates member list for each node in the hierarchy network.
+	 * 
+	 * @param hierarchyNetwork
+	 */
+	private void createMemberList(CyNetwork hierarchyNetwork) {
+		for (CyNode node : hierarchyNetwork.getNodeList()) {
+			Set<CyNode> memberNodes = HierarchyHelper.getInstance().getMemberList(hierarchyNetwork, node);
 			StringBuffer memberList = new StringBuffer();
 			for (CyNode memberNode : memberNodes) {
 				if (memberList.length() > 0) {
@@ -203,11 +224,12 @@ public class ReaderTask extends AbstractCyNetworkReader {
 				memberList.append(name);
 			}
 			if (memberList != null) {
-				network.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST, memberList.toString());
-				network.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST_SIZE, memberNodes.size());
-				network.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST_LOG_SIZE, log2(memberNodes.size()));
+				hierarchyNetwork.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST, memberList.toString());
+				hierarchyNetwork.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST_SIZE, memberNodes.size());
+				hierarchyNetwork.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST_LOG_SIZE, log2(memberNodes.size()));
 			}
 		}
+		HierarchyHelper.getInstance().clearAll();
 	}
 
 	private double log2(double x) {

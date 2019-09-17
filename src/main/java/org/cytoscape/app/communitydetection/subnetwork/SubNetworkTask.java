@@ -6,9 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.JOptionPane;
-
-import org.cytoscape.app.communitydetection.hierarchy.HierarchyHelper;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyEdge;
@@ -72,6 +69,9 @@ public class SubNetworkTask extends AbstractTask {
 		Long originalNetworkSUID = hierarchyNetwork.getRow(hierarchyNetwork).get(AppUtils.COLUMN_CD_ORIGINAL_NETWORK,
 				Long.class);
 		CyNetwork originalNetwork = networkManager.getNetwork(originalNetworkSUID);
+		if (originalNetwork == null) {
+			throw new Exception("No network found with SUID " + originalNetworkSUID);
+		}
 		CyNode communityNode = CyTableUtil.getSelectedNodes(hierarchyNetwork).get(0);
 		Set<CyNode> leafNodes = getMemberList(originalNetwork, communityNode);
 		Set<CyEdge> connectingEdges = getEdges(originalNetwork, leafNodes);
@@ -141,21 +141,17 @@ public class SubNetworkTask extends AbstractTask {
 		return edgeList;
 	}
 
-	private Set<CyNode> getMemberList(CyNetwork originalNetwork, CyNode selectedNode) {
-		Set<CyNode> leafNodes = HierarchyHelper.getInstance().getMemberList(hierarchyNetwork, selectedNode);
-		if (leafNodes == null) {
-			leafNodes = new HashSet<CyNode>();
-			List<String> memberList = Arrays.asList(hierarchyNetwork.getRow(selectedNode)
-					.get(AppUtils.COLUMN_CD_MEMBER_LIST, String.class).split(AppUtils.CD_MEMBER_LIST_DELIMITER));
-			if (memberList == null) {
-				// TODO create the whole list again
-				JOptionPane.showMessageDialog(null, AppUtils.COLUMN_CD_MEMBER_LIST + " does not exist!");
-				cancel();
-			}
-			for (CyNode node : originalNetwork.getNodeList()) {
-				if (memberList.contains(originalNetwork.getRow(node).get(CyNetwork.NAME, String.class))) {
-					leafNodes.add(node);
-				}
+	private Set<CyNode> getMemberList(CyNetwork originalNetwork, CyNode selectedNode) throws Exception {
+		Set<CyNode> leafNodes = new HashSet<CyNode>();
+		List<String> memberList = Arrays.asList(hierarchyNetwork.getRow(selectedNode)
+				.get(AppUtils.COLUMN_CD_MEMBER_LIST, String.class).split(AppUtils.CD_MEMBER_LIST_DELIMITER));
+		if (memberList == null) {
+			// TODO create the whole list again
+			throw new Exception(AppUtils.COLUMN_CD_MEMBER_LIST + " does not exist!");
+		}
+		for (CyNode node : originalNetwork.getNodeList()) {
+			if (memberList.contains(originalNetwork.getRow(node).get(CyNetwork.NAME, String.class))) {
+				leafNodes.add(node);
 			}
 		}
 		return leafNodes;

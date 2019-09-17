@@ -9,6 +9,11 @@ import org.cytoscape.io.write.CyWriter;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.view.model.CyNetworkView;
 
+/**
+ * {@link CyNetworkViewWriterFactory} implementation to create
+ * {@link WriterTask}.
+ *
+ */
 public class WriterTaskFactoryImpl implements CyNetworkViewWriterFactory {
 
 	private final CyFileFilter fileFilter;

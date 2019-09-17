@@ -13,6 +13,10 @@ import org.cytoscape.task.NetworkViewTaskFactory;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.work.TaskIterator;
 
+/**
+ * Task factory impl to create {@link HierarchyTask}.
+ *
+ */
 public class HierarchyTaskFactoryImpl implements NetworkViewTaskFactory {
 
 	private final String algorithm;

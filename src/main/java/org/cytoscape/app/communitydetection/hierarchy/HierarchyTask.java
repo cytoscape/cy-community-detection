@@ -6,6 +6,7 @@ import java.io.InputStream;
 
 import org.cytoscape.app.communitydetection.edgelist.ReaderTask;
 import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactoryImpl;
+import org.cytoscape.app.communitydetection.edgelist.WriterTask;
 import org.cytoscape.app.communitydetection.edgelist.WriterTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.rest.CDRestClient;
 import org.cytoscape.io.write.CyWriter;
@@ -15,6 +16,11 @@ import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionResult;
 
+/**
+ * Wraps {@link WriterTask} and {@link ReaderTask}. Executes a community
+ * detection algorithm on the selected network.
+ *
+ */
 public class HierarchyTask extends AbstractTask {
 
 	private final CyNetwork network;

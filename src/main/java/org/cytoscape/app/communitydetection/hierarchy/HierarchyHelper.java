@@ -8,10 +8,29 @@ import java.util.Set;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 
+/**
+ * Singleton class to create and access member of each community node in a
+ * hierarchy network.
+ *
+ */
 public class HierarchyHelper {
 
+	/**
+	 * A map to hold a set of all child nodes of a community node in the current
+	 * hierarchy network.
+	 */
 	private Map<CyNode, Set<CyNode>> childNodeMap;
+
+	/**
+	 * A map to hold a set of all member nodes of a community node in the current
+	 * hierarchy network. If the hierarchy network is a tree, then member nodes are
+	 * leaf nodes of the subtree rooted by that community node.
+	 */
 	private Map<CyNode, Set<CyNode>> memberNodeMap;
+
+	/**
+	 * Set of all the member nodes in the current hierarchy network
+	 */
 	private Set<CyNode> memberNodeList;
 
 	private HierarchyHelper() {
@@ -28,10 +47,28 @@ public class HierarchyHelper {
 		return SingletonHelper.INSTANCE;
 	}
 
+	public void clearAll() {
+		childNodeMap.clear();
+		memberNodeMap.clear();
+		memberNodeList.clear();
+	}
+
+	/**
+	 * Add a CyNode object to memberNodeList
+	 * 
+	 * @param memberNode
+	 */
 	public void addMemberNode(CyNode memberNode) {
 		memberNodeList.add(memberNode);
 	}
 
+	/**
+	 * Returns child nodes of the given CyNode object
+	 * 
+	 * @param currentNode
+	 * @return child nodes of currentNode, null if currentNode is not in
+	 *         childNodeMap
+	 */
 	public Set<CyNode> getChildNodes(CyNode currentNode) {
 		if (childNodeMap.containsKey(currentNode)) {
 			return childNodeMap.get(currentNode);
@@ -39,6 +76,12 @@ public class HierarchyHelper {
 		return null;
 	}
 
+	/**
+	 * Adds childNode to the list of child nodes of currentNode in childNodeMap
+	 * 
+	 * @param currentNode
+	 * @param childNode
+	 */
 	public void addChildNode(CyNode currentNode, CyNode childNode) {
 		Set<CyNode> childNodeSet;
 		if (childNodeMap.containsKey(currentNode)) {

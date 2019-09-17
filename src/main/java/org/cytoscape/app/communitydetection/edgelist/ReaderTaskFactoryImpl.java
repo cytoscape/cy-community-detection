@@ -16,7 +16,8 @@ import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskIterator;
 
 /**
- * Factory for Edge List reader objects.
+ * {@link AbstractInputStreamTaskFactory} implementation to create
+ * {@link ReaderTask}.
  * 
  */
 public class ReaderTaskFactoryImpl extends AbstractInputStreamTaskFactory {

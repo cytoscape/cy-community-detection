@@ -9,6 +9,12 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.work.TaskIterator;
 
+/**
+ * Implementation of {@link NetworkViewTaskFactory} and
+ * {@link AbstractNodeViewTaskFactory} to create {@link TermMappingTask} for
+ * Context menu.
+ *
+ */
 public class NodeTermMappingTaskFactoryImpl extends AbstractNodeViewTaskFactory implements NetworkViewTaskFactory {
 
 	private final String algorithm;
