@@ -11,7 +11,7 @@
 		<maven-bundle-plugin.version>3.4.0</maven-bundle-plugin.version>
 
 		<junit.version>4.12</junit.version>
-		<cytoscape.api.version>3.7.0</cytoscape.api.version>
+		<cytoscape.api.version>3.7.2</cytoscape.api.version>
 		<osgi.api.version>4.2.0</osgi.api.version>
 		<jackson.version>2.9.9</jackson.version>
 		<jackson-databind.version>2.9.9.3</jackson-databind.version>
@@ -203,6 +203,12 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.cytoscape</groupId>
+			<artifactId>work-api</artifactId>
+			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
 			<version>${osgi.api.version}</version>
@@ -231,7 +237,7 @@
 		<dependency>
 			<groupId>org.ndexbio.communitydetection.rest.model</groupId>
 			<artifactId>communitydetection-rest-model</artifactId>
-			<version>0.4.0</version>
+			<version>0.7.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>

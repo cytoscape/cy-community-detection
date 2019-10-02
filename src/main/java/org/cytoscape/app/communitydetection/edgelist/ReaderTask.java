@@ -1,12 +1,18 @@
 package org.cytoscape.app.communitydetection.edgelist;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.swing.JOptionPane;
 
@@ -21,6 +27,7 @@ import org.cytoscape.model.CyNode;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.session.CyNetworkNaming;
+import org.cytoscape.task.read.LoadVizmapFileTaskFactory;
 import org.cytoscape.view.layout.CyLayoutAlgorithm;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
@@ -43,6 +50,7 @@ public class ReaderTask extends AbstractCyNetworkReader {
 	private final CyRootNetworkManager rootNetworkManager;
 	private final CyNetworkViewManager networkViewManager;
 	private final VisualMappingManager visualMappingManager;
+	private final LoadVizmapFileTaskFactory vizmapFileTaskFactory;
 	private final CyLayoutAlgorithmManager layoutManager;
 	private final SynchronousTaskManager<?> syncTaskManager;
 	private final CyNetworkNaming networkNaming;
@@ -51,13 +59,14 @@ public class ReaderTask extends AbstractCyNetworkReader {
 	public ReaderTask(InputStream inputStream, CyNetworkViewFactory networkViewFactory, CyNetworkFactory networkFactory,
 			CyNetworkManager networkManager, CyNetworkViewManager networkViewManager,
 			CyRootNetworkManager rootNetworkManager, VisualMappingManager visualMappingManager,
-			CyLayoutAlgorithmManager layoutManager, SynchronousTaskManager<?> syncTaskManager,
-			CyNetworkNaming networkNaming, Long originalNetworkSUID) {
+			LoadVizmapFileTaskFactory vizmapFileTaskFactory, CyLayoutAlgorithmManager layoutManager,
+			SynchronousTaskManager<?> syncTaskManager, CyNetworkNaming networkNaming, Long originalNetworkSUID) {
 		super(inputStream, networkViewFactory, networkFactory, networkManager, rootNetworkManager);
 		this.networkManager = networkManager;
 		this.networkViewManager = networkViewManager;
 		this.rootNetworkManager = rootNetworkManager;
 		this.visualMappingManager = visualMappingManager;
+		this.vizmapFileTaskFactory = vizmapFileTaskFactory;
 		this.layoutManager = layoutManager;
 		this.syncTaskManager = syncTaskManager;
 		this.networkNaming = networkNaming;
@@ -71,22 +80,36 @@ public class ReaderTask extends AbstractCyNetworkReader {
 	 */
 	@Override
 	public CyNetworkView buildCyNetworkView(CyNetwork network) {
-		CyNetworkView originalNetworkView = null;
-		for (CyNetworkView netView : networkViewManager.getNetworkViews(originalNetwork)) {
-			originalNetworkView = netView;
-			break;
+		try {
+			VisualStyle hierarchyStyle = null;
+			for (VisualStyle style : visualMappingManager.getAllVisualStyles()) {
+				if (style.getTitle().equalsIgnoreCase("CD_Hierarchy")) {
+					hierarchyStyle = style;
+					break;
+				}
+			}
+			if (hierarchyStyle == null) {
+				ClassLoader classLoader = getClass().getClassLoader();
+				InputStream resourceStream = classLoader.getResourceAsStream("/styles/cd_hierarchy.xml");
+				File styleFile = File.createTempFile("cd_hierarchy", "xml");
+				Files.copy(resourceStream, styleFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				System.out.println("Style set size: " + vizmapFileTaskFactory.loadStyles(styleFile).size());
+				hierarchyStyle = vizmapFileTaskFactory.loadStyles(styleFile).iterator().next();
+				styleFile.delete();
+			}
+			CyNetworkView networkView = cyNetworkViewFactory.createNetworkView(network);
+			visualMappingManager.setVisualStyle(hierarchyStyle, networkView);
+			hierarchyStyle.apply(networkView);
+			CyLayoutAlgorithm layout = layoutManager.getDefaultLayout();
+			TaskIterator layoutTasks = layout.createTaskIterator(networkView, layout.createLayoutContext(),
+					CyLayoutAlgorithm.ALL_NODE_VIEWS, null);
+			syncTaskManager.execute(layoutTasks);
+			networkViewManager.addNetworkView(networkView);
+			return networkView;
+		} catch (Exception e) {
+			System.out.println(e.getLocalizedMessage());
 		}
-		VisualStyle style = visualMappingManager.getVisualStyle(originalNetworkView);
-
-		CyNetworkView networkView = cyNetworkViewFactory.createNetworkView(network);
-		visualMappingManager.setVisualStyle(style, networkView);
-		style.apply(networkView);
-		CyLayoutAlgorithm layout = layoutManager.getDefaultLayout();
-		TaskIterator layoutTasks = layout.createTaskIterator(networkView, layout.createLayoutContext(),
-				CyLayoutAlgorithm.ALL_NODE_VIEWS, null);
-		syncTaskManager.execute(layoutTasks);
-		networkViewManager.addNetworkView(networkView);
-		return networkView;
+		return null;
 	}
 
 	@Override
@@ -214,7 +237,15 @@ public class ReaderTask extends AbstractCyNetworkReader {
 	 */
 	private void createMemberList(CyNetwork hierarchyNetwork) {
 		for (CyNode node : hierarchyNetwork.getNodeList()) {
-			Set<CyNode> memberNodes = HierarchyHelper.getInstance().getMemberList(hierarchyNetwork, node);
+			List<CyNode> memberNodes = HierarchyHelper.getInstance().getMemberList(hierarchyNetwork, node).stream()
+					.collect(Collectors.toList());
+			Collections.sort(memberNodes, new Comparator<CyNode>() {
+				@Override
+				public int compare(CyNode node1, CyNode node2) {
+					return originalNetwork.getRow(node1).get(CyNetwork.NAME, String.class)
+							.compareTo(originalNetwork.getRow(node2).get(CyNetwork.NAME, String.class));
+				}
+			});
 			StringBuffer memberList = new StringBuffer();
 			for (CyNode memberNode : memberNodes) {
 				if (memberList.length() > 0) {

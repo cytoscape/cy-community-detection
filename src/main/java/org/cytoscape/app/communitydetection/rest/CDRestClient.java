@@ -2,7 +2,9 @@ package org.cytoscape.app.communitydetection.rest;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
@@ -12,7 +14,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.work.TaskMonitor;
+import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithms;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionRequest;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionResult;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionResultStatus;
@@ -27,14 +31,17 @@ import com.fasterxml.jackson.databind.node.TextNode;
  */
 public class CDRestClient {
 
-	private final static String URI = "http://ddot-stage.ucsd.edu/cd/communitydetection/v1";
+	private final static String URI = "http://ddot.ucsd.edu/cd/communitydetection/v1";
 
 	private final ObjectMapper mapper;
 	private boolean isTaskCanceled;
 
+	private Map<String, Double> resolutionParamMap;
+
 	private CDRestClient() {
 		mapper = new ObjectMapper();
 		isTaskCanceled = false;
+		resolutionParamMap = new HashMap<String, Double>();
 	}
 
 	private static class SingletonHelper {
@@ -45,19 +52,39 @@ public class CDRestClient {
 		return SingletonHelper.INSTANCE;
 	}
 
-	private CloseableHttpClient getClient(int timeout) {
-		RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout * 1000)
-				.setConnectionRequestTimeout(timeout * 1000).setSocketTimeout(timeout * 1000).build();
-		return HttpClientBuilder.create().setDefaultRequestConfig(config).build();
+	/**
+	 * Adds a key-value pair to resolutionParamMap. If key exists, the older value
+	 * will be replaced.
+	 */
+	public void addToResolutionParamMap(String key, Double value) {
+		resolutionParamMap.put(key, value);
+	}
+
+	/**
+	 * Returns the value mapped to key. Returns null if key doesn't exist.
+	 */
+	public Double getResolutionParam(String key) {
+		return resolutionParamMap.get(key);
+	}
+
+	/**
+	 * Returns resolutionParamMap's keySet.
+	 */
+	public Set<String> getResolutionParamKeySet() {
+		return resolutionParamMap.keySet();
 	}
 
 	public String postCDData(String algorithm, Boolean graphDirected, String data) throws Exception {
 
 		CommunityDetectionRequest request = new CommunityDetectionRequest();
+		Map<String, String> customParameters = new HashMap<String, String>();
 		request.setAlgorithm(algorithm);
 		request.setData(new TextNode(data));
-		request.setGraphdirected(graphDirected);
-		request.setIpAddress(InetAddress.getLocalHost().getHostAddress());
+		if (resolutionParamMap.containsKey(algorithm)) {
+			customParameters.put(AppUtils.RESOLUTION_PARAMETERS.get(algorithm),
+					Double.toString(getResolutionParam(algorithm)));
+			request.setCustomParameters(customParameters);
+		}
 		StringEntity body = new StringEntity(mapper.writeValueAsString(request));
 
 		CloseableHttpClient client = getClient(10);
@@ -147,7 +174,20 @@ public class CDRestClient {
 		return cdResult;
 	}
 
+	public CommunityDetectionAlgorithms getCDAlgorithms() throws Exception {
+		CloseableHttpClient client = getClient(10);
+		HttpResponse httpGetResponse = client.execute(new HttpGet(URI + "/" + "algorithms"));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(httpGetResponse.getEntity().getContent()));
+		return mapper.readValue(reader, CommunityDetectionAlgorithms.class);
+	}
+
 	public void setTaskCanceled(boolean isCanceled) {
 		isTaskCanceled = isCanceled;
+	}
+
+	private CloseableHttpClient getClient(int timeout) {
+		RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout * 1000)
+				.setConnectionRequestTimeout(timeout * 1000).setSocketTimeout(timeout * 1000).build();
+		return HttpClientBuilder.create().setDefaultRequestConfig(config).build();
 	}
 }

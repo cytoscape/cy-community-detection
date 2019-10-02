@@ -8,6 +8,7 @@ import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.session.CyNetworkNaming;
+import org.cytoscape.task.read.LoadVizmapFileTaskFactory;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
@@ -28,6 +29,7 @@ public class ReaderTaskFactoryImpl extends AbstractInputStreamTaskFactory {
 	private final CyNetworkViewManager cyNetworkViewManager;
 	private final CyRootNetworkManager cyRootNetworkManager;
 	private final VisualMappingManager visualMappingManager;
+	private final LoadVizmapFileTaskFactory vizmapFileTaskFactory;
 	private final CyLayoutAlgorithmManager layoutManager;
 	private final SynchronousTaskManager<?> syncTaskManager;
 	private final CyNetworkNaming networkNaming;
@@ -35,10 +37,11 @@ public class ReaderTaskFactoryImpl extends AbstractInputStreamTaskFactory {
 	private ReaderTask readerTask;
 
 	public ReaderTaskFactoryImpl(CyFileFilter filter, CyNetworkViewFactory cyNetworkViewFactory,
-			CyNetworkFactory cyNetworkFactory, final CyNetworkManager cyNetworkManager,
-			final CyNetworkViewManager cyNetworkViewManager, CyRootNetworkManager cyRootNetworkManager,
-			final VisualMappingManager visualMappingManager, final CyLayoutAlgorithmManager layoutManager,
-			SynchronousTaskManager<?> syncTaskManager, CyNetworkNaming networkNaming) {
+			CyNetworkFactory cyNetworkFactory, CyNetworkManager cyNetworkManager,
+			CyNetworkViewManager cyNetworkViewManager, CyRootNetworkManager cyRootNetworkManager,
+			VisualMappingManager visualMappingManager, LoadVizmapFileTaskFactory vizmapFileTaskFactory,
+			CyLayoutAlgorithmManager layoutManager, SynchronousTaskManager<?> syncTaskManager,
+			CyNetworkNaming networkNaming) {
 		super(filter);
 		this.cyNetworkManager = cyNetworkManager;
 		this.cyRootNetworkManager = cyRootNetworkManager;
@@ -46,6 +49,7 @@ public class ReaderTaskFactoryImpl extends AbstractInputStreamTaskFactory {
 		this.cyNetworkViewManager = cyNetworkViewManager;
 		this.cyNetworkViewFactory = cyNetworkViewFactory;
 		this.visualMappingManager = visualMappingManager;
+		this.vizmapFileTaskFactory = vizmapFileTaskFactory;
 		this.layoutManager = layoutManager;
 		this.syncTaskManager = syncTaskManager;
 		this.networkNaming = networkNaming;
@@ -53,8 +57,8 @@ public class ReaderTaskFactoryImpl extends AbstractInputStreamTaskFactory {
 
 	public TaskIterator createTaskIterator(InputStream inputStream, String collectionName, Long originalNetSUID) {
 		readerTask = new ReaderTask(inputStream, cyNetworkViewFactory, cyNetworkFactory, cyNetworkManager,
-				cyNetworkViewManager, cyRootNetworkManager, visualMappingManager, layoutManager, syncTaskManager,
-				networkNaming, originalNetSUID);
+				cyNetworkViewManager, cyRootNetworkManager, visualMappingManager, vizmapFileTaskFactory, layoutManager,
+				syncTaskManager, networkNaming, originalNetSUID);
 		return this.createTaskIterator(inputStream, collectionName);
 	}
 

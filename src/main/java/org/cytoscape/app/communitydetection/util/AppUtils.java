@@ -42,4 +42,12 @@ public class AppUtils {
 			put("gprofilersingletermv2", "GProfiler term Mapping");
 		}
 	};
+
+	public final static Map<String, String> RESOLUTION_PARAMETERS = new HashMap<String, String>() {
+		{
+			put("louvain", "--resolution");
+			put("infomap", "--markovtime");
+			put("clixo", "--alpha");
+		}
+	};
 }
