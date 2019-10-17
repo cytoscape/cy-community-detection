@@ -73,6 +73,17 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener {
 		setVisible(true);
 	}
 
+	private String getAlgorithmName() {
+		String algoName = null;
+		for (CommunityDetectionAlgorithm algo : algorithmList) {
+			if (algo.getDisplayName().equalsIgnoreCase((String) getDropDown().getSelectedItem())) {
+				algoName = algo.getName();
+				break;
+			}
+		}
+		return algoName;
+	}
+
 	private String getParameterDisplayName() {
 		String paramDisplayName = null;
 		for (CommunityDetectionAlgorithm algo : algorithmList) {
@@ -95,15 +106,26 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener {
 		return paramName;
 	}
 
-	private String getAlgorithmName() {
-		String algoName = null;
+	private String getParameterDefaultValue() {
+		String paramDefault = null;
 		for (CommunityDetectionAlgorithm algo : algorithmList) {
 			if (algo.getDisplayName().equalsIgnoreCase((String) getDropDown().getSelectedItem())) {
-				algoName = algo.getName();
+				paramDefault = paramMap.get(algo.getName()).get(0).getDefaultValue();
 				break;
 			}
 		}
-		return algoName;
+		return paramDefault;
+	}
+
+	private void setParamInput() {
+		String paramVal = null;
+		if (CDRestClient.getInstance().getResolutionParam((String) getDropDown().getSelectedItem()) != null) {
+			paramVal = Double.toString(CDRestClient.getInstance()
+					.getResolutionParam((String) getDropDown().getSelectedItem()).get(getParameterName()));
+		} else {
+			paramVal = getParameterDefaultValue();
+		}
+		paramInput.setText(paramVal);
 	}
 
 	private JLabel getParamLabel() {
@@ -131,6 +153,7 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				paramLabel.setText(getParameterDisplayName());
+				setParamInput();
 			}
 		});
 		return algoDropDown;
@@ -141,6 +164,7 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener {
 			return paramInput;
 		}
 		paramInput = new JTextField();
+		setParamInput();
 		return paramInput;
 	}
 
