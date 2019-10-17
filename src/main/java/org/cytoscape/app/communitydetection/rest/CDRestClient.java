@@ -2,7 +2,10 @@ package org.cytoscape.app.communitydetection.rest;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,10 +19,12 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.work.TaskMonitor;
+import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithms;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionRequest;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionResult;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionResultStatus;
+import org.ndexbio.communitydetection.rest.model.CustomParameter;
 import org.ndexbio.communitydetection.rest.model.Task;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,13 +40,13 @@ public class CDRestClient {
 
 	private final ObjectMapper mapper;
 	private boolean isTaskCanceled;
-
-	private Map<String, Double> resolutionParamMap;
+	private Map<String, Map<String, Double>> resolutionParamMap;
+	private List<CommunityDetectionAlgorithm> algorithms;
 
 	private CDRestClient() {
 		mapper = new ObjectMapper();
 		isTaskCanceled = false;
-		resolutionParamMap = new HashMap<String, Double>();
+		resolutionParamMap = new LinkedHashMap<String, Map<String, Double>>();
 	}
 
 	private static class SingletonHelper {
@@ -56,14 +61,14 @@ public class CDRestClient {
 	 * Adds a key-value pair to resolutionParamMap. If key exists, the older value
 	 * will be replaced.
 	 */
-	public void addToResolutionParamMap(String key, Double value) {
+	public void addToResolutionParamMap(String key, Map<String, Double> value) {
 		resolutionParamMap.put(key, value);
 	}
 
 	/**
 	 * Returns the value mapped to key. Returns null if key doesn't exist.
 	 */
-	public Double getResolutionParam(String key) {
+	public Map<String, Double> getResolutionParam(String key) {
 		return resolutionParamMap.get(key);
 	}
 
@@ -80,10 +85,15 @@ public class CDRestClient {
 		Map<String, String> customParameters = new HashMap<String, String>();
 		request.setAlgorithm(algorithm);
 		request.setData(new TextNode(data));
-		if (resolutionParamMap.containsKey(algorithm)) {
-			customParameters.put(AppUtils.RESOLUTION_PARAMETERS.get(algorithm),
-					Double.toString(getResolutionParam(algorithm)));
-			request.setCustomParameters(customParameters);
+		Map<String, List<CustomParameter>> resParams = getResolutionParameters();
+		for (CommunityDetectionAlgorithm cdAlgo : getAlgorithms()) {
+			if (cdAlgo.getName().equalsIgnoreCase(algorithm) && resolutionParamMap.containsKey(algorithm)) {
+				for (CustomParameter param : resParams.get(algorithm)) {
+					customParameters.put(param.getName(),
+							Double.toString(getResolutionParam(algorithm).get(param.getName())));
+					request.setCustomParameters(customParameters);
+				}
+			}
 		}
 		StringEntity body = new StringEntity(mapper.writeValueAsString(request));
 
@@ -174,11 +184,50 @@ public class CDRestClient {
 		return cdResult;
 	}
 
-	public CommunityDetectionAlgorithms getCDAlgorithms() throws Exception {
+	public List<CommunityDetectionAlgorithm> getAlgorithms() throws Exception {
+		if (algorithms != null) {
+			return algorithms;
+		}
+		algorithms = new ArrayList<CommunityDetectionAlgorithm>();
 		CloseableHttpClient client = getClient(10);
 		HttpResponse httpGetResponse = client.execute(new HttpGet(URI + "/" + "algorithms"));
 		BufferedReader reader = new BufferedReader(new InputStreamReader(httpGetResponse.getEntity().getContent()));
-		return mapper.readValue(reader, CommunityDetectionAlgorithms.class);
+		CommunityDetectionAlgorithms algos = mapper.readValue(reader, CommunityDetectionAlgorithms.class);
+		for (CommunityDetectionAlgorithm algo : algos.getAlgorithms().values()) {
+			algorithms.add(algo);
+		}
+		return algorithms;
+	}
+
+	public List<CommunityDetectionAlgorithm> getAlgorithmsByType(String inputType) throws Exception {
+		List<CommunityDetectionAlgorithm> algos = new ArrayList<CommunityDetectionAlgorithm>();
+		for (CommunityDetectionAlgorithm algo : getAlgorithms()) {
+			if (algo.getInputDataFormat().equalsIgnoreCase(inputType)) {
+				algos.add(algo);
+			}
+		}
+		return algos;
+	}
+
+	public Map<String, List<CustomParameter>> getResolutionParameters() throws Exception {
+		Map<String, List<CustomParameter>> paramMap = new LinkedHashMap<String, List<CustomParameter>>();
+		for (CommunityDetectionAlgorithm algo : getAlgorithmsByType(AppUtils.CD_ALGORITHM_INPUT_TYPE)) {
+			Set<CustomParameter> paramSet = algo.getCustomParameters();
+			for (CustomParameter param : paramSet) {
+				if (param.getValidationType() != null
+						&& param.getValidationType().equals(CustomParameter.NUMBER_VALIDATION)) {
+					List<CustomParameter> paramList;
+					if (paramMap.containsKey(algo.getName())) {
+						paramList = paramMap.get(algo.getName());
+					} else {
+						paramList = new ArrayList<CustomParameter>();
+					}
+					paramList.add(param);
+					paramMap.put(algo.getName(), paramList);
+				}
+			}
+		}
+		return paramMap;
 	}
 
 	public void setTaskCanceled(boolean isCanceled) {

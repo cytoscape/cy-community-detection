@@ -237,7 +237,7 @@
 		<dependency>
 			<groupId>org.ndexbio.communitydetection.rest.model</groupId>
 			<artifactId>communitydetection-rest-model</artifactId>
-			<version>0.7.0</version>
+			<version>0.8.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>

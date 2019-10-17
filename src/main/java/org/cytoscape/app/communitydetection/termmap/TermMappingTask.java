@@ -10,6 +10,7 @@ import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
+import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionResult;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -34,7 +35,15 @@ public class TermMappingTask extends AbstractTask {
 	public void run(TaskMonitor taskMonitor) throws Exception {
 		taskMonitor.setTitle("Community Detection: Term Mapping");
 		taskMonitor.setProgress(0.0);
-		taskMonitor.setStatusMessage("Running " + AppUtils.TERM_MAPPING_ALGORITHMS.get(algorithm));
+		String algoDisplayName = null;
+		for (CommunityDetectionAlgorithm algo : CDRestClient.getInstance()
+				.getAlgorithmsByType(AppUtils.TM_ALGORITHM_INPUT_TYPE)) {
+			if (algo.getName().equalsIgnoreCase(algorithm)) {
+				algoDisplayName = algo.getDisplayName();
+				break;
+			}
+		}
+		taskMonitor.setStatusMessage("Running " + algoDisplayName);
 		if (network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_COMMUNITY_NAME) == null) {
 			network.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_COMMUNITY_NAME, String.class, false, null);
 		}

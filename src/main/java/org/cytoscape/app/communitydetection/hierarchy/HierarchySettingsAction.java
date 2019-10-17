@@ -17,7 +17,7 @@ public class HierarchySettingsAction extends AbstractCyAction implements SetCurr
 	private HierarchySettingsDialog settingsDialog;
 
 	public HierarchySettingsAction(CyApplicationManager applicationManager, CyNetworkViewManager networkViewManager,
-			CySwingApplication swingApplication) {
+			CySwingApplication swingApplication) throws Exception {
 		super("Settings...", applicationManager, ActionEnableSupport.ENABLE_FOR_ALWAYS, networkViewManager);
 		setPreferredMenu(AppUtils.TOP_MENU);
 		setMenuGravity(2.0f);

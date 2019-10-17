@@ -1,8 +1,5 @@
 package org.cytoscape.app.communitydetection.util;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class AppUtils {
 
 	public static final String TOP_MENU = "Tools.Community Detection";
@@ -29,25 +26,6 @@ public class AppUtils {
 	public final static String TYPE_WEIGHTED = "weighted";
 	public final static String TYPE_NONE_VALUE = "(none)";
 
-	public final static Map<String, String> HIERARCHY_ALGORITHMS = new HashMap<String, String>() {
-		{
-			put("louvain", "Louvain");
-			put("infomap", "InfoMap");
-			put("clixo", "CliXO");
-		}
-	};
-
-	public final static Map<String, String> TERM_MAPPING_ALGORITHMS = new HashMap<String, String>() {
-		{
-			put("gprofilersingletermv2", "GProfiler term Mapping");
-		}
-	};
-
-	public final static Map<String, String> RESOLUTION_PARAMETERS = new HashMap<String, String>() {
-		{
-			put("louvain", "--resolution");
-			put("infomap", "--markovtime");
-			put("clixo", "--alpha");
-		}
-	};
+	public final static String CD_ALGORITHM_INPUT_TYPE = "EDGELIST";
+	public final static String TM_ALGORITHM_INPUT_TYPE = "GENELIST";
 }

@@ -9,6 +9,7 @@ import static org.cytoscape.work.ServiceProperties.MENU_GRAVITY;
 import static org.cytoscape.work.ServiceProperties.PREFERRED_MENU;
 import static org.cytoscape.work.ServiceProperties.TITLE;
 
+import java.util.List;
 import java.util.Properties;
 
 import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactoryImpl;
@@ -16,6 +17,7 @@ import org.cytoscape.app.communitydetection.edgelist.WriterTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.hierarchy.HierarchySettingsAction;
 import org.cytoscape.app.communitydetection.hierarchy.HierarchyTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.hierarchy.TaskListenerFactory;
+import org.cytoscape.app.communitydetection.rest.CDRestClient;
 import org.cytoscape.app.communitydetection.subnetwork.SubNetworkTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.termmap.NetworkTermMappingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.termmap.NodeTermMappingTaskFactoryImpl;
@@ -38,6 +40,7 @@ import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.SynchronousTaskManager;
+import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm;
 import org.osgi.framework.BundleContext;
 
 public class CyActivator extends AbstractCyActivator {
@@ -89,19 +92,24 @@ public class CyActivator extends AbstractCyActivator {
 		Properties taskExecProps = new Properties();
 		taskExecProps.setProperty(MENU_GRAVITY, "1.0");
 		// Registering Edge List services
-		for (String key : AppUtils.HIERARCHY_ALGORITHMS.keySet()) {
-			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU + "." + AppUtils.HIERARCHY_ALGORITHMS.get(key));
+		List<CommunityDetectionAlgorithm> cdAlgos = CDRestClient.getInstance()
+				.getAlgorithmsByType(AppUtils.CD_ALGORITHM_INPUT_TYPE);
+		for (CommunityDetectionAlgorithm algo : cdAlgos) {
+			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU + "." + algo.getDisplayName());
 			taskExecProps.setProperty(TITLE, AppUtils.TYPE_NONE_VALUE);
-			registerAllServices(bc, new HierarchyTaskFactoryImpl(key, AppUtils.TYPE_NONE), taskExecProps);
+			registerAllServices(bc, new HierarchyTaskFactoryImpl(algo.getName(), AppUtils.TYPE_NONE), taskExecProps);
 
-			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU + "." + AppUtils.HIERARCHY_ALGORITHMS.get(key));
+			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU + "." + algo.getDisplayName());
 			taskExecProps.setProperty(TITLE, "Weighted");
-			registerAllServices(bc, new HierarchyTaskFactoryImpl(key, AppUtils.TYPE_WEIGHTED), taskExecProps);
+			registerAllServices(bc, new HierarchyTaskFactoryImpl(algo.getName(), AppUtils.TYPE_WEIGHTED),
+					taskExecProps);
 		}
-		for (String key : AppUtils.TERM_MAPPING_ALGORITHMS.keySet()) {
+		List<CommunityDetectionAlgorithm> tmAlgos = CDRestClient.getInstance()
+				.getAlgorithmsByType(AppUtils.TM_ALGORITHM_INPUT_TYPE);
+		for (CommunityDetectionAlgorithm algo : tmAlgos) {
 			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
-			taskExecProps.setProperty(TITLE, AppUtils.TERM_MAPPING_ALGORITHMS.get(key));
-			registerAllServices(bc, new NetworkTermMappingTaskFactoryImpl(key), taskExecProps);
+			taskExecProps.setProperty(TITLE, algo.getDisplayName());
+			registerAllServices(bc, new NetworkTermMappingTaskFactoryImpl(algo.getName()), taskExecProps);
 		}
 		registerAllServices(bc, new HierarchySettingsAction(applicationManager, networkViewManager, swingApplication));
 
@@ -115,9 +123,9 @@ public class CyActivator extends AbstractCyActivator {
 				networkManager, networkViewManager, networkViewFactory, visualMappingManager, layoutAlgorithmManager,
 				syncTaskManager, networkNaming);
 		registerAllServices(bc, subnetworkfactoryImpl, contextMenuProps);
-		for (String key : AppUtils.TERM_MAPPING_ALGORITHMS.keySet()) {
-			contextMenuProps.setProperty(TITLE, AppUtils.TERM_MAPPING_ALGORITHMS.get(key));
-			registerAllServices(bc, new NodeTermMappingTaskFactoryImpl(key), contextMenuProps);
+		for (CommunityDetectionAlgorithm algo : tmAlgos) {
+			contextMenuProps.setProperty(TITLE, algo.getDisplayName());
+			registerAllServices(bc, new NodeTermMappingTaskFactoryImpl(algo.getName()), contextMenuProps);
 		}
 	}
 
