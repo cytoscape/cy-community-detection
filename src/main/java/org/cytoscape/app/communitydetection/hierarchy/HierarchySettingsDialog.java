@@ -2,18 +2,26 @@ package org.cytoscape.app.communitydetection.hierarchy;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.GroupLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
@@ -73,6 +81,82 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener {
 		setVisible(true);
 	}
 
+	private JLabel getParamLabel() throws IOException {
+		if (paramLabel != null) {
+			return paramLabel;
+		}
+		String text = getParameterDisplayName();
+		InputStream imgStream = getClass().getClassLoader().getResourceAsStream("images/info_icon.png");
+		File imgFile = File.createTempFile("info_icon", "png");
+		Files.copy(imgStream, imgFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		ImageIcon infoIcon = new ImageIcon(
+				new ImageIcon(imgFile.getPath()).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+
+		paramLabel = new JLabel(text, infoIcon, JLabel.CENTER);
+		paramLabel.setToolTipText(getParameterDescription());
+		return paramLabel;
+	}
+
+	private JComboBox<String> getDropDown() {
+		if (algoDropDown != null) {
+			return algoDropDown;
+		}
+		List<String> algoNames = new ArrayList<String>();
+		for (CommunityDetectionAlgorithm algo : algorithmList) {
+			algoNames.add(algo.getDisplayName());
+		}
+		String[] data = algoNames.toArray(new String[0]);
+		algoDropDown = new JComboBox<String>(data);
+		algoDropDown.setSelectedIndex(0);
+		algoDropDown.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				paramLabel.setText(getParameterDisplayName());
+				paramLabel.setToolTipText(getParameterDescription());
+				setParamInput();
+			}
+		});
+		return algoDropDown;
+	}
+
+	private JTextField getParamTextField() {
+		if (paramInput != null) {
+			return paramInput;
+		}
+		paramInput = new JTextField();
+		setParamInput();
+		return paramInput;
+	}
+
+	private Component getOKButton() {
+		JButton button = new JButton("OK");
+		button.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("selectedAlgorithm: " + getDropDown().getSelectedItem());
+				System.out.println("resolutionParamater: " + getParamTextField().getText());
+				Map<String, Double> pMap = new LinkedHashMap<String, Double>();
+				double resParam = 0.0;
+				try {
+					resParam = Double.parseDouble(getParamTextField().getText());
+				} catch (Exception ex) {
+					JOptionPane.showMessageDialog(getParent(), "Please provide a number greater than 0");
+					return;
+				}
+				if (resParam < 0.0) {
+					JOptionPane.showMessageDialog(getParent(), "Please provide a number greater than 0");
+					return;
+				}
+				pMap.put(getParameterName(), resParam);
+				CDRestClient.getInstance().addToResolutionParamMap(getAlgorithmName(), pMap);
+				dispose();
+			}
+		});
+		return button;
+	}
+
 	private String getAlgorithmName() {
 		String algoName = null;
 		for (CommunityDetectionAlgorithm algo : algorithmList) {
@@ -117,6 +201,17 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener {
 		return paramDefault;
 	}
 
+	private String getParameterDescription() {
+		String paramDes = null;
+		for (CommunityDetectionAlgorithm algo : algorithmList) {
+			if (algo.getDisplayName().equalsIgnoreCase((String) getDropDown().getSelectedItem())) {
+				paramDes = paramMap.get(algo.getName()).get(0).getDescription();
+				break;
+			}
+		}
+		return paramDes;
+	}
+
 	private void setParamInput() {
 		String paramVal = null;
 		if (CDRestClient.getInstance().getResolutionParam((String) getDropDown().getSelectedItem()) != null) {
@@ -126,63 +221,5 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener {
 			paramVal = getParameterDefaultValue();
 		}
 		paramInput.setText(paramVal);
-	}
-
-	private JLabel getParamLabel() {
-		if (paramLabel != null) {
-			return paramLabel;
-		}
-		String text = getParameterDisplayName();
-		paramLabel = new JLabel(text);
-		return paramLabel;
-	}
-
-	private JComboBox<String> getDropDown() {
-		if (algoDropDown != null) {
-			return algoDropDown;
-		}
-		List<String> algoNames = new ArrayList<String>();
-		for (CommunityDetectionAlgorithm algo : algorithmList) {
-			algoNames.add(algo.getDisplayName());
-		}
-		String[] data = algoNames.toArray(new String[0]);
-		algoDropDown = new JComboBox<String>(data);
-		algoDropDown.setSelectedIndex(0);
-		algoDropDown.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				paramLabel.setText(getParameterDisplayName());
-				setParamInput();
-			}
-		});
-		return algoDropDown;
-	}
-
-	private JTextField getParamTextField() {
-		if (paramInput != null) {
-			return paramInput;
-		}
-		paramInput = new JTextField();
-		setParamInput();
-		return paramInput;
-	}
-
-	private Component getOKButton() {
-		JButton button = new JButton("OK");
-		button.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				System.out.println("selectedAlgorithm: " + getDropDown().getSelectedItem());
-				System.out.println("resolutionParamater: " + getParamTextField().getText());
-				Map<String, Double> pMap = new LinkedHashMap<String, Double>();
-				double resParam = Double.parseDouble(getParamTextField().getText());
-				pMap.put(getParameterName(), resParam);
-				CDRestClient.getInstance().addToResolutionParamMap(getAlgorithmName(), pMap);
-				dispose();
-			}
-		});
-		return button;
 	}
 }

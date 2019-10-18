@@ -89,8 +89,8 @@ public class ReaderTask extends AbstractCyNetworkReader {
 				}
 			}
 			if (hierarchyStyle == null) {
-				ClassLoader classLoader = getClass().getClassLoader();
-				InputStream resourceStream = classLoader.getResourceAsStream("/styles/cd_hierarchy.xml");
+				InputStream resourceStream = getClass().getClassLoader()
+						.getResourceAsStream("/styles/cd_hierarchy.xml");
 				File styleFile = File.createTempFile("cd_hierarchy", "xml");
 				Files.copy(resourceStream, styleFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				System.out.println("Style set size: " + vizmapFileTaskFactory.loadStyles(styleFile).size());
