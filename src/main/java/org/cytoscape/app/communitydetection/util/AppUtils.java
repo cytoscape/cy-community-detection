@@ -24,7 +24,10 @@ public class AppUtils {
 
 	public final static String TYPE_NONE = "none";
 	public final static String TYPE_WEIGHTED = "weighted";
+	public final static String TYPE_ABOUT = "about";
 	public final static String TYPE_NONE_VALUE = "(none)";
+	public final static String TYPE_WEIGHTED_VALUE = "Weighted";
+	public final static String TYPE_ABOUT_VALUE = "About";
 
 	public final static String CD_ALGORITHM_INPUT_TYPE = "EDGELIST";
 	public final static String TM_ALGORITHM_INPUT_TYPE = "GENELIST";

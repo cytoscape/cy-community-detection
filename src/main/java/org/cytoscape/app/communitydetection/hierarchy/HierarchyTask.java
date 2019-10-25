@@ -9,11 +9,13 @@ import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.edgelist.WriterTask;
 import org.cytoscape.app.communitydetection.edgelist.WriterTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.rest.CDRestClient;
+import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.io.write.CyWriter;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
+import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionResult;
 
 /**
@@ -24,10 +26,10 @@ import org.ndexbio.communitydetection.rest.model.CommunityDetectionResult;
 public class HierarchyTask extends AbstractTask {
 
 	private final CyNetwork network;
-	private final String algorithm;
+	private final CommunityDetectionAlgorithm algorithm;
 	private final String attribute;
 
-	public HierarchyTask(CyNetwork network, String algorithm, String attribute) {
+	public HierarchyTask(CyNetwork network, CommunityDetectionAlgorithm algorithm, String attribute) {
 		this.network = network;
 		this.algorithm = algorithm;
 		this.attribute = attribute;
@@ -35,7 +37,7 @@ public class HierarchyTask extends AbstractTask {
 
 	@Override
 	public void run(TaskMonitor taskMonitor) throws Exception {
-		if (attribute == null) {
+		if (attribute == null || attribute.equals(AppUtils.TYPE_ABOUT)) {
 			return;
 		}
 		taskMonitor.setTitle("Community Detection: Creating Hierarchy Network");
@@ -45,7 +47,7 @@ public class HierarchyTask extends AbstractTask {
 				.getEdgeListWriterFactory();
 		CyWriter writer = writerFactory.createWriter(outStream, network, attribute);
 		writer.run(taskMonitor);
-		String resultURI = CDRestClient.getInstance().postCDData(algorithm, false, outStream.toString());
+		String resultURI = CDRestClient.getInstance().postCDData(algorithm.getName(), false, outStream.toString());
 		if (cancelled) {
 			CDRestClient.getInstance().setTaskCanceled(false);
 			return;
@@ -67,7 +69,7 @@ public class HierarchyTask extends AbstractTask {
 		TaskIterator iterator = readerFactory.createTaskIterator(inStream, null, network.getSUID());
 		ReaderTask reader = (ReaderTask) iterator.next();
 		reader.run(taskMonitor);
-		reader.setNetworkName(algorithm, attribute);
+		reader.setNetworkName(algorithm.getName(), attribute);
 		taskMonitor.setProgress(0.95);
 
 		taskMonitor.setStatusMessage("Creating a view for the network");

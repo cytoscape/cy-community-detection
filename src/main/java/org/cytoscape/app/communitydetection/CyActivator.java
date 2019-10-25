@@ -97,19 +97,26 @@ public class CyActivator extends AbstractCyActivator {
 		for (CommunityDetectionAlgorithm algo : cdAlgos) {
 			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU + "." + algo.getDisplayName());
 			taskExecProps.setProperty(TITLE, AppUtils.TYPE_NONE_VALUE);
-			registerAllServices(bc, new HierarchyTaskFactoryImpl(algo.getName(), AppUtils.TYPE_NONE), taskExecProps);
+			registerAllServices(bc, new HierarchyTaskFactoryImpl(algo, AppUtils.TYPE_NONE), taskExecProps);
 
 			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU + "." + algo.getDisplayName());
-			taskExecProps.setProperty(TITLE, "Weighted");
-			registerAllServices(bc, new HierarchyTaskFactoryImpl(algo.getName(), AppUtils.TYPE_WEIGHTED),
-					taskExecProps);
+			taskExecProps.setProperty(TITLE, AppUtils.TYPE_WEIGHTED_VALUE);
+			registerAllServices(bc, new HierarchyTaskFactoryImpl(algo, AppUtils.TYPE_WEIGHTED), taskExecProps);
+
+			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU + "." + algo.getDisplayName());
+			taskExecProps.setProperty(TITLE, AppUtils.TYPE_ABOUT_VALUE);
+			registerAllServices(bc, new HierarchyTaskFactoryImpl(algo, AppUtils.TYPE_ABOUT), taskExecProps);
 		}
 		List<CommunityDetectionAlgorithm> tmAlgos = CDRestClient.getInstance()
 				.getAlgorithmsByType(AppUtils.TM_ALGORITHM_INPUT_TYPE);
 		for (CommunityDetectionAlgorithm algo : tmAlgos) {
-			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
+			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU + "." + algo.getDisplayName());
 			taskExecProps.setProperty(TITLE, algo.getDisplayName());
-			registerAllServices(bc, new NetworkTermMappingTaskFactoryImpl(algo.getName()), taskExecProps);
+			registerAllServices(bc, new NetworkTermMappingTaskFactoryImpl(algo, AppUtils.TYPE_NONE), taskExecProps);
+
+			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU + "." + algo.getDisplayName());
+			taskExecProps.setProperty(TITLE, AppUtils.TYPE_ABOUT_VALUE);
+			registerAllServices(bc, new NetworkTermMappingTaskFactoryImpl(algo, AppUtils.TYPE_ABOUT), taskExecProps);
 		}
 		registerAllServices(bc, new HierarchySettingsAction(applicationManager, networkViewManager, swingApplication));
 
@@ -125,7 +132,7 @@ public class CyActivator extends AbstractCyActivator {
 		registerAllServices(bc, subnetworkfactoryImpl, contextMenuProps);
 		for (CommunityDetectionAlgorithm algo : tmAlgos) {
 			contextMenuProps.setProperty(TITLE, algo.getDisplayName());
-			registerAllServices(bc, new NodeTermMappingTaskFactoryImpl(algo.getName()), contextMenuProps);
+			registerAllServices(bc, new NodeTermMappingTaskFactoryImpl(algo), contextMenuProps);
 		}
 	}
 

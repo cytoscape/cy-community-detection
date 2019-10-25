@@ -8,6 +8,7 @@ import org.cytoscape.task.NetworkViewTaskFactory;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.work.TaskIterator;
+import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm;
 
 /**
  * Implementation of {@link NetworkViewTaskFactory} and
@@ -17,15 +18,16 @@ import org.cytoscape.work.TaskIterator;
  */
 public class NodeTermMappingTaskFactoryImpl extends AbstractNodeViewTaskFactory implements NetworkViewTaskFactory {
 
-	private final String algorithm;
+	private final CommunityDetectionAlgorithm algorithm;
 
-	public NodeTermMappingTaskFactoryImpl(String algorithm) {
+	public NodeTermMappingTaskFactoryImpl(CommunityDetectionAlgorithm algorithm) {
 		this.algorithm = algorithm;
 	}
 
 	@Override
 	public TaskIterator createTaskIterator(CyNetworkView networkView) {
-		return new TaskIterator(new TermMappingTask(algorithm, networkView.getModel(), true));
+		return new TaskIterator(
+				new TermMappingTask(algorithm.getName(), AppUtils.TYPE_NONE, networkView.getModel(), true));
 	}
 
 	@Override

@@ -22,17 +22,23 @@ import com.fasterxml.jackson.databind.JsonNode;
 public class TermMappingTask extends AbstractTask {
 
 	private final String algorithm;
+	private final String attribute;
 	private final CyNetwork network;
 	private final boolean isContextMenu;
 
-	public TermMappingTask(String algorithm, CyNetwork network, boolean isContextMenu) {
+	public TermMappingTask(String algorithm, String attribute, CyNetwork network, boolean isContextMenu) {
 		this.algorithm = algorithm;
+		this.attribute = attribute;
 		this.network = network;
 		this.isContextMenu = isContextMenu;
 	}
 
 	@Override
 	public void run(TaskMonitor taskMonitor) throws Exception {
+		if (attribute == null || attribute.equals(AppUtils.TYPE_ABOUT)) {
+			return;
+		}
+
 		taskMonitor.setTitle("Community Detection: Term Mapping");
 		taskMonitor.setProgress(0.0);
 		String algoDisplayName = null;
