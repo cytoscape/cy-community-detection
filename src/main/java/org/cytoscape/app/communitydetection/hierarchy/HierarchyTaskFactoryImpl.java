@@ -81,6 +81,7 @@ public class HierarchyTaskFactoryImpl implements NetworkTaskFactory {
 
 	private JTextPane getDescriptionTextPane(String description) {
 		JTextPane textPane = new JTextPane();
+		textPane.setContentType("text/html");
 		Document doc = textPane.getDocument();
 		try {
 			doc.insertString(0, description, new SimpleAttributeSet());

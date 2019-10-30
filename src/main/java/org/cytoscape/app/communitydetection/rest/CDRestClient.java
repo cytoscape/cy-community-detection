@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
  */
 public class CDRestClient {
 
-	private final static String URI = "http://ddot.ucsd.edu/cd/communitydetection/v1";
+	private final static String URI = "http://cdservice.cytoscape.org/cd/communitydetection/v1";
 
 	private final ObjectMapper mapper;
 	private boolean isTaskCanceled;
