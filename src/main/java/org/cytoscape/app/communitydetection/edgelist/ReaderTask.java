@@ -125,6 +125,8 @@ public class ReaderTask extends AbstractCyNetworkReader {
 	}
 
 	public void setNetworkName(String algorithmName, String attribute) {
+		String origNetName = originalNetwork.getRow(originalNetwork).get(CyNetwork.NAME, String.class);
+
 		String name;
 		if (attribute.equals(AppUtils.TYPE_NONE)) {
 			name = networkNaming.getSuggestedNetworkTitle(
@@ -137,6 +139,19 @@ public class ReaderTask extends AbstractCyNetworkReader {
 		CyRootNetwork rootNetwork = rootNetworkManager.getRootNetwork(getNetworks()[0]);
 		rootNetwork.getRow(rootNetwork).set(CyNetwork.NAME, name);
 		getNetworks()[0].getRow(getNetworks()[0]).set(CyNetwork.NAME, name);
+
+		StringBuffer description = new StringBuffer("Original network: " + origNetName + "\n");
+		description.append("Algorithm used for community detection: " + algorithmName + "\n");
+		description.append("Edge table column used as weight: " + attribute + "\n");
+		String UUID = originalNetwork.getRow(originalNetwork, CyNetwork.HIDDEN_ATTRS).get("NDEx UUID", String.class);
+		if (UUID != null) {
+			description.append("Original network's NDEx UUID: " + UUID);
+		}
+		if (getNetworks()[0].getDefaultNetworkTable().getColumn(AppUtils.COLUMN_DESCRIPTION) == null) {
+			getNetworks()[0].getDefaultNetworkTable().createColumn(AppUtils.COLUMN_DESCRIPTION, String.class, false,
+					null);
+		}
+		getNetworks()[0].getRow(getNetworks()[0]).set(AppUtils.COLUMN_DESCRIPTION, description.toString());
 	}
 
 	/**

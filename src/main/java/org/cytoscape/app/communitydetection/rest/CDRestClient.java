@@ -230,6 +230,10 @@ public class CDRestClient {
 		return paramMap;
 	}
 
+	public boolean getIsTaskCanceled() {
+		return isTaskCanceled;
+	}
+
 	public void setTaskCanceled(boolean isCanceled) {
 		isTaskCanceled = isCanceled;
 	}

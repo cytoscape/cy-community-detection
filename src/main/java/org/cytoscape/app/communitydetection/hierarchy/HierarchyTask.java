@@ -40,6 +40,7 @@ public class HierarchyTask extends AbstractTask {
 		if (attribute == null || attribute.equals(AppUtils.TYPE_ABOUT)) {
 			return;
 		}
+		long startTime = System.currentTimeMillis();
 		taskMonitor.setTitle("Community Detection: Creating Hierarchy Network");
 		taskMonitor.setStatusMessage("Exporting the network");
 		ByteArrayOutputStream outStream = new ByteArrayOutputStream();
@@ -63,6 +64,7 @@ public class HierarchyTask extends AbstractTask {
 		InputStream inStream = new ByteArrayInputStream(
 				cdResult.getResult().asText().trim().replace(';', '\n').getBytes());
 		taskMonitor.setProgress(0.9);
+		System.out.printf("CD app: Hierarchy edge list received in %d ms\n", (System.currentTimeMillis() - startTime));
 		taskMonitor.setStatusMessage("Received hierarchy, creating a new network");
 		ReaderTaskFactoryImpl readerFactory = (ReaderTaskFactoryImpl) TaskListenerFactory.getInstance()
 				.getEdgeListReaderFactory();
@@ -75,6 +77,7 @@ public class HierarchyTask extends AbstractTask {
 		taskMonitor.setStatusMessage("Creating a view for the network");
 		reader.buildCyNetworkView(reader.getNetworks()[0]);
 		taskMonitor.setProgress(1.0);
+		System.out.printf("CD app: Total time: %d ms\n", (System.currentTimeMillis() - startTime));
 	}
 
 	@Override

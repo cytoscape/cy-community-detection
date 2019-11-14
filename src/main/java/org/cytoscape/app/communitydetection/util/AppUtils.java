@@ -2,8 +2,10 @@ package org.cytoscape.app.communitydetection.util;
 
 public class AppUtils {
 
-	public static final String TOP_MENU = "Tools.Community Detection";
-	public static final String CONTEXT_MENU = "Community Detection";
+	public static final String TOP_MENU_CD = "Tools.Community Detection";
+	public static final String TOP_MENU_TM = "Tools.Term Mapping";
+	public static final String CONTEXT_MENU_CD = "Community Detection";
+	public static final String CONTEXT_MENU_TM = "Term Mapping";
 
 	public static final String WRITE_CX_MENU_ITEM = "Export Network to CX";
 	public static final String READ_CX_MENU_ITEM = "Import Network from CX";
@@ -11,6 +13,7 @@ public class AppUtils {
 	public static final String EDGE_WRITER_ID = "edgeListWriterFactory";
 
 	public final static String COLUMN_SUID = "SUID";
+	public final static String COLUMN_DESCRIPTION = "Description";
 	public final static String COLUMN_CD_MEMBER_LIST = "CD_MemberList";
 	public final static String COLUMN_CD_MEMBER_LIST_SIZE = "CD_MemberList_Size";
 	public final static String COLUMN_CD_MEMBER_LIST_LOG_SIZE = "CD_MemberList_LogSize";

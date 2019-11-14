@@ -95,33 +95,32 @@ public class CyActivator extends AbstractCyActivator {
 		List<CommunityDetectionAlgorithm> cdAlgos = CDRestClient.getInstance()
 				.getAlgorithmsByType(AppUtils.CD_ALGORITHM_INPUT_TYPE);
 		for (CommunityDetectionAlgorithm algo : cdAlgos) {
-			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU + "." + algo.getDisplayName());
+			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU_CD + "." + algo.getDisplayName());
 			taskExecProps.setProperty(TITLE, AppUtils.TYPE_NONE_VALUE);
 			registerAllServices(bc, new HierarchyTaskFactoryImpl(algo, AppUtils.TYPE_NONE), taskExecProps);
 
-			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU + "." + algo.getDisplayName());
+			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU_CD + "." + algo.getDisplayName());
 			taskExecProps.setProperty(TITLE, AppUtils.TYPE_WEIGHTED_VALUE);
 			registerAllServices(bc, new HierarchyTaskFactoryImpl(algo, AppUtils.TYPE_WEIGHTED), taskExecProps);
 
-			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU + "." + algo.getDisplayName());
+			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU_CD + "." + algo.getDisplayName());
 			taskExecProps.setProperty(TITLE, AppUtils.TYPE_ABOUT_VALUE);
 			registerAllServices(bc, new HierarchyTaskFactoryImpl(algo, AppUtils.TYPE_ABOUT), taskExecProps);
 		}
 		List<CommunityDetectionAlgorithm> tmAlgos = CDRestClient.getInstance()
 				.getAlgorithmsByType(AppUtils.TM_ALGORITHM_INPUT_TYPE);
 		for (CommunityDetectionAlgorithm algo : tmAlgos) {
-			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU + "." + algo.getDisplayName());
+			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU_TM + "." + algo.getDisplayName());
 			taskExecProps.setProperty(TITLE, algo.getDisplayName());
 			registerAllServices(bc, new NetworkTermMappingTaskFactoryImpl(algo, AppUtils.TYPE_NONE), taskExecProps);
 
-			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU + "." + algo.getDisplayName());
+			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU_TM + "." + algo.getDisplayName());
 			taskExecProps.setProperty(TITLE, AppUtils.TYPE_ABOUT_VALUE);
 			registerAllServices(bc, new NetworkTermMappingTaskFactoryImpl(algo, AppUtils.TYPE_ABOUT), taskExecProps);
 		}
-		registerAllServices(bc, new HierarchySettingsAction(applicationManager, networkViewManager, swingApplication));
 
 		Properties contextMenuProps = new Properties();
-		contextMenuProps.setProperty(PREFERRED_MENU, AppUtils.CONTEXT_MENU);
+		contextMenuProps.setProperty(PREFERRED_MENU, AppUtils.CONTEXT_MENU_CD);
 		contextMenuProps.setProperty(ENABLE_FOR, ENABLE_FOR_SELECTED_NODES);
 		contextMenuProps.setProperty(TITLE, "View Interactions for this Community");
 		contextMenuProps.put(IN_MENU_BAR, false);
@@ -131,9 +130,12 @@ public class CyActivator extends AbstractCyActivator {
 				syncTaskManager, networkNaming);
 		registerAllServices(bc, subnetworkfactoryImpl, contextMenuProps);
 		for (CommunityDetectionAlgorithm algo : tmAlgos) {
+			contextMenuProps.setProperty(PREFERRED_MENU, AppUtils.CONTEXT_MENU_TM);
 			contextMenuProps.setProperty(TITLE, algo.getDisplayName());
 			registerAllServices(bc, new NodeTermMappingTaskFactoryImpl(algo), contextMenuProps);
 		}
+
+		registerAllServices(bc, new HierarchySettingsAction(applicationManager, networkViewManager, swingApplication));
 	}
 
 }
