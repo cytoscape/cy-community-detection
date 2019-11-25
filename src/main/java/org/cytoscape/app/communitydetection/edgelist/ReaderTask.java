@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 import javax.swing.JOptionPane;
@@ -24,6 +25,7 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyTable;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.session.CyNetworkNaming;
@@ -89,8 +91,7 @@ public class ReaderTask extends AbstractCyNetworkReader {
 				}
 			}
 			if (hierarchyStyle == null) {
-				InputStream resourceStream = getClass().getClassLoader()
-						.getResourceAsStream("/styles/cd_hierarchy.xml");
+				InputStream resourceStream = getClass().getClassLoader().getResourceAsStream("cd_hierarchy.xml");
 				File styleFile = File.createTempFile("cd_hierarchy", "xml");
 				Files.copy(resourceStream, styleFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				System.out.println("Style set size: " + vizmapFileTaskFactory.loadStyles(styleFile).size());
@@ -124,36 +125,6 @@ public class ReaderTask extends AbstractCyNetworkReader {
 		}
 	}
 
-	public void setNetworkName(String algorithmName, String attribute) {
-		String origNetName = originalNetwork.getRow(originalNetwork).get(CyNetwork.NAME, String.class);
-
-		String name;
-		if (attribute.equals(AppUtils.TYPE_NONE)) {
-			name = networkNaming.getSuggestedNetworkTitle(
-					algorithmName + "_" + originalNetwork.getRow(originalNetwork).get(CyNetwork.NAME, String.class));
-		} else {
-			name = networkNaming.getSuggestedNetworkTitle(algorithmName + "_" + attribute + "_"
-					+ originalNetwork.getRow(originalNetwork).get(CyNetwork.NAME, String.class));
-		}
-
-		CyRootNetwork rootNetwork = rootNetworkManager.getRootNetwork(getNetworks()[0]);
-		rootNetwork.getRow(rootNetwork).set(CyNetwork.NAME, name);
-		getNetworks()[0].getRow(getNetworks()[0]).set(CyNetwork.NAME, name);
-
-		StringBuffer description = new StringBuffer("Original network: " + origNetName + "\n");
-		description.append("Algorithm used for community detection: " + algorithmName + "\n");
-		description.append("Edge table column used as weight: " + attribute + "\n");
-		String UUID = originalNetwork.getRow(originalNetwork, CyNetwork.HIDDEN_ATTRS).get("NDEx UUID", String.class);
-		if (UUID != null) {
-			description.append("Original network's NDEx UUID: " + UUID);
-		}
-		if (getNetworks()[0].getDefaultNetworkTable().getColumn(AppUtils.COLUMN_DESCRIPTION) == null) {
-			getNetworks()[0].getDefaultNetworkTable().createColumn(AppUtils.COLUMN_DESCRIPTION, String.class, false,
-					null);
-		}
-		getNetworks()[0].getRow(getNetworks()[0]).set(AppUtils.COLUMN_DESCRIPTION, description.toString());
-	}
-
 	/**
 	 * Creates the hierarchy network and populates all of its tables.
 	 * 
@@ -164,30 +135,15 @@ public class ReaderTask extends AbstractCyNetworkReader {
 
 		CyNetwork newNetwork = cyNetworkFactory.createNetwork();
 
-		if (newNetwork.getDefaultNetworkTable().getColumn(AppUtils.COLUMN_CD_ORIGINAL_NETWORK) == null) {
-			newNetwork.getDefaultNetworkTable().createColumn(AppUtils.COLUMN_CD_ORIGINAL_NETWORK, Long.class, false,
-					originalNetwork.getSUID());
-		}
-		if (newNetwork.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_MEMBER_LIST) == null) {
-			newNetwork.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_MEMBER_LIST, String.class, false, null);
-		}
-		if (newNetwork.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_MEMBER_LIST_SIZE) == null) {
-			newNetwork.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_MEMBER_LIST_SIZE, Integer.class, false, 0);
-		}
-		if (newNetwork.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_MEMBER_LIST_LOG_SIZE) == null) {
-			newNetwork.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_MEMBER_LIST_LOG_SIZE, Double.class, false,
-					0.0);
-		}
-		if (newNetwork.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_COMMUNITY_NAME) == null) {
-			newNetwork.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_COMMUNITY_NAME, String.class, false, null);
-		}
-		if (newNetwork.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_ANNOTATED_MEMBERS) == null) {
-			newNetwork.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_ANNOTATED_MEMBERS, String.class, false,
-					null);
-		}
-		if (newNetwork.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_LABELED) == null) {
-			newNetwork.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_LABELED, Boolean.class, true, false);
-		}
+		createTableColumn(newNetwork.getDefaultNetworkTable(), AppUtils.COLUMN_CD_ORIGINAL_NETWORK, Long.class, false,
+				originalNetwork.getSUID());
+		CyTable nodeTable = newNetwork.getDefaultNodeTable();
+		createTableColumn(nodeTable, AppUtils.COLUMN_CD_MEMBER_LIST, String.class, false, null);
+		createTableColumn(nodeTable, AppUtils.COLUMN_CD_MEMBER_LIST_SIZE, Integer.class, false, 0);
+		createTableColumn(nodeTable, AppUtils.COLUMN_CD_MEMBER_LIST_LOG_SIZE, Double.class, false, 0.0);
+		createTableColumn(nodeTable, AppUtils.COLUMN_CD_COMMUNITY_NAME, String.class, false, null);
+		createTableColumn(nodeTable, AppUtils.COLUMN_CD_ANNOTATED_MEMBERS, String.class, false, null);
+		createTableColumn(nodeTable, AppUtils.COLUMN_CD_LABELED, Boolean.class, true, false);
 
 		Map<Long, CyNode> nMap = new HashMap<Long, CyNode>();
 		String line;
@@ -245,6 +201,46 @@ public class ReaderTask extends AbstractCyNetworkReader {
 		createMemberList(newNetwork);
 	}
 
+	public void setNetworkAttributes(String algorithmName, String attribute, String dockerImageName, String version)
+			throws Exception {
+
+		String name;
+		if (attribute.equals(AppUtils.TYPE_NONE)) {
+			name = networkNaming.getSuggestedNetworkTitle(
+					algorithmName + "_" + originalNetwork.getRow(originalNetwork).get(CyNetwork.NAME, String.class));
+		} else {
+			name = networkNaming.getSuggestedNetworkTitle(algorithmName + "_" + attribute + "_"
+					+ originalNetwork.getRow(originalNetwork).get(CyNetwork.NAME, String.class));
+		}
+		CyRootNetwork rootNetwork = rootNetworkManager.getRootNetwork(getNetworks()[0]);
+		rootNetwork.getRow(rootNetwork).set(CyNetwork.NAME, name);
+		getNetworks()[0].getRow(getNetworks()[0]).set(CyNetwork.NAME, name);
+
+		String origNetName = originalNetwork.getRow(originalNetwork).get(CyNetwork.NAME, String.class);
+		String derivedFrom = origNetName;
+		StringBuffer description = new StringBuffer("Original network: " + origNetName + "\n");
+		description.append("Algorithm used for community detection: " + algorithmName + "\n");
+		description.append("Edge table column used as weight: " + attribute + "\n");
+		String UUID = originalNetwork.getRow(originalNetwork, CyNetwork.HIDDEN_ATTRS).get("NDEx UUID", String.class);
+		if (UUID != null) {
+			description.append("Original network's NDEx UUID: " + UUID);
+			derivedFrom += " UUID: " + UUID;
+		}
+		Properties properties = new Properties();
+		properties.load(getClass().getClassLoader().getResourceAsStream("project.properties"));
+		String generatedBy = "App: " + properties.getProperty(AppUtils.PROP_PROJECT_NAME);
+		generatedBy += " (" + properties.getProperty(AppUtils.PROP_PROJECT_VERSION) + ")";
+		generatedBy += " Service: " + dockerImageName + " (" + version + ")";
+
+		CyTable netTable = getNetworks()[0].getDefaultNetworkTable();
+		createTableColumn(netTable, AppUtils.COLUMN_DESCRIPTION, String.class, false, null);
+		createTableColumn(netTable, AppUtils.COLUMN_DERIVED_FROM, String.class, false, null);
+		createTableColumn(netTable, AppUtils.COLUMN_GENERATED_BY, String.class, false, null);
+		getNetworks()[0].getRow(getNetworks()[0]).set(AppUtils.COLUMN_DESCRIPTION, description.toString());
+		getNetworks()[0].getRow(getNetworks()[0]).set(AppUtils.COLUMN_DERIVED_FROM, derivedFrom);
+		getNetworks()[0].getRow(getNetworks()[0]).set(AppUtils.COLUMN_GENERATED_BY, generatedBy);
+	}
+
 	/**
 	 * Creates member list for each node in the hierarchy network.
 	 * 
@@ -276,6 +272,13 @@ public class ReaderTask extends AbstractCyNetworkReader {
 			}
 		}
 		HierarchyHelper.getInstance().clearAll();
+	}
+
+	<T> void createTableColumn(CyTable table, String colName, Class<? extends T> type, boolean isImmutable,
+			T defaultValue) {
+		if (table.getColumn(colName) == null) {
+			table.createColumn(colName, type, isImmutable, defaultValue);
+		}
 	}
 
 	private double log2(double x) {

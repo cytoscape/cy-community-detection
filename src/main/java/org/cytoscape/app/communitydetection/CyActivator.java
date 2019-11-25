@@ -32,6 +32,7 @@ import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
+import org.cytoscape.property.CyProperty;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.session.CyNetworkNaming;
 import org.cytoscape.task.read.LoadVizmapFileTaskFactory;
@@ -64,6 +65,16 @@ public class CyActivator extends AbstractCyActivator {
 		final SynchronousTaskManager<?> syncTaskManager = getService(bc, SynchronousTaskManager.class);
 		final CyNetworkNaming networkNaming = getService(bc, CyNetworkNaming.class);
 		final CySwingApplication swingApplication = getService(bc, CySwingApplication.class);
+
+		String cyPropertyName = "project.properties";
+		PropertiesReader propReader = new PropertiesReader(AppUtils.APP_NAME, cyPropertyName);
+		Properties propReaderProperties = new Properties();
+		propReaderProperties.setProperty("cyPropertyName", cyPropertyName);
+		registerAllServices(bc, propReader, propReaderProperties);
+
+		final CyProperty<Properties> cyProperties = getService(bc, CyProperty.class,
+				"(cyPropertyName=" + cyPropertyName + ")");
+		CDRestClient.getInstance().setBaseURL(cyProperties.getProperties().getProperty(AppUtils.PROP_APP_BASEURL));
 
 		// Setting up Edge List I/O services
 		final StreamUtil streamUtil = getService(bc, StreamUtil.class);

@@ -90,7 +90,7 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener {
 			return paramLabel;
 		}
 		String text = getParameterDisplayName();
-		InputStream imgStream = getClass().getClassLoader().getResourceAsStream("images/info_icon.png");
+		InputStream imgStream = getClass().getClassLoader().getResourceAsStream("info_icon.png");
 		File imgFile = File.createTempFile("info_icon", "png");
 		Files.copy(imgStream, imgFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		ImageIcon infoIcon = new ImageIcon(

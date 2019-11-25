@@ -2,6 +2,11 @@ package org.cytoscape.app.communitydetection.util;
 
 public class AppUtils {
 
+	public static final String APP_NAME = "cdApp";
+	public static final String PROP_APP_BASEURL = "app.baseurl";
+	public static final String PROP_PROJECT_VERSION = "project.version";
+	public static final String PROP_PROJECT_NAME = "project.name";
+
 	public static final String TOP_MENU_CD = "Tools.Community Detection";
 	public static final String TOP_MENU_TM = "Tools.Term Mapping";
 	public static final String CONTEXT_MENU_CD = "Community Detection";
@@ -14,6 +19,8 @@ public class AppUtils {
 
 	public final static String COLUMN_SUID = "SUID";
 	public final static String COLUMN_DESCRIPTION = "Description";
+	public final static String COLUMN_DERIVED_FROM = "prov:wasDerivedFrom";
+	public final static String COLUMN_GENERATED_BY = "prov:wasGeneratedBy";
 	public final static String COLUMN_CD_MEMBER_LIST = "CD_MemberList";
 	public final static String COLUMN_CD_MEMBER_LIST_SIZE = "CD_MemberList_Size";
 	public final static String COLUMN_CD_MEMBER_LIST_LOG_SIZE = "CD_MemberList_LogSize";

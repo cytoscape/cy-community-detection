@@ -71,8 +71,9 @@ public class HierarchyTask extends AbstractTask {
 		TaskIterator iterator = readerFactory.createTaskIterator(inStream, null, network.getSUID());
 		ReaderTask reader = (ReaderTask) iterator.next();
 		reader.run(taskMonitor);
-		reader.setNetworkName(algorithm.getName(), attribute);
+		reader.setNetworkAttributes(algorithm.getName(), attribute, algorithm.getDockerImage(), algorithm.getVersion());
 		taskMonitor.setProgress(0.95);
+		System.out.printf("CD app: Newtork created in %d ms\n", (System.currentTimeMillis() - startTime));
 
 		taskMonitor.setStatusMessage("Creating a view for the network");
 		reader.buildCyNetworkView(reader.getNetworks()[0]);

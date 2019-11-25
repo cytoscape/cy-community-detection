@@ -36,11 +36,11 @@ import com.fasterxml.jackson.databind.node.TextNode;
  */
 public class CDRestClient {
 
-	private final static String URI = "http://cdservice.cytoscape.org/cd/communitydetection/v1";
-
 	private final ObjectMapper mapper;
 	private boolean isTaskCanceled;
+	private String baseurl;
 	private Map<String, Map<String, Double>> resolutionParamMap;
+
 	private List<CommunityDetectionAlgorithm> algorithms;
 
 	private CDRestClient() {
@@ -55,6 +55,10 @@ public class CDRestClient {
 
 	public static CDRestClient getInstance() {
 		return SingletonHelper.INSTANCE;
+	}
+
+	public void setBaseURL(String baseurl) {
+		this.baseurl = baseurl;
 	}
 
 	/**
@@ -98,7 +102,7 @@ public class CDRestClient {
 		StringEntity body = new StringEntity(mapper.writeValueAsString(request));
 
 		CloseableHttpClient client = getClient(10);
-		HttpPost postRequest = new HttpPost(URI);
+		HttpPost postRequest = new HttpPost(baseurl);
 		postRequest.addHeader("accept", "application/json");
 		postRequest.addHeader("Content-Type", "application/json");
 		postRequest.setEntity(body);
@@ -111,7 +115,8 @@ public class CDRestClient {
 			}
 		}
 		if (202 != httpPostResponse.getStatusLine().getStatusCode()) {
-			throw new Exception("Error: " + httpPostResponse.getStatusLine().getStatusCode());
+			throw new Exception("POST call to " + baseurl + " failed. Error code: "
+					+ httpPostResponse.getStatusLine().getStatusCode());
 		}
 		BufferedReader reader = new BufferedReader(new InputStreamReader(httpPostResponse.getEntity().getContent()));
 		Task serviceTask = mapper.readValue(reader, Task.class);
@@ -121,7 +126,7 @@ public class CDRestClient {
 
 	public void deleteTask(String taskId) throws Exception {
 		CloseableHttpClient client = getClient(10);
-		HttpResponse deleteResponse = client.execute(new HttpDelete(URI + "/" + taskId));
+		HttpResponse deleteResponse = client.execute(new HttpDelete(baseurl + "/" + taskId));
 		if (200 != deleteResponse.getStatusLine().getStatusCode()) {
 			System.out.println("Could not delete task: " + taskId);
 		}
@@ -137,7 +142,7 @@ public class CDRestClient {
 				deleteTask(taskId);
 				break;
 			}
-			HttpResponse httpGetResponse = client.execute(new HttpGet(URI + "/" + taskId));
+			HttpResponse httpGetResponse = client.execute(new HttpGet(baseurl + "/" + taskId));
 			BufferedReader reader = new BufferedReader(new InputStreamReader(httpGetResponse.getEntity().getContent()));
 			cdResult = mapper.readValue(reader, CommunityDetectionResult.class);
 			if (cdResult.getStatus().equals(CommunityDetectionResultStatus.COMPLETE_STATUS)) {
@@ -165,7 +170,7 @@ public class CDRestClient {
 				deleteTask(taskId);
 				break;
 			}
-			HttpResponse httpGetResponse = client.execute(new HttpGet(URI + "/" + taskId));
+			HttpResponse httpGetResponse = client.execute(new HttpGet(baseurl + "/" + taskId));
 			BufferedReader reader = new BufferedReader(new InputStreamReader(httpGetResponse.getEntity().getContent()));
 			cdResult = mapper.readValue(reader, CommunityDetectionResult.class);
 			if (cdResult.getStatus().equals(CommunityDetectionResultStatus.COMPLETE_STATUS)) {
@@ -190,7 +195,7 @@ public class CDRestClient {
 		}
 		algorithms = new ArrayList<CommunityDetectionAlgorithm>();
 		CloseableHttpClient client = getClient(10);
-		HttpResponse httpGetResponse = client.execute(new HttpGet(URI + "/" + "algorithms"));
+		HttpResponse httpGetResponse = client.execute(new HttpGet(baseurl + "/" + "algorithms"));
 		BufferedReader reader = new BufferedReader(new InputStreamReader(httpGetResponse.getEntity().getContent()));
 		CommunityDetectionAlgorithms algos = mapper.readValue(reader, CommunityDetectionAlgorithms.class);
 		for (CommunityDetectionAlgorithm algo : algos.getAlgorithms().values()) {

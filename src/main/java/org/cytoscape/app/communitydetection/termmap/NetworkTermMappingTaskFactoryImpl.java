@@ -1,13 +1,13 @@
 package org.cytoscape.app.communitydetection.termmap;
 
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 
+import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
-import javax.swing.JTextPane;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.SimpleAttributeSet;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.model.CyNetwork;
@@ -33,7 +33,7 @@ public class NetworkTermMappingTaskFactoryImpl implements NetworkTaskFactory {
 	@Override
 	public TaskIterator createTaskIterator(CyNetwork network) {
 		if (type.equals(AppUtils.TYPE_ABOUT)) {
-			JOptionPane.showMessageDialog(null, getDescriptionTextPane(algorithm.getDescription()),
+			JOptionPane.showMessageDialog(null, getDescriptionFrame(algorithm.getDescription()),
 					"About " + algorithm.getDisplayName(), JOptionPane.INFORMATION_MESSAGE);
 			return new TaskIterator(new TermMappingTask(algorithm.getName(), AppUtils.TYPE_ABOUT, network, false));
 		}
@@ -51,19 +51,29 @@ public class NetworkTermMappingTaskFactoryImpl implements NetworkTaskFactory {
 		return network != null;
 	}
 
-	private JTextPane getDescriptionTextPane(String description) {
-		JTextPane textPane = new JTextPane();
-		Document doc = textPane.getDocument();
-		try {
-			doc.insertString(0, description, new SimpleAttributeSet());
-		} catch (BadLocationException e) {
-			e.printStackTrace();
-		}
-		textPane.setFont(new Font("Sans-Serif", Font.PLAIN, 12));
-		int width = textPane.getPreferredSize().width > 600 ? 600 : textPane.getPreferredSize().width;
-		textPane.setSize(new Dimension(width, 10));
-		textPane.setPreferredSize(new Dimension(width, textPane.getPreferredSize().height));
-		return textPane;
-	}
+	private JEditorPane getDescriptionFrame(String description) {
+		JEditorPane editorPane = new JEditorPane("text/html", description);
+		editorPane.setEditable(false);
+		editorPane.setOpaque(false);
 
+		editorPane.addHyperlinkListener(new HyperlinkListener() {
+			public void hyperlinkUpdate(HyperlinkEvent linkEvent) {
+				if (HyperlinkEvent.EventType.ACTIVATED.equals(linkEvent.getEventType())) {
+					try {
+						Desktop.getDesktop().browse(linkEvent.getURL().toURI());
+					} catch (Exception e) {
+						JOptionPane.showMessageDialog(null,
+								"Default browser window could not be opened. Please copy/paste this link to your browser: "
+										+ linkEvent.getURL());
+					}
+					System.out.println(linkEvent.getURL());
+				}
+			}
+		});
+		int width = editorPane.getPreferredSize().width > 600 ? 600 : editorPane.getPreferredSize().width;
+		editorPane.setSize(new Dimension(width, 10));
+		editorPane.setPreferredSize(new Dimension(width, editorPane.getPreferredSize().height));
+		editorPane.setFont(new Font("Sans-Serif", Font.PLAIN, 12));
+		return editorPane;
+	}
 }
