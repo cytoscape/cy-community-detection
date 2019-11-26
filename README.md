@@ -3,6 +3,7 @@
 [git]: https://git-scm.com/
 [make]: https://www.gnu.org/software/make
 [cytoscape]: https://cytoscape.org/
+[directappinstall]: http://manual.cytoscape.org/en/stable/App_Manager.html#installing-apps
 
 Community Detection App for Cytoscape
 ======================================
@@ -25,8 +26,8 @@ Requirements to use
 Installation
 ==============
 
-TODO
-
+1. Download jar from releases on this page
+1. Open Cytoscape and follow instructions [here][directappinstall]
 
 
 Requirements to build (for developers)
