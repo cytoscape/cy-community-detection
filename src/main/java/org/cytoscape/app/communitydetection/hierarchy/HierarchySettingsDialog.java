@@ -192,8 +192,6 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("selectedAlgorithm: " + getDropDown().getSelectedItem());
-				System.out.println("resolutionParamater: " + getParamTextField().getText());
 				Map<String, Double> pMap = new LinkedHashMap<String, Double>();
 				double resParam = 0.0;
 				try {

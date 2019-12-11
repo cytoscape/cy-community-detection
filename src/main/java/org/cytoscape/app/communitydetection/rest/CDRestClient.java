@@ -3,11 +3,13 @@ package org.cytoscape.app.communitydetection.rest;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
@@ -93,9 +95,11 @@ public class CDRestClient {
 		for (CommunityDetectionAlgorithm cdAlgo : getAlgorithms()) {
 			if (cdAlgo.getName().equalsIgnoreCase(algorithm) && resolutionParamMap.containsKey(algorithm)) {
 				for (CustomParameter param : resParams.get(algorithm)) {
-					customParameters.put(param.getName(),
-							Double.toString(getResolutionParam(algorithm).get(param.getName())));
-					request.setCustomParameters(customParameters);
+					if (getResolutionParam(algorithm).containsKey(param.getName())) {
+						customParameters.put(param.getName(),
+								Double.toString(getResolutionParam(algorithm).get(param.getName())));
+						request.setCustomParameters(customParameters);
+					}
 				}
 			}
 		}
@@ -218,17 +222,19 @@ public class CDRestClient {
 		Map<String, List<CustomParameter>> paramMap = new LinkedHashMap<String, List<CustomParameter>>();
 		for (CommunityDetectionAlgorithm algo : getAlgorithmsByType(AppUtils.CD_ALGORITHM_INPUT_TYPE)) {
 			Set<CustomParameter> paramSet = algo.getCustomParameters();
-			for (CustomParameter param : paramSet) {
+			List<CustomParameter> paramList = paramSet.stream()
+					.sorted(Comparator.comparing(CustomParameter::getDisplayName)).collect(Collectors.toList());
+			for (CustomParameter param : paramList) {
 				if (param.getValidationType() != null
 						&& param.getValidationType().equals(CustomParameter.NUMBER_VALIDATION)) {
-					List<CustomParameter> paramList;
+					List<CustomParameter> numericParams;
 					if (paramMap.containsKey(algo.getName())) {
-						paramList = paramMap.get(algo.getName());
+						numericParams = paramMap.get(algo.getName());
 					} else {
-						paramList = new ArrayList<CustomParameter>();
+						numericParams = new ArrayList<CustomParameter>();
 					}
-					paramList.add(param);
-					paramMap.put(algo.getName(), paramList);
+					numericParams.add(param);
+					paramMap.put(algo.getName(), numericParams);
 				}
 			}
 		}
@@ -247,5 +253,14 @@ public class CDRestClient {
 		RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout * 1000)
 				.setConnectionRequestTimeout(timeout * 1000).setSocketTimeout(timeout * 1000).build();
 		return HttpClientBuilder.create().setDefaultRequestConfig(config).build();
+	}
+
+	class CustomParameterComparator implements Comparator<CustomParameter> {
+
+		@Override
+		public int compare(CustomParameter o1, CustomParameter o2) {
+			return o1.getDisplayName().compareTo(o2.getDisplayName());
+		}
+
 	}
 }

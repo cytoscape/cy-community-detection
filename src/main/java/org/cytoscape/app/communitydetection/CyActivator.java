@@ -14,7 +14,7 @@ import java.util.Properties;
 
 import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.edgelist.WriterTaskFactoryImpl;
-import org.cytoscape.app.communitydetection.hierarchy.HierarchySettingsAction;
+import org.cytoscape.app.communitydetection.hierarchy.HierarchySettingsMenu;
 import org.cytoscape.app.communitydetection.hierarchy.HierarchyTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.hierarchy.TaskListenerFactory;
 import org.cytoscape.app.communitydetection.rest.CDRestClient;
@@ -146,7 +146,7 @@ public class CyActivator extends AbstractCyActivator {
 			registerAllServices(bc, new NodeTermMappingTaskFactoryImpl(algo), contextMenuProps);
 		}
 
-		registerAllServices(bc, new HierarchySettingsAction(applicationManager, networkViewManager, swingApplication));
+		registerAllServices(bc, new HierarchySettingsMenu(swingApplication));
 	}
 
 }

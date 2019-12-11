@@ -2,15 +2,15 @@ package org.cytoscape.app.communitydetection.util;
 
 public class AppUtils {
 
-	public static final String APP_NAME = "cdApp";
+	public static final String APP_NAME = "CyCommunityDetection";
 	public static final String PROP_APP_BASEURL = "app.baseurl";
 	public static final String PROP_PROJECT_VERSION = "project.version";
 	public static final String PROP_PROJECT_NAME = "project.name";
 
-	public static final String TOP_MENU_CD = "Tools.Community Detection";
-	public static final String TOP_MENU_TM = "Tools.Term Mapping";
+	public static final String TOP_MENU_CD = "Apps.Community Detection.Community Detection";
+	public static final String TOP_MENU_TM = "Apps.Community Detection.Functional Enrichment";
 	public static final String CONTEXT_MENU_CD = "Community Detection";
-	public static final String CONTEXT_MENU_TM = "Term Mapping";
+	public static final String CONTEXT_MENU_TM = CONTEXT_MENU_CD + ".Functional Enrichment";
 
 	public static final String WRITE_CX_MENU_ITEM = "Export Network to CX";
 	public static final String READ_CX_MENU_ITEM = "Import Network from CX";
