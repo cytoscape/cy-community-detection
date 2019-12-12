@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.cytoscape.app.communitydetection.PropertiesHelper;
 import org.cytoscape.app.communitydetection.rest.CDRestClient;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.model.CyNetwork;
@@ -69,7 +70,8 @@ public class TermMappingTask extends AbstractTask {
 		} else {
 			selectedNodes = network.getNodeList();
 		}
-		ExecutorService executor = Executors.newFixedThreadPool(2 * Runtime.getRuntime().availableProcessors() - 1);
+		int processorCount = Integer.parseInt(PropertiesHelper.getInstance().getThreadcount());
+		ExecutorService executor = Executors.newFixedThreadPool(processorCount);
 		List<Future<Boolean>> futureList = new ArrayList<Future<Boolean>>();
 		for (CyNode node : selectedNodes) {
 			TermMappingCallable tmTask = new TermMappingCallable(algorithm, network, node);

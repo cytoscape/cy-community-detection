@@ -4,6 +4,7 @@ public class AppUtils {
 
 	public static final String APP_NAME = "CyCommunityDetection";
 	public static final String PROP_APP_BASEURL = "app.baseurl";
+	public static final String PROP_APP_THREADCOUNT = "app.threadcount";
 	public static final String PROP_PROJECT_VERSION = "project.version";
 	public static final String PROP_PROJECT_NAME = "project.name";
 

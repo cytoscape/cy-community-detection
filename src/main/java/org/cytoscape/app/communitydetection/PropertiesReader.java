@@ -2,7 +2,6 @@ package org.cytoscape.app.communitydetection;
 
 import java.util.Properties;
 
-import org.cytoscape.app.communitydetection.rest.CDRestClient;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.property.AbstractConfigDirPropsReader;
 import org.cytoscape.property.CyProperty;
@@ -22,7 +21,10 @@ public class PropertiesReader extends AbstractConfigDirPropsReader implements Pr
 	public void handleEvent(PropertyUpdatedEvent e) {
 		if (e.getSource().getName().equalsIgnoreCase(propName)) {
 			String baseurl = ((Properties) e.getSource().getProperties()).getProperty(AppUtils.PROP_APP_BASEURL);
-			CDRestClient.getInstance().setBaseURL(baseurl);
+			PropertiesHelper.getInstance().setBaseurl(baseurl);
+			String threadcount = ((Properties) e.getSource().getProperties())
+					.getProperty(AppUtils.PROP_APP_THREADCOUNT);
+			PropertiesHelper.getInstance().setThreadcount(threadcount);
 		}
 	}
 

@@ -74,7 +74,9 @@ public class CyActivator extends AbstractCyActivator {
 
 		final CyProperty<Properties> cyProperties = getService(bc, CyProperty.class,
 				"(cyPropertyName=" + cyPropertyName + ")");
-		CDRestClient.getInstance().setBaseURL(cyProperties.getProperties().getProperty(AppUtils.PROP_APP_BASEURL));
+		PropertiesHelper.getInstance().setBaseurl(cyProperties.getProperties().getProperty(AppUtils.PROP_APP_BASEURL));
+		PropertiesHelper.getInstance()
+				.setThreadcount(cyProperties.getProperties().getProperty(AppUtils.PROP_APP_THREADCOUNT));
 
 		// Setting up Edge List I/O services
 		final StreamUtil streamUtil = getService(bc, StreamUtil.class);
