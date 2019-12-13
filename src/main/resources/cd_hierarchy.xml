@@ -22,16 +22,15 @@
             <visualProperty default="0.0" name="NODE_Z_LOCATION"/>
             <visualProperty default="#333333" name="NODE_BORDER_PAINT"/>
             <visualProperty default="0.0" name="NODE_Y_LOCATION"/>
-            <visualProperty default="0.0" name="NODE_BORDER_WIDTH"/>
+            <visualProperty default="1.0" name="NODE_BORDER_WIDTH"/>
             <visualProperty default="Dialog.plain,plain,12" name="NODE_LABEL_FONT_FACE"/>
             <visualProperty default="0.0" name="NODE_X_LOCATION"/>
             <visualProperty default="DefaultVisualizableVisualProperty(id=NODE_CUSTOMPAINT_4, name=Node Custom Paint 4)" name="NODE_CUSTOMPAINT_4"/>
             <visualProperty default="org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ]," name="NODE_CUSTOMGRAPHICS_7"/>
             <visualProperty default="#CCCCCC" name="NODE_FILL_COLOR">
-                <continuousMapping attributeName="CD_MemberList_LogSize" attributeType="float">
-                    <continuousMappingPoint attrValue="1.0" equalValue="#009933" greaterValue="#009933" lesserValue="#F0F921"/>
-                    <continuousMappingPoint attrValue="7.210045902301158" equalValue="#CC4778" greaterValue="#CC4778" lesserValue="#CC4778"/>
-                    <continuousMappingPoint attrValue="13.420091804602317" equalValue="#100788" greaterValue="#0D0887" lesserValue="#100788"/>
+                <continuousMapping attributeName="CD_AnnotatedMembers_Overlap" attributeType="float">
+                    <continuousMappingPoint attrValue="0.0" equalValue="#FFFFFF" greaterValue="#FFFFFF" lesserValue="#FFFFFF"/>
+                    <continuousMappingPoint attrValue="1.0" equalValue="#FF3333" greaterValue="#FF0000" lesserValue="#FF3333"/>
                 </continuousMapping>
             </visualProperty>
             <visualProperty default="ELLIPSE" name="NODE_SHAPE"/>
@@ -108,7 +107,7 @@
             <visualProperty default="org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ]," name="NODE_CUSTOMGRAPHICS_4"/>
             <visualProperty default="0.0" name="NODE_CUSTOMGRAPHICS_SIZE_8"/>
             <visualProperty default="DefaultVisualizableVisualProperty(id=NODE_CUSTOMPAINT_8, name=Node Custom Paint 8)" name="NODE_CUSTOMPAINT_8"/>
-            <visualProperty default="400.0" name="NODE_LABEL_WIDTH"/>
+            <visualProperty default="200.0" name="NODE_LABEL_WIDTH"/>
         </node>
         <edge>
             <dependency value="true" name="arrowColorMatchesEdge"/>
