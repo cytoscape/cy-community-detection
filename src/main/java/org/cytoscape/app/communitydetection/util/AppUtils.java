@@ -28,6 +28,10 @@ public class AppUtils {
 	public final static String COLUMN_CD_ORIGINAL_NETWORK = "CD_OriginalNetwork";
 	public final static String COLUMN_CD_COMMUNITY_NAME = "CD_CommunityName";
 	public final static String COLUMN_CD_ANNOTATED_MEMBERS = "CD_AnnotatedMembers";
+	public final static String COLUMN_CD_ANNOTATED_MEMBERS_SIZE = "CD_AnnotatedMembers_Size";
+	public final static String COLUMN_CD_ANNOTATED_OVERLAP = "CD_AnnotatedMembers_Overlap";
+	public final static String COLUMN_CD_ANNOTATED_PVALUE = "CD_AnnotatedMembers_Pvalue";
+	
 	public final static String COLUMN_CD_LABELED = "CD_Labeled";
 
 	public final static String EDGE_LIST_SPLIT_PATTERN = ",";
