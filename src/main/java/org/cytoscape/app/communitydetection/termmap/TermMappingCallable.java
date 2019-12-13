@@ -34,8 +34,11 @@ public class TermMappingCallable implements Callable<Boolean> {
 		CommunityDetectionResult cdResult = CDRestClient.getInstance().getCDResult(URI, 300);
 		String name = AppUtils.TYPE_NONE_VALUE;
 		String annotatedList = "";
+		int counter = 0;
+		double pvalue = Double.NaN;
 		if (cdResult != null && cdResult.getResult() != null && cdResult.getResult().size() > 0) {
 			name = cdResult.getResult().get("name").asText(name);
+			pvalue = cdResult.getResult().get("p_value").asDouble();
 			if (cdResult.getResult().get("intersections").size() > 0) {
 				Iterator<JsonNode> iterator = cdResult.getResult().get("intersections").elements();
 				while (iterator.hasNext()) {
@@ -43,11 +46,22 @@ public class TermMappingCallable implements Callable<Boolean> {
 						annotatedList += " ";
 					}
 					annotatedList += iterator.next().asText();
+					counter++;
 				}
 			}
 		}
 		network.getRow(node).set(AppUtils.COLUMN_CD_COMMUNITY_NAME, name);
 		network.getRow(node).set(AppUtils.COLUMN_CD_ANNOTATED_MEMBERS, annotatedList);
+		network.getRow(node).set(AppUtils.COLUMN_CD_ANNOTATED_MEMBERS_SIZE, counter);
+		network.getRow(node).set(AppUtils.COLUMN_CD_ANNOTATED_PVALUE, pvalue);
+		double overlap = 0.0;
+		double inputGeneSize = network.getRow(node).get(AppUtils.COLUMN_CD_MEMBER_LIST_SIZE,
+			Integer.class);
+		
+		if (inputGeneSize > 0){
+		    overlap = (double)counter/inputGeneSize;
+		}
+		network.getRow(node).set(AppUtils.COLUMN_CD_ANNOTATED_OVERLAP, overlap);
 		if (name != AppUtils.TYPE_NONE_VALUE) {
 			network.getRow(node).set(AppUtils.COLUMN_CD_LABELED, true);
 		}

@@ -58,6 +58,15 @@ public class TermMappingTask extends AbstractTask {
 		if (network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_ANNOTATED_MEMBERS) == null) {
 			network.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_ANNOTATED_MEMBERS, String.class, false, null);
 		}
+		if (network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_ANNOTATED_MEMBERS_SIZE) == null) {
+			network.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_ANNOTATED_MEMBERS_SIZE, Integer.class, false, null);
+		}
+		if (network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_ANNOTATED_OVERLAP) == null) {
+			network.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_ANNOTATED_OVERLAP, Double.class, false, 0.0);
+		}
+		if (network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_ANNOTATED_PVALUE) == null) {
+			network.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_ANNOTATED_PVALUE, Double.class, false, 0.0);
+		}
 		if (network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_LABELED) == null) {
 			network.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_LABELED, Boolean.class, true, false);
 		}
