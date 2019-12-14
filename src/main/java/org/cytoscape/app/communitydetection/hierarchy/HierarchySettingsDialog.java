@@ -1,10 +1,13 @@
 package org.cytoscape.app.communitydetection.hierarchy;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -18,10 +21,11 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.BoxLayout;
 
-import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -37,7 +41,7 @@ import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm;
 import org.ndexbio.communitydetection.rest.model.CustomParameter;
 
 @SuppressWarnings("serial")
-public class HierarchySettingsDialog extends JDialog implements ActionListener {
+public class HierarchySettingsDialog extends JDialog implements ActionListener,ItemListener {
 
 	private Map<String, List<CustomParameter>> paramMap;
 	private List<CommunityDetectionAlgorithm> algorithmList;
@@ -45,6 +49,7 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener {
 	private JLabel paramLabel;
 	private JComboBox<String> algoDropDown;
 	private JTextField paramInput;
+	private JPanel cards;
 
 	public HierarchySettingsDialog(CySwingApplication swingApplication) throws Exception {
 		super(swingApplication.getJFrame().getOwner(), "CD Settings", ModalityType.MODELESS);
@@ -52,34 +57,77 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener {
 		paramMap = CDRestClient.getInstance().getResolutionParameters();
 		algorithmList = CDRestClient.getInstance().getAlgorithmsByType(AppUtils.CD_ALGORITHM_INPUT_TYPE);
 
+		cards = new JPanel(new CardLayout());
+		
 		JPanel contentPane = new JPanel();
-		GroupLayout layout = new GroupLayout(contentPane);
-		contentPane.setLayout(layout);
-		layout.setAutoCreateGaps(true);
-		layout.setAutoCreateContainerGaps(true);
-
-		JLabel algoLabel = new JLabel("Select algorithm");
-		Component doneBtn = getOKButton();
-		layout.setHorizontalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(algoLabel)
-						.addComponent(getParamLabel()))
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(getDropDown())
-						.addComponent(getParamTextField()))
-				.addComponent(doneBtn));
-		layout.setVerticalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(algoLabel)
-						.addComponent(getDropDown()))
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(getParamLabel())
-						.addComponent(getParamTextField()))
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(doneBtn)));
-
-		add(contentPane, BorderLayout.CENTER);
+		
+		String[] algoNames  = new String[algorithmList.size()];
+		int counter = 0;
+		for (CommunityDetectionAlgorithm cda : algorithmList){
+		    Map<String, CustomParameter> pMap = cda.getCustomParameterMap();
+		    if (pMap == null){
+			continue;
+		    }
+		    JPanel algoCard = new JPanel();
+		    algoCard.setLayout(new BoxLayout(algoCard, BoxLayout.Y_AXIS));
+		    algoNames[counter++] = cda.getDisplayName();
+		    for (String key : pMap.keySet()){
+			CustomParameter cp = pMap.get(key);
+			JPanel rowPanel = new JPanel();
+			JLabel paramLabel = new JLabel(cp.getDisplayName()); 
+			rowPanel.add(paramLabel);
+			if (cp.getType() == null || cp.getType().equalsIgnoreCase("value")){
+			    JTextField inputField = null;
+			    if (cp.getDefaultValue() != null){
+				inputField = new JTextField(cp.getDefaultValue());
+			    }
+			    else {
+				inputField = new JTextField();
+			    }
+			    rowPanel.add(inputField);
+			} else if (cp.getType().equalsIgnoreCase("flag")){
+			    rowPanel.add(new JCheckBox());
+			}
+			if (cp.getDescription() != null){
+			    rowPanel.setToolTipText(cp.getDescription());
+			}
+			algoCard.add(rowPanel);
+		    }
+		    cards.add(algoCard, cda.getDisplayName());
+		}
+		JComboBox cb = new JComboBox(algoNames);
+		cb.setEditable(false);
+		cb.addItemListener(this);
+		contentPane.add(new JLabel("Algorithm: "));
+		contentPane.add(cb);
+		
+		
+		JPanel masterPanel = new JPanel();
+		masterPanel.setLayout(new BoxLayout(masterPanel, BoxLayout.Y_AXIS));
+		masterPanel.add(cards);
+		
+		JPanel okPanel = new JPanel();
+		okPanel.add(new JButton("Cancel.."));
+		okPanel.add(new JButton("Apply"));
+		
+		masterPanel.add(okPanel);
+		
+		add(contentPane, BorderLayout.PAGE_START);
+		
+		add(masterPanel, BorderLayout.CENTER);
+		
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		setResizable(false);
+		setResizable(true);
 		setLocationRelativeTo(getOwner());
 		pack();
 	}
 
+	@Override
+	public void itemStateChanged(ItemEvent evt) {
+		CardLayout cl = (CardLayout)(cards.getLayout());
+		cl.show(cards, (String)evt.getItem());
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		setVisible(true);
