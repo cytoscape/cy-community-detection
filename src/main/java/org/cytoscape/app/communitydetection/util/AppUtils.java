@@ -46,4 +46,6 @@ public class AppUtils {
 
 	public final static String CD_ALGORITHM_INPUT_TYPE = "EDGELIST";
 	public final static String TM_ALGORITHM_INPUT_TYPE = "GENELIST";
+	public final static String CANCEL = "Cancel";
+	public final static String APPLY = "Apply";
 }

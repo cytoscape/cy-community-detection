@@ -18,7 +18,7 @@ public class HierarchySettingsMenu extends AbstractCyAction implements SetCurren
 		setPreferredMenu(AppUtils.TOP_MENU_CD);
 		setMenuGravity(10.0f);
 		insertSeparatorBefore();
-		settingsDialog = new HierarchySettingsDialog(swingApplication);
+		settingsDialog = new HierarchySettingsDialog(swingApplication, new JEditorPaneFactoryImpl());
 	}
 
 	@Override

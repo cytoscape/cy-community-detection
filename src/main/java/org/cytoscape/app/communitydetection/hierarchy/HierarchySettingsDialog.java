@@ -28,6 +28,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -50,10 +51,18 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 	private JComboBox<String> algoDropDown;
 	private JTextField paramInput;
 	private JPanel cards;
+	private JEditorPaneFactory editorPaneFac;
+	private ImageIcon infoIconSmall;
+	private ImageIcon infoIconLarge;
+	
+	
+	
 
-	public HierarchySettingsDialog(CySwingApplication swingApplication) throws Exception {
+	public HierarchySettingsDialog(CySwingApplication swingApplication,
+		JEditorPaneFactory editorPaneFac) throws Exception {
 		super(swingApplication.getJFrame().getOwner(), "CD Settings", ModalityType.MODELESS);
-
+		this.editorPaneFac = editorPaneFac;
+		loadImageIcon();
 		paramMap = CDRestClient.getInstance().getResolutionParameters();
 		algorithmList = CDRestClient.getInstance().getAlgorithmsByType(AppUtils.CD_ALGORITHM_INPUT_TYPE);
 
@@ -91,6 +100,7 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 			if (cp.getDescription() != null){
 			    rowPanel.setToolTipText(cp.getDescription());
 			}
+			rowPanel.add(getParameterInfoIcon(cp));
 			algoCard.add(rowPanel);
 		    }
 		    cards.add(algoCard, cda.getDisplayName());
@@ -107,19 +117,31 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 		masterPanel.add(cards);
 		
 		JPanel okPanel = new JPanel();
-		okPanel.add(new JButton("Cancel.."));
-		okPanel.add(new JButton("Apply"));
+		okPanel.add(new JButton(AppUtils.CANCEL));
+		okPanel.add(new JButton(AppUtils.APPLY));
 		
-		masterPanel.add(okPanel);
 		
 		add(contentPane, BorderLayout.PAGE_START);
 		
-		add(masterPanel, BorderLayout.CENTER);
-		
+		add(masterPanel, BorderLayout.LINE_START);
+		add(okPanel, BorderLayout.PAGE_END);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setResizable(true);
 		setLocationRelativeTo(getOwner());
 		pack();
+	}
+	
+	private void loadImageIcon(){
+	    try {
+		    File imgFile = File.createTempFile("info_icon", "png");
+	        InputStream imgStream = getClass().getClassLoader().getResourceAsStream("info_icon.png");
+		Files.copy(imgStream, imgFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		infoIconSmall = new ImageIcon(new ImageIcon(imgFile.getPath()).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+		infoIconLarge = new ImageIcon(new ImageIcon(imgFile.getPath()).getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH));
+	    }
+	    catch (IOException ex){
+		    
+	    }
 	}
 
 	@Override
@@ -132,20 +154,43 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 	public void actionPerformed(ActionEvent e) {
 		setVisible(true);
 	}
-
-	private JLabel getParamLabel() throws IOException {
-		if (paramLabel != null) {
-			return paramLabel;
-		}
-		String text = getParameterDisplayName();
-		InputStream imgStream = getClass().getClassLoader().getResourceAsStream("info_icon.png");
-		File imgFile = File.createTempFile("info_icon", "png");
-		Files.copy(imgStream, imgFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-		ImageIcon infoIcon = new ImageIcon(
-				new ImageIcon(imgFile.getPath()).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
-
-		paramLabel = new JLabel(text, infoIcon, JLabel.CENTER);
-		paramLabel.setToolTipText(getParameterDescription());
+	
+	private JEditorPane getCustomParameterHelp(final CustomParameter parameter){
+	    if (parameter == null){
+		return editorPaneFac.getDescriptionFrame("No parameter set, unable to generate help");
+	    }
+	    StringBuilder sb = new StringBuilder();
+	    sb.append("<b>Parameter:</b> ");
+	    sb.append(parameter.getDisplayName());
+	    sb.append(" (");
+	    sb.append(parameter.getName());
+	    sb.append(")");
+	    if (parameter.getDefaultValue() != null){
+		sb.append(" [Default: ");
+		sb.append(parameter.getDefaultValue());
+		sb.append("]");
+	    }
+	    sb.append("<br/><h3>Description</h3> ");
+	    sb.append(parameter.getDescription());
+	    if (parameter.getValidationHelp() != null){
+		sb.append("<br/>");
+		sb.append(parameter.getValidationHelp());
+	    }
+	    return editorPaneFac.getDescriptionFrame(sb.toString());
+	}
+	
+	/**
+	 * Creates a {@link javax.swing.JLabel} with an info icon that when clicked
+	 * displays a small dialog that displays information about the parameter
+	 * passed in
+	 * @param parameter The parameter
+	 * @return 
+	 * @throws IOException 
+	 */
+	private JLabel getParameterInfoIcon(final CustomParameter parameter) throws IOException {
+		JLabel paramLabel = new JLabel(infoIconSmall, JLabel.CENTER);
+		paramLabel.setToolTipText("Click here for more information about " +
+			parameter.getDisplayName() + "parameter");
 
 		paramLabel.addKeyListener(new KeyListener() {
 
@@ -157,7 +202,9 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				JOptionPane.showMessageDialog(getParent(), getParameterDescription());
+				JOptionPane.showMessageDialog(getParent(), getCustomParameterHelp(parameter),
+					"Parameter " + parameter.getDisplayName(), JOptionPane.INFORMATION_MESSAGE,
+					infoIconLarge);
 			}
 
 			@Override
@@ -195,7 +242,9 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				JOptionPane.showMessageDialog(getParent(), getParameterDescription());
+				JOptionPane.showMessageDialog(getParent(), getCustomParameterHelp(parameter),
+					"Parameter " + parameter.getDisplayName(), JOptionPane.INFORMATION_MESSAGE,
+					infoIconLarge);
 			}
 		});
 
