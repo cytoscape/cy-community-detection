@@ -1,6 +1,7 @@
 package org.cytoscape.app.communitydetection.hierarchy;
 
 import java.awt.event.ActionEvent;
+import org.cytoscape.app.communitydetection.rest.CDRestClient;
 
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.application.events.SetCurrentNetworkViewEvent;
@@ -15,10 +16,11 @@ public class HierarchySettingsMenu extends AbstractCyAction implements SetCurren
 
 	public HierarchySettingsMenu(CySwingApplication swingApplication) throws Exception {
 		super("Settings...");
-		setPreferredMenu(AppUtils.TOP_MENU_CD);
+		setPreferredMenu(AppUtils.TOP_MENU);
 		setMenuGravity(10.0f);
 		insertSeparatorBefore();
 		settingsDialog = new HierarchySettingsDialog(swingApplication, new JEditorPaneFactoryImpl());
+		CDRestClient.getInstance().setHierarchySettingsDialog(settingsDialog);
 	}
 
 	@Override

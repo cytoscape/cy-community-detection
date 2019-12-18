@@ -8,8 +8,9 @@ public class AppUtils {
 	public static final String PROP_PROJECT_VERSION = "project.version";
 	public static final String PROP_PROJECT_NAME = "project.name";
 
-	public static final String TOP_MENU_CD = "Apps.Community Detection.Community Detection";
-	public static final String TOP_MENU_TM = "Apps.Community Detection.Functional Enrichment";
+	public static final String TOP_MENU = "Apps.Community Detection";
+	public static final String TOP_MENU_CD = TOP_MENU + ".Community Detection";
+	public static final String TOP_MENU_TM = TOP_MENU + ".Functional Enrichment";
 	public static final String CONTEXT_MENU_CD = "Community Detection";
 	public static final String CONTEXT_MENU_TM = CONTEXT_MENU_CD + ".Functional Enrichment";
 

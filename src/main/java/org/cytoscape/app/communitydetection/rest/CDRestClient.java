@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +31,7 @@ import org.ndexbio.communitydetection.rest.model.Task;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.TextNode;
+import org.cytoscape.app.communitydetection.hierarchy.HierarchySettingsDialog;
 
 /**
  * REST API client for CD service. Implements GET, POST and DELETE.
@@ -46,6 +46,7 @@ public class CDRestClient {
 	private Map<String, CommunityDetectionRequest> requestParamMap;
 	
 	private List<CommunityDetectionAlgorithm> algorithms;
+	private HierarchySettingsDialog settingsDialog;
 
 	private CDRestClient() {
 		mapper = new ObjectMapper();
@@ -72,6 +73,10 @@ public class CDRestClient {
 	
 	public void removeRequestParamMap(final String algorithm){
 	    requestParamMap.remove(algorithm);
+	}
+	
+	public void setHierarchySettingsDialog(HierarchySettingsDialog dialog){
+	    settingsDialog = dialog;
 	}
 
 	/**
@@ -102,15 +107,16 @@ public class CDRestClient {
 
 	public String postCDData(String algorithm, Boolean graphDirected, String data) throws Exception {
 		CommunityDetectionRequest request = null;
-		if (requestParamMap.containsKey(algorithm)){
-		    request = requestParamMap.get(algorithm);
-		}
-		else {
-		    request = new CommunityDetectionRequest();
-		    request.setAlgorithm(algorithm);
-		}
-		request.setData(new TextNode(data));
 
+		request = new CommunityDetectionRequest();
+		request.setAlgorithm(algorithm);
+		request.setData(new TextNode(data));
+		if (settingsDialog != null){
+		   Map<String, String> cParam = settingsDialog.getAlgorithmCustomParameters(algorithm);
+		   if (cParam != null){
+		       request.setCustomParameters(cParam);
+		   }
+		}
 		StringEntity body = new StringEntity(mapper.writeValueAsString(request));
 
 		CloseableHttpClient client = getClient(10);

@@ -49,16 +49,16 @@ import org.ndexbio.communitydetection.rest.model.CustomParameter;
 @SuppressWarnings("serial")
 public class HierarchySettingsDialog extends JDialog implements ActionListener,ItemListener {
 
+    
+	private static final String INPUTDELIM = ":::";
 	private List<CommunityDetectionAlgorithm> algorithmList;
 
-	private JLabel paramLabel;
-	private JComboBox<String> algoDropDown;
-	private JTextField paramInput;
 	private JPanel cards;
 	private JEditorPaneFactory editorPaneFac;
 	private ImageIcon infoIconSmall;
 	private ImageIcon infoIconLarge;
 	private Map<String, JPanel> algoCardMap;
+	private JComboBox algorithmComboBox;
 
 	public HierarchySettingsDialog(CySwingApplication swingApplication,
 		JEditorPaneFactory editorPaneFac) throws Exception {
@@ -67,79 +67,20 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 		this.editorPaneFac = editorPaneFac;
 		loadImageIcon();
 		algoCardMap = new LinkedHashMap<>();
-		algorithmList = CDRestClient.getInstance().getAlgorithmsByType(AppUtils.CD_ALGORITHM_INPUT_TYPE);
+		algorithmList = CDRestClient.getInstance().getAlgorithms();
 
 		cards = new JPanel(new CardLayout());
+		algorithmComboBox = new JComboBox();
+		algorithmComboBox.setEditable(false);
+		algorithmComboBox.addItemListener(this);
+
+		loadAlgorithmCards();
 		
 		JPanel contentPane = new JPanel();
-		
-		String[] algoNames  = new String[algorithmList.size()];
-		int counter = 0;
-		int rowIndex = 1;
-		for (CommunityDetectionAlgorithm cda : algorithmList){
-		    Map<String, CustomParameter> pMap = cda.getCustomParameterMap();
-		    if (pMap == null){
-			continue;
-		    }
-		    CommunityDetectionRequest request = CDRestClient.getInstance().getRequestForAlgorithm(cda.getName());
-		    JPanel algoCard = new JPanel();
-		    algoCard.setName(cda.getName());
-		    algoCardMap.put(cda.getName(), algoCard);
-		    algoCard.setLayout(new GridBagLayout());
-		    algoCard.setBorder(BorderFactory.createCompoundBorder(
-                                BorderFactory.createTitledBorder("Parameters"),
-                                BorderFactory.createEmptyBorder(5,5,5,5)));
-		    algoNames[counter++] = cda.getDisplayName();
-		    for (String key : pMap.keySet()){
-			CustomParameter cp = pMap.get(key);
-			JLabel paramLabel = new JLabel(cp.getDisplayName() + ":");
-			
-			GridBagConstraints labelConstraints = new GridBagConstraints();
-			labelConstraints.gridy = rowIndex;
-			labelConstraints.gridx = 0;
-			labelConstraints.anchor = GridBagConstraints.LINE_END;
-			labelConstraints.insets = new Insets(0, 5, 5, 0);
-			algoCard.add(paramLabel, labelConstraints);
-			
-			JComponent inputComponent = getCustomParameterInput(cda.getName(), request, cp);
-			if (cp.getDescription() != null){
-			    inputComponent.setToolTipText(cp.getDescription());
-			    paramLabel.setToolTipText(cp.getDescription());
-			}
-			
-			GridBagConstraints inputConstraints = new GridBagConstraints();
-			inputConstraints.gridy = rowIndex;
-			inputConstraints.gridx = 1;
-			inputConstraints.gridwidth = 1;
-			inputConstraints.weightx = 1.0;
-			inputConstraints.anchor = GridBagConstraints.LINE_START;
-			inputConstraints.insets = new Insets(0, 0, 5, 0);
-			inputConstraints.fill = GridBagConstraints.HORIZONTAL;
-			
-			algoCard.add(inputComponent, inputConstraints);
-			
-			GridBagConstraints infoConstraints = new GridBagConstraints();
-			infoConstraints.gridy = rowIndex;
-			infoConstraints.gridx = 2;
-			infoConstraints.insets = new Insets(0, 0, 5, 0);
-			algoCard.add(getParameterInfoIcon(cp), infoConstraints);
-			
-			rowIndex++;
-		    }
-		    GridBagConstraints resetConstraints = new GridBagConstraints();
-		    resetConstraints.gridy = 0;
-		    resetConstraints.gridx = 0;
-		    resetConstraints.insets = new Insets(0, 5, 0, 0);
-		    resetConstraints.anchor = GridBagConstraints.LINE_START;
-		    algoCard.add(this.getResetButton(cda.getName()), resetConstraints);
-		    cards.add(algoCard, cda.getDisplayName());
-		}
-		JComboBox cb = new JComboBox(algoNames);
-		cb.setEditable(false);
-		cb.addItemListener(this);
 		contentPane.add(new JLabel("Algorithm: "));
-		contentPane.add(cb);
 		
+		
+		contentPane.add(algorithmComboBox);
 		
 		JPanel masterPanel = new JPanel();
 		masterPanel.setLayout(new BoxLayout(masterPanel, BoxLayout.Y_AXIS));
@@ -157,12 +98,79 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 		setLocationRelativeTo(getOwner());
 		pack();
 	}
+
+	
+	private void loadAlgorithmCards(){
+	    algoCardMap.clear();
+	    cards.removeAll();
+	    algorithmComboBox.removeAllItems();
+	    int rowIndex = 1;
+	    for (CommunityDetectionAlgorithm cda : algorithmList){
+		Map<String, CustomParameter> pMap = cda.getCustomParameterMap();
+		if (pMap == null){
+		    continue;
+		}
+		CommunityDetectionRequest request = CDRestClient.getInstance().getRequestForAlgorithm(cda.getName());
+		JPanel algoCard = new JPanel();
+		algoCard.setName(cda.getName());
+		algoCardMap.put(cda.getName(), algoCard);
+		algoCard.setLayout(new GridBagLayout());
+		algoCard.setBorder(BorderFactory.createCompoundBorder(
+			    BorderFactory.createTitledBorder("Parameters"),
+			    BorderFactory.createEmptyBorder(5,5,5,5)));
+		algorithmComboBox.addItem(cda.getDisplayName());
+		for (String key : pMap.keySet()){
+		    CustomParameter cp = pMap.get(key);
+		    JLabel paramLabel = new JLabel(cp.getDisplayName() + ":");
+
+		    GridBagConstraints labelConstraints = new GridBagConstraints();
+		    labelConstraints.gridy = rowIndex;
+		    labelConstraints.gridx = 0;
+		    labelConstraints.anchor = GridBagConstraints.LINE_END;
+		    labelConstraints.insets = new Insets(0, 5, 5, 0);
+		    algoCard.add(paramLabel, labelConstraints);
+
+		    JComponent inputComponent = getCustomParameterInput(cda.getName(), request, cp);
+		    if (cp.getDescription() != null){
+			inputComponent.setToolTipText(cp.getDescription());
+			paramLabel.setToolTipText(cp.getDescription());
+		    }
+
+		    GridBagConstraints inputConstraints = new GridBagConstraints();
+		    inputConstraints.gridy = rowIndex;
+		    inputConstraints.gridx = 1;
+		    inputConstraints.gridwidth = 1;
+		    inputConstraints.weightx = 1.0;
+		    inputConstraints.anchor = GridBagConstraints.LINE_START;
+		    inputConstraints.insets = new Insets(0, 0, 5, 0);
+		    inputConstraints.fill = GridBagConstraints.HORIZONTAL;
+
+		    algoCard.add(inputComponent, inputConstraints);
+
+		    GridBagConstraints infoConstraints = new GridBagConstraints();
+		    infoConstraints.gridy = rowIndex;
+		    infoConstraints.gridx = 2;
+		    infoConstraints.insets = new Insets(0, 0, 5, 0);
+		    algoCard.add(getParameterInfoIcon(cp), infoConstraints);
+
+		    rowIndex++;
+		}
+		GridBagConstraints resetConstraints = new GridBagConstraints();
+		resetConstraints.gridy = 0;
+		resetConstraints.gridx = 0;
+		resetConstraints.insets = new Insets(0, 5, 0, 0);
+		resetConstraints.anchor = GridBagConstraints.LINE_START;
+		algoCard.add(this.getResetButton(cda.getName()), resetConstraints);
+		cards.add(algoCard, cda.getDisplayName());
+		this.resetAlgorithmToDefaults(cda.getName());
+	    }
+	}
 	
 	private JComponent getCustomParameterInput(final String algorithm, final CommunityDetectionRequest request,
 		final CustomParameter parameter){
 	    if (parameter.getType() != null && parameter.getType().equalsIgnoreCase("flag")){
 		    JCheckBox checkBox = new JCheckBox();
-		    checkBox.setName(algorithm + ":::" + parameter.getName());
+		    checkBox.setName(algorithm + INPUTDELIM + parameter.getName());
 		    if (request != null && request.getCustomParameters().containsKey(parameter.getName())){
 			checkBox.setSelected(true);
 		    }
@@ -175,10 +183,10 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 		} else {
 		    textField = new JTextField(parameter.getDefaultValue());
 		}
-		textField.setName(algorithm + ":::" + parameter.getName());
+		textField.setName(algorithm + INPUTDELIM + parameter.getName());
 	    }
 	    JTextField textField = new JTextField();
-	    textField.setName(algorithm + ":::" + parameter.getName());
+	    textField.setName(algorithm + INPUTDELIM + parameter.getName());
 	    return textField;
 	}
 	
@@ -238,7 +246,7 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 	 * @return 
 	 * @throws IOException 
 	 */
-	private JLabel getParameterInfoIcon(final CustomParameter parameter) throws IOException {
+	private JLabel getParameterInfoIcon(final CustomParameter parameter) {
 		JLabel paramLabel = new JLabel(infoIconSmall, JLabel.CENTER);
 		paramLabel.setToolTipText("Click here for more information about " +
 			parameter.getDisplayName() + "parameter");
@@ -319,14 +327,72 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 	    if (algoCardMap.containsKey(algorithm) == false){
 		return;
 	    }
+	    CommunityDetectionAlgorithm cda = getCommunityDetectionAlgorithm(algorithm);
+	    if (cda == null){
+		return;
+	    }
+	    Map<String, CustomParameter> pMap = cda.getCustomParameterMap();
 	    JPanel algoCard = algoCardMap.get(algorithm);
 	    for (Component c : algoCard.getComponents()){
 		if (c.getName() == null || !c.getName().startsWith(algorithm + ":::")){
 		    continue;
 		}
-		System.out.println("Component: " + c.getName());
+		String paramName = c.getName().replaceAll("^.*" + INPUTDELIM, "");
+		if (pMap.containsKey(paramName) == false){
+		    continue;
+		}
+		CustomParameter cp = pMap.get(paramName);
 		
+		if (c instanceof JTextField){
+		    JTextField tField = (JTextField)c;
+		    if (cp.getDefaultValue() == null){
+			tField.setText("");
+		    } else {
+			tField.setText(cp.getDefaultValue());
+		    }
+		} else if (c instanceof JCheckBox){
+		    JCheckBox checkBox = (JCheckBox)c;
+		    checkBox.setSelected(false);
+		}
 	    }
+	}
+	
+	private CommunityDetectionAlgorithm getCommunityDetectionAlgorithm(final String algorithm){
+	    for (CommunityDetectionAlgorithm cda : this.algorithmList){
+		if (cda.getName().equals(algorithm)){
+		    return cda;
+		}
+	    }
+	    return null;
+	}
+	
+	public Map<String, String> getAlgorithmCustomParameters(final String algorithm){
+	    JPanel algoCard = algoCardMap.get(algorithm);
+	    if (algoCard == null){
+		return null;
+	    }
+	    Map<String, String> cParam = new LinkedHashMap<String, String>();
+	    
+	    for (Component c : algoCard.getComponents()){
+		if (c.getName() == null || !c.getName().startsWith(algorithm + ":::")){
+		    continue;
+		}
+		String paramName = c.getName().replaceAll("^.*" + INPUTDELIM, "");
+		
+		if (c instanceof JTextField){
+		    JTextField tField = (JTextField)c;
+		    if (tField.getText() == null || tField.getText().trim().length() == 0){
+			continue;
+		    }
+		    cParam.put(paramName, tField.getText());
+		} else if (c instanceof JCheckBox){
+		    JCheckBox checkBox = (JCheckBox)c;
+		    if (checkBox.isSelected() == true){
+			cParam.put(paramName, "");
+		    }
+		}
+	    }
+	    return cParam;
 	}
 
 	private JButton getResetButton(final String algorithm) {
@@ -335,7 +401,6 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 		button.addActionListener(new ActionListener() {
 		    @Override
 		    public void actionPerformed(ActionEvent e) {
-			System.out.println("Reset button clicked");
 			JComponent c = (JComponent)e.getSource();
 			String algorithm = c.getName();
 			System.out.println("Reset button clicked on algorithm: " + algorithm);
