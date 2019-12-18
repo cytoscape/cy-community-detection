@@ -39,8 +39,7 @@ public class JEditorPaneFactoryImpl implements JEditorPaneFactory {
 			}
 		}
 	});
-	int width = editorPane.getPreferredSize().width > 600 ? 600 : editorPane.getPreferredSize().width;
-	editorPane.setSize(new Dimension(width, 10));
+	int width = editorPane.getPreferredSize().width < 600 ? 600 : editorPane.getPreferredSize().width;	
 	editorPane.setPreferredSize(new Dimension(width, editorPane.getPreferredSize().height));
 	editorPane.setFont(new Font("Sans-Serif", Font.PLAIN, 12));
 	return editorPane;

@@ -48,4 +48,6 @@ public class AppUtils {
 	public final static String TM_ALGORITHM_INPUT_TYPE = "GENELIST";
 	public final static String CANCEL = "Cancel";
 	public final static String APPLY = "Apply";
+	public final static String CLOSE = "Close";
+	public final static String RESET = "Reset to defaults";
 }

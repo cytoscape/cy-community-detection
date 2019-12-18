@@ -42,13 +42,16 @@ public class CDRestClient {
 	private final ObjectMapper mapper;
 	private boolean isTaskCanceled;
 	private Map<String, Map<String, Double>> resolutionParamMap;
-
+	
+	private Map<String, CommunityDetectionRequest> requestParamMap;
+	
 	private List<CommunityDetectionAlgorithm> algorithms;
 
 	private CDRestClient() {
 		mapper = new ObjectMapper();
 		isTaskCanceled = false;
 		resolutionParamMap = new LinkedHashMap<String, Map<String, Double>>();
+		requestParamMap = new LinkedHashMap<String, CommunityDetectionRequest>();
 	}
 
 	private static class SingletonHelper {
@@ -57,6 +60,18 @@ public class CDRestClient {
 
 	public static CDRestClient getInstance() {
 		return SingletonHelper.INSTANCE;
+	}
+	
+	public CommunityDetectionRequest getRequestForAlgorithm(final String algorithm){
+	    return requestParamMap.get(algorithm);
+	}
+	
+	public void updateRequestParamMap(final String algorithm, CommunityDetectionRequest req){
+	    requestParamMap.put(algorithm, req);
+	}
+	
+	public void removeRequestParamMap(final String algorithm){
+	    requestParamMap.remove(algorithm);
 	}
 
 	/**
@@ -86,23 +101,16 @@ public class CDRestClient {
 	}
 
 	public String postCDData(String algorithm, Boolean graphDirected, String data) throws Exception {
-
-		CommunityDetectionRequest request = new CommunityDetectionRequest();
-		Map<String, String> customParameters = new HashMap<String, String>();
-		request.setAlgorithm(algorithm);
-		request.setData(new TextNode(data));
-		Map<String, List<CustomParameter>> resParams = getResolutionParameters();
-		for (CommunityDetectionAlgorithm cdAlgo : getAlgorithms()) {
-			if (cdAlgo.getName().equalsIgnoreCase(algorithm) && resolutionParamMap.containsKey(algorithm)) {
-				for (CustomParameter param : resParams.get(algorithm)) {
-					if (getResolutionParam(algorithm).containsKey(param.getName())) {
-						customParameters.put(param.getName(),
-								Double.toString(getResolutionParam(algorithm).get(param.getName())));
-						request.setCustomParameters(customParameters);
-					}
-				}
-			}
+		CommunityDetectionRequest request = null;
+		if (requestParamMap.containsKey(algorithm)){
+		    request = requestParamMap.get(algorithm);
 		}
+		else {
+		    request = new CommunityDetectionRequest();
+		    request.setAlgorithm(algorithm);
+		}
+		request.setData(new TextNode(data));
+
 		StringEntity body = new StringEntity(mapper.writeValueAsString(request));
 
 		CloseableHttpClient client = getClient(10);
