@@ -214,6 +214,11 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 		setVisible(true);
 	}
 	
+	/**
+	 * Gets a UI Component that describes the parameter passed in.
+	 * @param parameter
+	 * @return 
+	 */
 	private JEditorPane getCustomParameterHelp(final CustomParameter parameter){
 	    if (parameter == null){
 		return editorPaneFac.getDescriptionFrame("No parameter set, unable to generate help");
@@ -248,8 +253,8 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 	 */
 	private JLabel getParameterInfoIcon(final CustomParameter parameter) {
 		JLabel paramLabel = new JLabel(infoIconSmall, JLabel.CENTER);
-		paramLabel.setToolTipText("Click here for more information about " +
-			parameter.getDisplayName() + "parameter");
+		paramLabel.setToolTipText("Click here for more information about '" +
+			parameter.getDisplayName() + "' parameter");
 
 		paramLabel.addKeyListener(new KeyListener() {
 
@@ -310,9 +315,13 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 		return paramLabel;
 	}
 
-	
+	/**
+	 * Gets close button which is set to close the dialog
+	 * @return 
+	 */
 	private Component getCloseButton() {
 		JButton button = new JButton(AppUtils.CLOSE);
+		button.setToolTipText("Close this dialog, any changes are recorded");
 		button.addActionListener(new ActionListener() {
 		    @Override
 		    public void actionPerformed(ActionEvent e) {
@@ -322,6 +331,11 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 		return button;
 	}
 	
+	/**
+	 * Given an internal algorithm name 'algorithm' this method 
+	 * sets the UI panel input fields for this algorithm to their defaults
+	 * @param algorithm 
+	 */
 	private void resetAlgorithmToDefaults(final String algorithm){
 	    System.out.println("Resetting " + algorithm + " to defaults");
 	    if (algoCardMap.containsKey(algorithm) == false){
@@ -357,6 +371,14 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 	    }
 	}
 	
+	/**
+	 * Given 'algorithm' internal name, this method returns 
+	 * {@link org.ndexbio.communitydetection.reste.model.CommunityDetectionAlgorithm}
+	 * obtained from constructor of this object.
+	 * 
+	 * @param algorithm internal algorithm name
+	 * @return 
+	 */
 	private CommunityDetectionAlgorithm getCommunityDetectionAlgorithm(final String algorithm){
 	    for (CommunityDetectionAlgorithm cda : this.algorithmList){
 		if (cda.getName().equals(algorithm)){
@@ -366,6 +388,20 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 	    return null;
 	}
 	
+	/**
+	 * Given an 'algorithm' name this method looks at the settings UI for the
+	 * parameters for the 'algorithm' The code then gets all the user values
+	 * set. The way it works is the {@link javax.swing.JComponent} containing
+	 * the algorithm parameters is named 'algorithm' and each JTextField or JCheckBox 
+	 * within that pnael is named
+	 * "<ALGORITHM>:::<PARAMETER NAME>" so this method looks for the UI
+	 * components with that naming convention extracting the values which are
+	 * returned as a {@link java.util.Map}
+	 * @param algorithm
+	 * @return {@link java.util.Map} where the key is parameter name ie --overlap and
+	 *         value is the user set value. If value was a checkbox then this is set
+	 *         to empty string, otherwise it is not included in {@link java.util.Map}
+	 */
 	public Map<String, String> getAlgorithmCustomParameters(final String algorithm){
 	    JPanel algoCard = algoCardMap.get(algorithm);
 	    if (algoCard == null){
@@ -395,15 +431,25 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 	    return cParam;
 	}
 
+	/**
+	 * Creates reset button that when clicked resets all parameters for that
+	 * algorithm to default values. The link is done by setting the name of the
+	 * button to the algorithm name
+	 * @param algorithm internal algorithm name
+	 * @return reset button
+	 */
 	private JButton getResetButton(final String algorithm) {
 		JButton button = new JButton(AppUtils.RESET);
 		button.setName(algorithm);
+		button.setToolTipText("Resets all parameters for this "
+			+ "algorithm to default values");
 		button.addActionListener(new ActionListener() {
 		    @Override
 		    public void actionPerformed(ActionEvent e) {
 			JComponent c = (JComponent)e.getSource();
 			String algorithm = c.getName();
-			System.out.println("Reset button clicked on algorithm: " + algorithm);
+			System.out.println("Reset button clicked "
+				+ "on algorithm: " + algorithm);
 			resetAlgorithmToDefaults(algorithm);
 		    }
 		});
