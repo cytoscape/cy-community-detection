@@ -59,16 +59,28 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 	private ImageIcon infoIconLarge;
 	private Map<String, JPanel> algoCardMap;
 	private JComboBox algorithmComboBox;
+	private boolean guiLoaded = false;
 
 	public HierarchySettingsDialog(CySwingApplication swingApplication,
 		JEditorPaneFactory editorPaneFac) throws Exception {
 		super(swingApplication.getJFrame().getOwner(), AppUtils.APP_NAME + " settings",
 			ModalityType.MODELESS);
 		this.editorPaneFac = editorPaneFac;
-		loadImageIcon();
+		
+	}
+	
+	private void createGUI(){
+	    loadImageIcon();
 		algoCardMap = new LinkedHashMap<>();
-		algorithmList = CDRestClient.getInstance().getAlgorithms();
-
+		try {
+		    algorithmList = CDRestClient.getInstance().getAlgorithms();
+		} catch(Exception ex){
+		    try {
+			algorithmList = CDRestClient.getInstance().getAlgorithms();
+		    } catch(Exception subex){
+			
+		    }
+		}
 		cards = new JPanel(new CardLayout());
 		algorithmComboBox = new JComboBox();
 		algorithmComboBox.setEditable(false);
@@ -97,6 +109,7 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 		setResizable(true);
 		setLocationRelativeTo(getOwner());
 		pack();
+		guiLoaded = true;
 	}
 
 	
@@ -211,7 +224,10 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		setVisible(true);
+	    if (guiLoaded == false){
+		this.createGUI();
+	    }
+	    setVisible(true);
 	}
 	
 	/**
