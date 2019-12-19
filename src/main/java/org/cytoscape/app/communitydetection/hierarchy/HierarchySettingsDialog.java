@@ -419,6 +419,9 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 	 *         to empty string, otherwise it is not included in {@link java.util.Map}
 	 */
 	public Map<String, String> getAlgorithmCustomParameters(final String algorithm){
+	    if (guiLoaded == false){
+		this.createGUI();
+	    }
 	    JPanel algoCard = algoCardMap.get(algorithm);
 	    if (algoCard == null){
 		return null;
