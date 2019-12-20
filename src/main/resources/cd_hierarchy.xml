@@ -58,9 +58,6 @@
             <visualProperty default="S,N,c,0.00,5.00" name="NODE_LABEL_POSITION"/>
             <visualProperty default="C,C,c,0.00,0.00" name="NODE_CUSTOMGRAPHICS_POSITION_4"/>
             <visualProperty default="ROUND_RECTANGLE" name="COMPOUND_NODE_SHAPE"/>
-            <visualProperty default="#000000" name="NODE_LABEL_COLOR">
-                <passthroughMapping attributeName="CD_MemberList_LogSize" attributeType="float"/>
-            </visualProperty>
             <visualProperty default="C,C,c,0.00,0.00" name="NODE_CUSTOMGRAPHICS_POSITION_8"/>
             <visualProperty default="org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ]," name="NODE_CUSTOMGRAPHICS_6"/>
             <visualProperty default="#787878" name="NODE_PAINT"/>
@@ -118,9 +115,7 @@
             <visualProperty default="NONE" name="EDGE_TARGET_ARROW_SHAPE"/>
             <visualProperty default="#FFFF00" name="EDGE_TARGET_ARROW_SELECTED_PAINT"/>
             <visualProperty default="" name="EDGE_LABEL"/>
-            <visualProperty default="2.0" name="EDGE_WIDTH">
-                <discreteMapping attributeName="interaction" attributeType="string"/>
-            </visualProperty>
+            <visualProperty default="2.0" name="EDGE_WIDTH"/>
             <visualProperty default="#FF0000" name="EDGE_SELECTED_PAINT"/>
             <visualProperty default="true" name="EDGE_CURVED"/>
             <visualProperty default="#FFFF00" name="EDGE_SOURCE_ARROW_SELECTED_PAINT"/>
@@ -130,9 +125,7 @@
                 </discreteMapping>
             </visualProperty>
             <visualProperty default="255" name="EDGE_LABEL_TRANSPARENCY"/>
-            <visualProperty default="" name="EDGE_BEND">
-                <discreteMapping attributeName="interaction" attributeType="string"/>
-            </visualProperty>
+            <visualProperty default="" name="EDGE_BEND"/>
             <visualProperty default="4.0" name="EDGE_TARGET_ARROW_SIZE"/>
             <visualProperty default="SOLID" name="EDGE_LINE_TYPE"/>
             <visualProperty default="" name="EDGE_TOOLTIP"/>
@@ -144,12 +137,8 @@
             <visualProperty default="Dialog.plain,plain,10" name="EDGE_LABEL_FONT_FACE"/>
             <visualProperty default="6.0" name="EDGE_SOURCE_ARROW_SIZE"/>
             <visualProperty default="false" name="EDGE_SELECTED"/>
-            <visualProperty default="170" name="EDGE_TRANSPARENCY">
-                <discreteMapping attributeName="interaction" attributeType="string"/>
-            </visualProperty>
-            <visualProperty default="#999999" name="EDGE_UNSELECTED_PAINT">
-                <discreteMapping attributeName="interaction" attributeType="string"/>
-            </visualProperty>
+            <visualProperty default="170" name="EDGE_TRANSPARENCY"/>
+            <visualProperty default="#999999" name="EDGE_UNSELECTED_PAINT"/>
             <visualProperty default="ARROW" name="EDGE_SOURCE_ARROW_SHAPE"/>
             <visualProperty default="#FF0000" name="EDGE_STROKE_SELECTED_PAINT"/>
             <visualProperty default="#000000" name="EDGE_LABEL_COLOR"/>
