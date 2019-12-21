@@ -23,6 +23,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 
@@ -31,25 +32,25 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.WindowConstants;
 
 import org.cytoscape.app.communitydetection.rest.CDRestClient;
 import org.cytoscape.app.communitydetection.util.AppUtils;
-import org.cytoscape.application.swing.CySwingApplication;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionRequest;
 import org.ndexbio.communitydetection.rest.model.CustomParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
-public class HierarchySettingsDialog extends JDialog implements ActionListener,ItemListener {
+public class LauncherDialog extends JPanel implements ItemListener {
 
-    
+    	private final static Logger _logger = LoggerFactory.getLogger(LauncherDialog.class);
+
 	private static final String INPUTDELIM = ":::";
 	private List<CommunityDetectionAlgorithm> algorithmList;
 
@@ -59,24 +60,33 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 	private ImageIcon infoIconLarge;
 	private Map<String, JPanel> algoCardMap;
 	private JComboBox algorithmComboBox;
+	private JComboBox weightComboBox;
 	private boolean guiLoaded = false;
+	private String algorithmType;
 
-	public HierarchySettingsDialog(CySwingApplication swingApplication,
-		JEditorPaneFactory editorPaneFac) throws Exception {
-		super(swingApplication.getJFrame().getOwner(), AppUtils.APP_NAME + " settings",
-			ModalityType.MODELESS);
+	public LauncherDialog(JEditorPaneFactory editorPaneFac,
+		final String algorithmType) throws Exception {
 		this.editorPaneFac = editorPaneFac;
+		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		this.algorithmType = algorithmType;
 		
 	}
 	
-	private void createGUI(){
+	public void createGUI(){
+	    createGUI(false);
+	}
+	
+	public void createGUI(boolean refresh){
+	    if (guiLoaded == true && refresh==false){
+		return;
+	    }
 	    loadImageIcon();
 		algoCardMap = new LinkedHashMap<>();
 		try {
-		    algorithmList = CDRestClient.getInstance().getAlgorithms();
+		    algorithmList = CDRestClient.getInstance().getAlgorithmsByType(algorithmType);
 		} catch(Exception ex){
 		    try {
-			algorithmList = CDRestClient.getInstance().getAlgorithms();
+			algorithmList = CDRestClient.getInstance().getAlgorithmsByType(algorithmType);
 		    } catch(Exception subex){
 			
 		    }
@@ -97,21 +107,80 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 		JPanel masterPanel = new JPanel();
 		masterPanel.setLayout(new BoxLayout(masterPanel, BoxLayout.Y_AXIS));
 		masterPanel.add(cards);
-		
-		JPanel closePanel = new JPanel();
-		closePanel.add(getCloseButton());
-		
+
 		add(contentPane, BorderLayout.PAGE_START);
 		
+		// only add weight panel if its not null
+		JPanel weightPanel = this.getWeightPanel();
+		if (weightPanel != null){
+		    add(weightPanel, BorderLayout.CENTER);
+		}
 		add(masterPanel, BorderLayout.CENTER);
-		add(closePanel, BorderLayout.PAGE_END);
-		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		setResizable(true);
-		setLocationRelativeTo(getOwner());
-		pack();
 		guiLoaded = true;
+		loadAlgorithmCards();
+		updateWeightColumnCombo(null);
+	}
+	
+	/**
+	 * Creates column weight panel if algorithm type is community detection
+	 * otherwise return null cause the dialog is for functional enrichment
+	 * and the weight column is not needed.
+	 * @return 
+	 */
+	private JPanel getWeightPanel(){
+	    if (!algorithmType.equals(AppUtils.CD_ALGORITHM_INPUT_TYPE)){
+		return null;
+	    }
+	    JPanel weightPanel = new JPanel();
+		weightPanel.setLayout(new GridBagLayout());
+		weightPanel.setBorder(BorderFactory.createCompoundBorder(
+			    BorderFactory.createTitledBorder("Weight Column"),
+			    BorderFactory.createEmptyBorder(5,5,5,5)));
+		
+		GridBagConstraints labelConstraints = new GridBagConstraints();
+		labelConstraints.gridy = 0;
+		labelConstraints.gridx = 0;
+		labelConstraints.anchor = GridBagConstraints.LINE_START;
+		labelConstraints.insets = new Insets(0, 5, 5, 0);
+		weightPanel.add(new JLabel("Weight Column: "), labelConstraints);
+
+		weightComboBox = new JComboBox();
+		weightComboBox.setEditable(false);
+		weightComboBox.setToolTipText("Numeric dge column to use for "
+			+ "edge weights in Community Detection. Select '" +
+			AppUtils.TYPE_NONE_VALUE + "' to"
+			+ " not use a column");
+		
+		GridBagConstraints weightComboConstraints = new GridBagConstraints();
+		weightComboConstraints.gridy = 0;
+		labelConstraints.gridx = 1;
+		labelConstraints.anchor = GridBagConstraints.LINE_END;
+		labelConstraints.insets = new Insets(0, 0, 5, 0);
+		weightPanel.add(weightComboBox, weightComboConstraints);
+		return weightPanel;
 	}
 
+	public void updateWeightColumnCombo(Set<String> columns){
+	    if (weightComboBox == null){
+		return;
+	    }
+	    weightComboBox.removeAllItems();
+	    
+	    weightComboBox.addItem(AppUtils.TYPE_NONE_VALUE);
+	    if (columns == null){
+		return;
+	    }
+	    for (String cName : columns){
+		weightComboBox.addItem(cName);
+	    }
+	}
+	
+	public String getWeightColumn(){
+	    if (weightComboBox == null){
+		return null;
+	    }
+	    return (String)weightComboBox.getSelectedItem();
+	}
 	
 	private void loadAlgorithmCards(){
 	    algoCardMap.clear();
@@ -177,6 +246,7 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 		cards.add(algoCard, cda.getDisplayName());
 		this.resetAlgorithmToDefaults(cda.getName());
 	    }
+	    
 	}
 	
 	private JComponent getCustomParameterInput(final String algorithm, final CommunityDetectionRequest request,
@@ -220,14 +290,6 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 	public void itemStateChanged(ItemEvent evt) {
 		CardLayout cl = (CardLayout)(cards.getLayout());
 		cl.show(cards, (String)evt.getItem());
-	}
-	
-	@Override
-	public void actionPerformed(ActionEvent e) {
-	    if (guiLoaded == false){
-		this.createGUI();
-	    }
-	    setVisible(true);
 	}
 	
 	/**
@@ -331,21 +393,6 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 		return paramLabel;
 	}
 
-	/**
-	 * Gets close button which is set to close the dialog
-	 * @return 
-	 */
-	private Component getCloseButton() {
-		JButton button = new JButton(AppUtils.CLOSE);
-		button.setToolTipText("Close this dialog, any changes are recorded");
-		button.addActionListener(new ActionListener() {
-		    @Override
-		    public void actionPerformed(ActionEvent e) {
-			dispose();
-		    }
-		});
-		return button;
-	}
 	
 	/**
 	 * Given an internal algorithm name 'algorithm' this method 
@@ -404,6 +451,33 @@ public class HierarchySettingsDialog extends JDialog implements ActionListener,I
 	    return null;
 	}
 	
+	private CommunityDetectionAlgorithm getCommunityDetectionAlgorithmByDisplayName(final String displayName){
+	    for (CommunityDetectionAlgorithm cda : this.algorithmList){
+		if (cda.getDisplayName().equals(displayName)){
+		    return cda;
+		}
+	    }
+	    return null;
+	}
+	
+	
+	public CommunityDetectionAlgorithm getSelectedCommunityDetectionAlgorithm(){
+	    if (guiLoaded == false){
+		System.out.println("gui not loaded");
+		return null;
+	    }
+	    if (algorithmComboBox == null){
+		System.out.println("no combo box loaded");
+		return null;
+	    }
+	    String algo = (String)algorithmComboBox.getSelectedItem();
+	    if (algo == null){
+		System.out.println("no algorithm selected in combo box");
+		return null;
+	    }
+	    System.out.println("Algorithm: " + algo);
+	    return getCommunityDetectionAlgorithmByDisplayName(algo);
+	}
 	/**
 	 * Given an 'algorithm' name this method looks at the settings UI for the
 	 * parameters for the 'algorithm' The code then gets all the user values

@@ -40,6 +40,8 @@ import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
+import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm;
+import org.ndexbio.communitydetection.rest.model.CommunityDetectionResult;
 
 /**
  * Task to create a hierarchy network from an edge list received in form of
@@ -205,15 +207,16 @@ public class ReaderTask extends AbstractCyNetworkReader {
 		createMemberList(newNetwork);
 	}
 
-	public void setNetworkAttributes(String algorithmName, String attribute, String dockerImageName, String version)
+	public void setNetworkAttributes(final String weightColumn, CommunityDetectionAlgorithm algorithm,
+		CommunityDetectionResult cdResult, Map<String, String> customParameters)
 			throws Exception {
 
 		String name;
-		if (attribute.equals(AppUtils.TYPE_NONE)) {
+		if (weightColumn == null || weightColumn.equals(AppUtils.TYPE_NONE)) {
 			name = networkNaming.getSuggestedNetworkTitle(
-					algorithmName + "_" + originalNetwork.getRow(originalNetwork).get(CyNetwork.NAME, String.class));
+					algorithm.getName() + "_" + originalNetwork.getRow(originalNetwork).get(CyNetwork.NAME, String.class));
 		} else {
-			name = networkNaming.getSuggestedNetworkTitle(algorithmName + "_" + attribute + "_"
+			name = networkNaming.getSuggestedNetworkTitle(algorithm.getName() + "_" + weightColumn + "_"
 					+ originalNetwork.getRow(originalNetwork).get(CyNetwork.NAME, String.class));
 		}
 		CyRootNetwork rootNetwork = rootNetworkManager.getRootNetwork(getNetworks()[0]);
@@ -223,8 +226,16 @@ public class ReaderTask extends AbstractCyNetworkReader {
 		String origNetName = originalNetwork.getRow(originalNetwork).get(CyNetwork.NAME, String.class);
 		String derivedFrom = origNetName;
 		StringBuffer description = new StringBuffer("Original network: " + origNetName + "\n");
-		description.append("Algorithm used for community detection: " + algorithmName + "\n");
-		description.append("Edge table column used as weight: " + attribute + "\n");
+		description.append("Algorithm used for community detection: " + algorithm.getName() + "\n");
+		
+    		   description.append("Edge table column used as weight: ");
+		if (weightColumn != null){
+		   description.append(weightColumn);
+		   description.append("\n");
+		} else {
+		   description.append("no column used\n");
+		}
+		description.append("CustomParameters: " + customParameters + "\n");
 		String UUID = originalNetwork.getRow(originalNetwork, CyNetwork.HIDDEN_ATTRS).get("NDEx UUID", String.class);
 		if (UUID != null) {
 			description.append("Original network's NDEx UUID: " + UUID);
@@ -234,7 +245,7 @@ public class ReaderTask extends AbstractCyNetworkReader {
 		properties.load(getClass().getClassLoader().getResourceAsStream("project.properties"));
 		String generatedBy = "App: " + properties.getProperty(AppUtils.PROP_PROJECT_NAME);
 		generatedBy += " (" + properties.getProperty(AppUtils.PROP_PROJECT_VERSION) + ")";
-		generatedBy += " Service: " + dockerImageName + " (" + version + ")";
+		generatedBy += " Docker Image: " + algorithm.getDockerImage();
 
 		CyTable netTable = getNetworks()[0].getDefaultNetworkTable();
 		createTableColumn(netTable, AppUtils.COLUMN_DESCRIPTION, String.class, false, null);

@@ -3,6 +3,7 @@ package org.cytoscape.app.communitydetection.hierarchy;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.Map;
 
 import org.cytoscape.app.communitydetection.edgelist.ReaderTask;
 import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactoryImpl;
@@ -27,18 +28,22 @@ public class HierarchyTask extends AbstractTask {
 
 	private final CyNetwork network;
 	private final CommunityDetectionAlgorithm algorithm;
-	private final String attribute;
+	private final String weightColumn;
+	private final Map<String, String> customParameters;
+	
 
-	public HierarchyTask(CyNetwork network, CommunityDetectionAlgorithm algorithm, String attribute) {
-		this.network = network;
-		this.algorithm = algorithm;
-		this.attribute = attribute;
+	public HierarchyTask(CyNetwork network, CommunityDetectionAlgorithm algorithm, Map<String, String> customParameters,
+		final String weightColumn){
+	    this.network = network;
+	    this.algorithm = algorithm;
+	    this.weightColumn = weightColumn;
+	    this.customParameters = customParameters;    
 	}
 
 	@Override
 	public void run(TaskMonitor taskMonitor) throws Exception {
-		if (attribute == null || attribute.equals(AppUtils.TYPE_ABOUT)) {
-			return;
+		if (this.algorithm == null){
+		    return;
 		}
 		long startTime = System.currentTimeMillis();
 		taskMonitor.setTitle("Community Detection: Creating Hierarchy Network");
@@ -46,9 +51,10 @@ public class HierarchyTask extends AbstractTask {
 		ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 		WriterTaskFactoryImpl writerFactory = (WriterTaskFactoryImpl) TaskListenerFactory.getInstance()
 				.getEdgeListWriterFactory();
-		CyWriter writer = writerFactory.createWriter(outStream, network, attribute);
+		CyWriter writer = writerFactory.createWriter(outStream, network, weightColumn);
 		writer.run(taskMonitor);
-		String resultURI = CDRestClient.getInstance().postCDData(algorithm.getName(), false, outStream.toString());
+		String resultURI = CDRestClient.getInstance().postCDData(algorithm.getName(),
+			this.customParameters, outStream.toString());
 		if (cancelled) {
 			CDRestClient.getInstance().setTaskCanceled(false);
 			return;
@@ -71,7 +77,8 @@ public class HierarchyTask extends AbstractTask {
 		TaskIterator iterator = readerFactory.createTaskIterator(inStream, null, network.getSUID());
 		ReaderTask reader = (ReaderTask) iterator.next();
 		reader.run(taskMonitor);
-		reader.setNetworkAttributes(algorithm.getName(), attribute, algorithm.getDockerImage(), algorithm.getVersion());
+		
+		reader.setNetworkAttributes(weightColumn, algorithm, cdResult, this.customParameters);
 		taskMonitor.setProgress(0.95);
 		System.out.printf("CD app: Newtork created in %d ms\n", (System.currentTimeMillis() - startTime));
 

@@ -30,7 +30,7 @@ public class TermMappingCallable implements Callable<Boolean> {
 		}
 		String memberList = network.getRow(node).get(AppUtils.COLUMN_CD_MEMBER_LIST, String.class)
 				.replaceAll(AppUtils.CD_MEMBER_LIST_DELIMITER, ",");
-		String URI = CDRestClient.getInstance().postCDData(algorithm, true, memberList);
+		String URI = CDRestClient.getInstance().postCDData(algorithm, null, memberList);
 		CommunityDetectionResult cdResult = CDRestClient.getInstance().getCDResult(URI, 300);
 		String name = AppUtils.TYPE_NONE_VALUE;
 		String annotatedList = "";

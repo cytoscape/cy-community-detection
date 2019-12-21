@@ -10,22 +10,22 @@ import org.cytoscape.application.swing.AbstractCyAction;
 import org.cytoscape.application.swing.CySwingApplication;
 
 @SuppressWarnings("serial")
-public class HierarchySettingsMenu extends AbstractCyAction implements SetCurrentNetworkViewListener {
+public class HierarchyLauncherMenu extends AbstractCyAction implements SetCurrentNetworkViewListener {
 
-	private HierarchySettingsDialog settingsDialog;
+	private LauncherDialog settingsDialog;
 
-	public HierarchySettingsMenu(CySwingApplication swingApplication) throws Exception {
+	public HierarchyLauncherMenu(CySwingApplication swingApplication) throws Exception {
 		super("Settings...");
 		setPreferredMenu(AppUtils.TOP_MENU);
 		setMenuGravity(10.0f);
 		insertSeparatorBefore();
-		settingsDialog = new HierarchySettingsDialog(swingApplication, new JEditorPaneFactoryImpl());
-		CDRestClient.getInstance().setHierarchySettingsDialog(settingsDialog);
+		//settingsDialog = new LauncherDialog(new JEditorPaneFactoryImpl());
+		//CDRestClient.getInstance().setHierarchySettingsDialog(settingsDialog);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		settingsDialog.actionPerformed(e);
+		//settingsDialog.actionPerformed(e);
 	}
 
 	@Override

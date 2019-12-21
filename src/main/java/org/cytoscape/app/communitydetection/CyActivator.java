@@ -14,8 +14,10 @@ import java.util.Properties;
 
 import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.edgelist.WriterTaskFactoryImpl;
-import org.cytoscape.app.communitydetection.hierarchy.HierarchySettingsMenu;
+import org.cytoscape.app.communitydetection.hierarchy.HierarchyLauncherMenu;
 import org.cytoscape.app.communitydetection.hierarchy.HierarchyTaskFactoryImpl;
+import org.cytoscape.app.communitydetection.hierarchy.JEditorPaneFactoryImpl;
+import org.cytoscape.app.communitydetection.hierarchy.LauncherDialog;
 import org.cytoscape.app.communitydetection.hierarchy.TaskListenerFactory;
 import org.cytoscape.app.communitydetection.rest.CDRestClient;
 import org.cytoscape.app.communitydetection.subnetwork.SubNetworkTaskFactoryImpl;
@@ -65,7 +67,7 @@ public class CyActivator extends AbstractCyActivator {
 		final SynchronousTaskManager<?> syncTaskManager = getService(bc, SynchronousTaskManager.class);
 		final CyNetworkNaming networkNaming = getService(bc, CyNetworkNaming.class);
 		final CySwingApplication swingApplication = getService(bc, CySwingApplication.class);
-
+		
 		String cyPropertyName = "project.properties";
 		PropertiesReader propReader = new PropertiesReader(AppUtils.APP_NAME, cyPropertyName);
 		Properties propReaderProperties = new Properties();
@@ -105,23 +107,24 @@ public class CyActivator extends AbstractCyActivator {
 		Properties taskExecProps = new Properties();
 		taskExecProps.setProperty(MENU_GRAVITY, "1.0");
 		// Registering Edge List services
-		List<CommunityDetectionAlgorithm> cdAlgos = CDRestClient.getInstance()
-				.getAlgorithmsByType(AppUtils.CD_ALGORITHM_INPUT_TYPE);
-		for (CommunityDetectionAlgorithm algo : cdAlgos) {
-			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU_CD + "." + algo.getDisplayName());
-			taskExecProps.setProperty(TITLE, AppUtils.TYPE_NONE_VALUE);
-			registerAllServices(bc, new HierarchyTaskFactoryImpl(algo, AppUtils.TYPE_NONE), taskExecProps);
+		taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
+		taskExecProps.setProperty(TITLE, "Run Community Detection");
+		LauncherDialog clusterAlgoDialog = new LauncherDialog(new JEditorPaneFactoryImpl(),
+		                                                      AppUtils.CD_ALGORITHM_INPUT_TYPE);
+		registerAllServices(bc, new HierarchyTaskFactoryImpl(swingApplication, clusterAlgoDialog), taskExecProps);
 
-			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU_CD + "." + algo.getDisplayName());
-			taskExecProps.setProperty(TITLE, AppUtils.TYPE_WEIGHTED_VALUE);
-			registerAllServices(bc, new HierarchyTaskFactoryImpl(algo, AppUtils.TYPE_WEIGHTED), taskExecProps);
+		
+		Properties tmExecProps = new Properties();
+		tmExecProps.setProperty(MENU_GRAVITY, "2.0");
+		// Registering Edge List services
+		tmExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
+		tmExecProps.setProperty(TITLE, "Run Functional Enrichment");
+		LauncherDialog tmAlgoDialog = new LauncherDialog(new JEditorPaneFactoryImpl(),
+		                                                      AppUtils.TM_ALGORITHM_INPUT_TYPE);
+		registerAllServices(bc, new NetworkTermMappingTaskFactoryImpl(swingApplication, tmAlgoDialog), tmExecProps);
 
-			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU_CD + "." + algo.getDisplayName());
-			taskExecProps.setProperty(TITLE, AppUtils.TYPE_ABOUT_VALUE);
-			registerAllServices(bc, new HierarchyTaskFactoryImpl(algo, AppUtils.TYPE_ABOUT), taskExecProps);
-		}
-		List<CommunityDetectionAlgorithm> tmAlgos = CDRestClient.getInstance()
-				.getAlgorithmsByType(AppUtils.TM_ALGORITHM_INPUT_TYPE);
+		
+		/**
 		for (CommunityDetectionAlgorithm algo : tmAlgos) {
 			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU_TM + "." + algo.getDisplayName());
 			taskExecProps.setProperty(TITLE, algo.getDisplayName());
@@ -131,7 +134,9 @@ public class CyActivator extends AbstractCyActivator {
 			taskExecProps.setProperty(TITLE, AppUtils.TYPE_ABOUT_VALUE);
 			registerAllServices(bc, new NetworkTermMappingTaskFactoryImpl(algo, AppUtils.TYPE_ABOUT), taskExecProps);
 		}
-
+		*/
+		List<CommunityDetectionAlgorithm> tmAlgos = CDRestClient.getInstance()
+				.getAlgorithmsByType(AppUtils.TM_ALGORITHM_INPUT_TYPE);
 		Properties contextMenuProps = new Properties();
 		contextMenuProps.setProperty(PREFERRED_MENU, AppUtils.CONTEXT_MENU_CD);
 		contextMenuProps.setProperty(ENABLE_FOR, ENABLE_FOR_SELECTED_NODES);
@@ -148,7 +153,7 @@ public class CyActivator extends AbstractCyActivator {
 			registerAllServices(bc, new NodeTermMappingTaskFactoryImpl(algo), contextMenuProps);
 		}
 
-		registerAllServices(bc, new HierarchySettingsMenu(swingApplication));
+		//registerAllServices(bc, new HierarchyLauncherMenu(swingApplication));
 	}
 
 }

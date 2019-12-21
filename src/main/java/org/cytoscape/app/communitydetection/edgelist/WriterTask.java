@@ -2,6 +2,7 @@ package org.cytoscape.app.communitydetection.edgelist;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import org.cytoscape.app.communitydetection.util.AppUtils;
 
 import org.cytoscape.io.write.CyWriter;
 import org.cytoscape.model.CyEdge;
@@ -21,7 +22,7 @@ public class WriterTask implements CyWriter {
 
 	private final OutputStream outStream;
 	private final CyNetwork network;
-	private final String attribute;
+	private final String weightColumn;
 
 	/**
 	 * @param outStream
@@ -31,24 +32,24 @@ public class WriterTask implements CyWriter {
 	public WriterTask(OutputStream outStream, CyNetwork network, String attribute) {
 		this.outStream = outStream;
 		this.network = network;
-		this.attribute = attribute;
+		this.weightColumn = attribute;
 	}
 
 	@Override
 	public void run(TaskMonitor taskMonitor) throws Exception {
-		if (attribute.equals("none")) {
+		if (weightColumn == null || weightColumn.equals(AppUtils.TYPE_NONE_VALUE)) {
 			for (CyEdge edge : network.getEdgeList()) {
 				String s = edge.getSource().getSUID().toString() + "\t" + edge.getTarget().getSUID().toString() + "\n";
 				outStream.write(s.getBytes());
 			}
 		} else {
 			for (CyEdge edge : network.getEdgeList()) {
-				if ((Double) network.getRow(edge).get(attribute, getColumnType()) < 0) {
-					throw new Exception(attribute
-							+ " contains negative values. Please select an attribute with non-negative values");
+				if ((Double) network.getRow(edge).get(weightColumn, getColumnType()) < 0) {
+					throw new Exception(weightColumn
+							+ " contains negative values. Please select a column with non-negative data values");
 				}
 				String s = edge.getSource().getSUID().toString() + "\t" + edge.getTarget().getSUID().toString() + "\t"
-						+ network.getRow(edge).get(attribute, getColumnType()) + "\n";
+						+ network.getRow(edge).get(weightColumn, getColumnType()) + "\n";
 				outStream.write(s.getBytes());
 			}
 		}
@@ -67,6 +68,6 @@ public class WriterTask implements CyWriter {
 	}
 
 	private Class<?> getColumnType() {
-		return network.getDefaultEdgeTable().getColumn(attribute).getType();
+		return network.getDefaultEdgeTable().getColumn(weightColumn).getType();
 	}
 }
