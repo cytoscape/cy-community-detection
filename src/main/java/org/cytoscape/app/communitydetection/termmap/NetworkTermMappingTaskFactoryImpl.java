@@ -54,6 +54,7 @@ public class NetworkTermMappingTaskFactoryImpl implements NetworkTaskFactory {
 	    }
 	    
 	    _dialog.createGUI();
+	    _dialog.updateNodeSelectionButtons(network);
 	    Object[] options = {AppUtils.RUN, AppUtils.CANCEL};
 	    int res = JOptionPane.showOptionDialog(_swingApplication.getJFrame(),
 		                                   this._dialog,
@@ -72,7 +73,8 @@ public class NetworkTermMappingTaskFactoryImpl implements NetworkTaskFactory {
 			    customParameters == null ? "" : " with " +
 				    customParameters.toString());
 
-		    return new TaskIterator(new TermMappingTask(network, cda, customParameters, false));
+		    return new TaskIterator(new TermMappingTask(network, cda, customParameters,
+			    _dialog.runOnSelectedNodes()));
 		} else {
 		   _logger.error("Couldnt get algorithm from dialog...");
 		}

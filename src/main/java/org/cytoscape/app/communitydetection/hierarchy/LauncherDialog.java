@@ -5,6 +5,7 @@ import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -36,10 +38,14 @@ import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import org.cytoscape.app.communitydetection.rest.CDRestClient;
 import org.cytoscape.app.communitydetection.util.AppUtils;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyTableUtil;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionRequest;
 import org.ndexbio.communitydetection.rest.model.CustomParameter;
@@ -51,50 +57,54 @@ public class LauncherDialog extends JPanel implements ItemListener {
 
     	private final static Logger _logger = LoggerFactory.getLogger(LauncherDialog.class);
 
+	private static final String SELECTED_NODES_BUTTON_LABEL = "Selected Nodes";
 	private static final String INPUTDELIM = ":::";
-	private List<CommunityDetectionAlgorithm> algorithmList;
+	private List<CommunityDetectionAlgorithm> _algorithmList;
 
-	private JPanel cards;
-	private JEditorPaneFactory editorPaneFac;
-	private ImageIcon infoIconSmall;
-	private ImageIcon infoIconLarge;
-	private Map<String, JPanel> algoCardMap;
-	private JComboBox algorithmComboBox;
-	private JComboBox weightComboBox;
-	private boolean guiLoaded = false;
-	private String algorithmType;
+	private JPanel _cards;
+	private JEditorPaneFactory _editorPaneFac;
+	private ImageIcon _infoIconSmall;
+	private ImageIcon _infoIconLarge;
+	private Map<String, JPanel> _algoCardMap;
+	private JComboBox _algorithmComboBox;
+	private JComboBox _weightComboBox;
+	private JRadioButton _selectedButton;
+	private JRadioButton _allButton;
+	private boolean _guiLoaded = false;
+	private String _algorithmType;
 
 	public LauncherDialog(JEditorPaneFactory editorPaneFac,
 		final String algorithmType) throws Exception {
-		this.editorPaneFac = editorPaneFac;
+		this._editorPaneFac = editorPaneFac;
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		this.algorithmType = algorithmType;
+		this._algorithmType = algorithmType;
 		
 	}
+	
 	
 	public void createGUI(){
 	    createGUI(false);
 	}
 	
 	public void createGUI(boolean refresh){
-	    if (guiLoaded == true && refresh==false){
+	    if (_guiLoaded == true && refresh==false){
 		return;
 	    }
 	    loadImageIcon();
-		algoCardMap = new LinkedHashMap<>();
+		_algoCardMap = new LinkedHashMap<>();
 		try {
-		    algorithmList = CDRestClient.getInstance().getAlgorithmsByType(algorithmType);
+		    _algorithmList = CDRestClient.getInstance().getAlgorithmsByType(_algorithmType);
 		} catch(Exception ex){
 		    try {
-			algorithmList = CDRestClient.getInstance().getAlgorithmsByType(algorithmType);
+			_algorithmList = CDRestClient.getInstance().getAlgorithmsByType(_algorithmType);
 		    } catch(Exception subex){
 			
 		    }
 		}
-		cards = new JPanel(new CardLayout());
-		algorithmComboBox = new JComboBox();
-		algorithmComboBox.setEditable(false);
-		algorithmComboBox.addItemListener(this);
+		_cards = new JPanel(new CardLayout());
+		_algorithmComboBox = new JComboBox();
+		_algorithmComboBox.setEditable(false);
+		_algorithmComboBox.addItemListener(this);
 
 		loadAlgorithmCards();
 		
@@ -102,13 +112,19 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		contentPane.add(new JLabel("Algorithm: "));
 		
 		
-		contentPane.add(algorithmComboBox);
+		contentPane.add(_algorithmComboBox);
 		
 		JPanel masterPanel = new JPanel();
 		masterPanel.setLayout(new BoxLayout(masterPanel, BoxLayout.Y_AXIS));
-		masterPanel.add(cards);
+		masterPanel.add(_cards);
 
 		add(contentPane, BorderLayout.PAGE_START);
+		
+		// only add node selection panel if its not null
+		JPanel nodePanel = this.getNodeSelectionPanel();
+		if (nodePanel != null){
+		    add(nodePanel, BorderLayout.CENTER);
+		}
 		
 		// only add weight panel if its not null
 		JPanel weightPanel = this.getWeightPanel();
@@ -116,11 +132,38 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		    add(weightPanel, BorderLayout.CENTER);
 		}
 		add(masterPanel, BorderLayout.CENTER);
-		guiLoaded = true;
+		_guiLoaded = true;
 		loadAlgorithmCards();
 		updateWeightColumnCombo(null);
 	}
 	
+	private JPanel getNodeSelectionPanel(){
+	    if (!_algorithmType.equals(AppUtils.TM_ALGORITHM_INPUT_TYPE)){
+		return null;
+	    }
+	    JPanel nodePanel = new JPanel();
+		nodePanel.setLayout(new GridLayout(2, 1));
+		nodePanel.setBorder(BorderFactory.createCompoundBorder(
+			    BorderFactory.createTitledBorder("Node Selection"),
+			    BorderFactory.createEmptyBorder(5,5,5,5)));
+	    _allButton = new JRadioButton("All Nodes", true);
+	    
+	    _allButton.setToolTipText("Perform Term Mapping on all nodes in "
+		    + "network");
+	    _selectedButton = new JRadioButton(SELECTED_NODES_BUTTON_LABEL);
+	    _selectedButton.setToolTipText("Perform Term Mapping on selected "
+		    + "nodes in network");
+	    
+	    // button group is needed cause only one of
+	    // the buttons should be set
+            ButtonGroup bgroup = new ButtonGroup();
+            bgroup.add(_allButton);
+            bgroup.add(_selectedButton);
+                    
+            nodePanel.add(_allButton);
+            nodePanel.add(_selectedButton);
+	    return nodePanel;
+	}
 	/**
 	 * Creates column weight panel if algorithm type is community detection
 	 * otherwise return null cause the dialog is for functional enrichment
@@ -128,7 +171,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	 * @return 
 	 */
 	private JPanel getWeightPanel(){
-	    if (!algorithmType.equals(AppUtils.CD_ALGORITHM_INPUT_TYPE)){
+	    if (!_algorithmType.equals(AppUtils.CD_ALGORITHM_INPUT_TYPE)){
 		return null;
 	    }
 	    JPanel weightPanel = new JPanel();
@@ -144,9 +187,9 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		labelConstraints.insets = new Insets(0, 5, 5, 0);
 		weightPanel.add(new JLabel("Weight Column: "), labelConstraints);
 
-		weightComboBox = new JComboBox();
-		weightComboBox.setEditable(false);
-		weightComboBox.setToolTipText("Numeric dge column to use for "
+		_weightComboBox = new JComboBox();
+		_weightComboBox.setEditable(false);
+		_weightComboBox.setToolTipText("Numeric dge column to use for "
 			+ "edge weights in Community Detection. Select '" +
 			AppUtils.TYPE_NONE_VALUE + "' to"
 			+ " not use a column");
@@ -156,43 +199,85 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		labelConstraints.gridx = 1;
 		labelConstraints.anchor = GridBagConstraints.LINE_END;
 		labelConstraints.insets = new Insets(0, 0, 5, 0);
-		weightPanel.add(weightComboBox, weightComboConstraints);
+		weightPanel.add(_weightComboBox, weightComboConstraints);
 		return weightPanel;
 	}
 
+	/**
+	 * Updates the radio buttons related to node selection based
+	 * on network passed in. If there are selected nodes in the
+	 * network then the selected button is enabled and selected.
+	 * In addition, the number of nodes
+	 * selected is displayed in radio button text
+	 * @param network 
+	 */
+	public void updateNodeSelectionButtons(CyNetwork network){
+	    if (_allButton == null || _selectedButton == null){
+		return;
+	    }
+	    _allButton.setSelected(true);
+	    if (network == null){
+		_selectedButton.setEnabled(false);
+		_selectedButton.setText(SELECTED_NODES_BUTTON_LABEL);
+		return;
+	    }
+	    List<CyNode> nodes = CyTableUtil.getSelectedNodes(network);
+	    if (nodes == null || nodes.isEmpty()){
+		
+		_selectedButton.setEnabled(false);
+		_selectedButton.setText(SELECTED_NODES_BUTTON_LABEL);
+		return;
+	    }
+	    _selectedButton.setSelected(true);
+	    _selectedButton.setEnabled(true);
+	    _selectedButton.setText(Integer.toString(nodes.size()) + " " +
+		    SELECTED_NODES_BUTTON_LABEL);
+	}
+	
+	/**
+	 * Returns true if user wishes to run on selected nodes, false otherwise
+	 * @return 
+	 */
+	public boolean runOnSelectedNodes(){
+	    if (_selectedButton == null){
+		return false;
+	    }
+	    return _selectedButton.isSelected();
+	}
+	
 	/**
 	 * Updates the weight column Combo box with columns passed in
 	 * plus a default value denoting to not to use any column
 	 * @param columns new weight columns to use
 	 */
 	public void updateWeightColumnCombo(Set<String> columns){
-	    if (weightComboBox == null){
+	    if (_weightComboBox == null){
 		return;
 	    }
-	    weightComboBox.removeAllItems();
+	    _weightComboBox.removeAllItems();
 	    
-	    weightComboBox.addItem(AppUtils.TYPE_NONE_VALUE);
+	    _weightComboBox.addItem(AppUtils.TYPE_NONE_VALUE);
 	    if (columns == null){
 		return;
 	    }
 	    for (String cName : columns){
-		weightComboBox.addItem(cName);
+		_weightComboBox.addItem(cName);
 	    }
 	}
 	
 	public String getWeightColumn(){
-	    if (weightComboBox == null){
+	    if (_weightComboBox == null){
 		return null;
 	    }
-	    return (String)weightComboBox.getSelectedItem();
+	    return (String)_weightComboBox.getSelectedItem();
 	}
 	
 	private void loadAlgorithmCards(){
-	    algoCardMap.clear();
-	    cards.removeAll();
-	    algorithmComboBox.removeAllItems();
+	    _algoCardMap.clear();
+	    _cards.removeAll();
+	    _algorithmComboBox.removeAllItems();
 	    int rowIndex = 1;
-	    for (CommunityDetectionAlgorithm cda : algorithmList){
+	    for (CommunityDetectionAlgorithm cda : _algorithmList){
 		Map<String, CustomParameter> pMap = cda.getCustomParameterMap();
 		if (pMap == null){
 		    continue;
@@ -200,12 +285,12 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		CommunityDetectionRequest request = CDRestClient.getInstance().getRequestForAlgorithm(cda.getName());
 		JPanel algoCard = new JPanel();
 		algoCard.setName(cda.getName());
-		algoCardMap.put(cda.getName(), algoCard);
+		_algoCardMap.put(cda.getName(), algoCard);
 		algoCard.setLayout(new GridBagLayout());
 		algoCard.setBorder(BorderFactory.createCompoundBorder(
 			    BorderFactory.createTitledBorder("Parameters"),
 			    BorderFactory.createEmptyBorder(5,5,5,5)));
-		algorithmComboBox.addItem(cda.getDisplayName());
+		_algorithmComboBox.addItem(cda.getDisplayName());
 		for (String key : pMap.keySet()){
 		    CustomParameter cp = pMap.get(key);
 		    JLabel paramLabel = new JLabel(cp.getDisplayName() + ":");
@@ -248,7 +333,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		resetConstraints.insets = new Insets(0, 5, 0, 0);
 		resetConstraints.anchor = GridBagConstraints.LINE_START;
 		algoCard.add(this.getResetButton(cda.getName()), resetConstraints);
-		cards.add(algoCard, cda.getDisplayName());
+		_cards.add(algoCard, cda.getDisplayName());
 		this.resetAlgorithmToDefaults(cda.getName());
 	    }
 	    
@@ -283,8 +368,8 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		    File imgFile = File.createTempFile("info_icon", "png");
 	        InputStream imgStream = getClass().getClassLoader().getResourceAsStream("info_icon.png");
 		Files.copy(imgStream, imgFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-		infoIconSmall = new ImageIcon(new ImageIcon(imgFile.getPath()).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
-		infoIconLarge = new ImageIcon(new ImageIcon(imgFile.getPath()).getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH));
+		_infoIconSmall = new ImageIcon(new ImageIcon(imgFile.getPath()).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+		_infoIconLarge = new ImageIcon(new ImageIcon(imgFile.getPath()).getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH));
 	    }
 	    catch (IOException ex){
 		    
@@ -300,8 +385,8 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	 */
 	@Override
 	public void itemStateChanged(ItemEvent evt) {
-		CardLayout cl = (CardLayout)(cards.getLayout());
-		cl.show(cards, (String)evt.getItem());
+		CardLayout cl = (CardLayout)(_cards.getLayout());
+		cl.show(_cards, (String)evt.getItem());
 	}
 	
 	/**
@@ -311,7 +396,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	 */
 	private JEditorPane getCustomParameterHelp(final CustomParameter parameter){
 	    if (parameter == null){
-		return editorPaneFac.getDescriptionFrame("No parameter set, unable to generate help");
+		return _editorPaneFac.getDescriptionFrame("No parameter set, unable to generate help");
 	    }
 	    StringBuilder sb = new StringBuilder();
 	    sb.append("<b>Parameter:</b> ");
@@ -330,7 +415,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		sb.append("<br/>");
 		sb.append(parameter.getValidationHelp());
 	    }
-	    return editorPaneFac.getDescriptionFrame(sb.toString());
+	    return _editorPaneFac.getDescriptionFrame(sb.toString());
 	}
 	
 	/**
@@ -342,7 +427,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	 * @throws IOException 
 	 */
 	private JLabel getParameterInfoIcon(final CustomParameter parameter) {
-		JLabel paramLabel = new JLabel(infoIconSmall, JLabel.CENTER);
+		JLabel paramLabel = new JLabel(_infoIconSmall, JLabel.CENTER);
 		paramLabel.setToolTipText("Click here for more information about '" +
 			parameter.getDisplayName() + "' parameter");
 
@@ -358,7 +443,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 			public void keyReleased(KeyEvent e) {
 				JOptionPane.showMessageDialog(getParent(), getCustomParameterHelp(parameter),
 					"Parameter " + parameter.getDisplayName(), JOptionPane.INFORMATION_MESSAGE,
-					infoIconLarge);
+					_infoIconLarge);
 			}
 
 			@Override
@@ -398,7 +483,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 			public void mouseClicked(MouseEvent e) {
 				JOptionPane.showMessageDialog(getParent(), getCustomParameterHelp(parameter),
 					"Parameter " + parameter.getDisplayName(), JOptionPane.INFORMATION_MESSAGE,
-					infoIconLarge);
+					_infoIconLarge);
 			}
 		});
 
@@ -413,7 +498,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	 */
 	private void resetAlgorithmToDefaults(final String algorithm){
 	    _logger.debug("Resetting " + algorithm + " to defaults");
-	    if (algoCardMap.containsKey(algorithm) == false){
+	    if (_algoCardMap.containsKey(algorithm) == false){
 		return;
 	    }
 	    CommunityDetectionAlgorithm cda = getCommunityDetectionAlgorithm(algorithm);
@@ -421,7 +506,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		return;
 	    }
 	    Map<String, CustomParameter> pMap = cda.getCustomParameterMap();
-	    JPanel algoCard = algoCardMap.get(algorithm);
+	    JPanel algoCard = _algoCardMap.get(algorithm);
 	    for (Component c : algoCard.getComponents()){
 		if (c.getName() == null || !c.getName().startsWith(algorithm + ":::")){
 		    continue;
@@ -455,7 +540,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	 * @return 
 	 */
 	private CommunityDetectionAlgorithm getCommunityDetectionAlgorithm(final String algorithm){
-	    for (CommunityDetectionAlgorithm cda : this.algorithmList){
+	    for (CommunityDetectionAlgorithm cda : this._algorithmList){
 		if (cda.getName().equals(algorithm)){
 		    return cda;
 		}
@@ -464,7 +549,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	}
 	
 	private CommunityDetectionAlgorithm getCommunityDetectionAlgorithmByDisplayName(final String displayName){
-	    for (CommunityDetectionAlgorithm cda : this.algorithmList){
+	    for (CommunityDetectionAlgorithm cda : this._algorithmList){
 		if (cda.getDisplayName().equals(displayName)){
 		    return cda;
 		}
@@ -474,15 +559,15 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	
 	
 	public CommunityDetectionAlgorithm getSelectedCommunityDetectionAlgorithm(){
-	    if (guiLoaded == false){
+	    if (_guiLoaded == false){
 		_logger.info("gui not loaded");
 		return null;
 	    }
-	    if (algorithmComboBox == null){
+	    if (_algorithmComboBox == null){
 		_logger.info("no combo box loaded");
 		return null;
 	    }
-	    String algo = (String)algorithmComboBox.getSelectedItem();
+	    String algo = (String)_algorithmComboBox.getSelectedItem();
 	    if (algo == null){
 		_logger.info("no algorithm selected in combo box");
 		return null;
@@ -505,10 +590,10 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	 *         to empty string, otherwise it is not included in {@link java.util.Map}
 	 */
 	public Map<String, String> getAlgorithmCustomParameters(final String algorithm){
-	    if (guiLoaded == false){
+	    if (_guiLoaded == false){
 		this.createGUI();
 	    }
-	    JPanel algoCard = algoCardMap.get(algorithm);
+	    JPanel algoCard = _algoCardMap.get(algorithm);
 	    if (algoCard == null){
 		return null;
 	    }

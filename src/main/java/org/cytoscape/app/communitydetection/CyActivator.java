@@ -19,7 +19,6 @@ import org.cytoscape.app.communitydetection.hierarchy.LauncherDialog;
 import org.cytoscape.app.communitydetection.hierarchy.TaskListenerFactory;
 import org.cytoscape.app.communitydetection.subnetwork.SubNetworkTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.termmap.NetworkTermMappingTaskFactoryImpl;
-import org.cytoscape.app.communitydetection.termmap.NodeTermMappingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.io.BasicCyFileFilter;
@@ -98,13 +97,14 @@ public class CyActivator extends AbstractCyActivator {
 		registerServiceListener(bc, edgeTaskFactory, "addWriterFactory", "removeWriterFactory",
 				CyNetworkViewWriterFactory.class);
 
+		JEditorPaneFactoryImpl editorPaneFac = new JEditorPaneFactoryImpl();
 		// Add Run Community Detection under Apps => Community Detection
 		// menu
 		Properties taskExecProps = new Properties();
 		taskExecProps.setProperty(MENU_GRAVITY, "1.0");
 		taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
 		taskExecProps.setProperty(TITLE, "Run Community Detection");
-		LauncherDialog clusterAlgoDialog = new LauncherDialog(new JEditorPaneFactoryImpl(),
+		LauncherDialog clusterAlgoDialog = new LauncherDialog(editorPaneFac,
 		                                                      AppUtils.CD_ALGORITHM_INPUT_TYPE);
 		registerAllServices(bc, new HierarchyTaskFactoryImpl(swingApplication, clusterAlgoDialog), taskExecProps);
 		
@@ -118,8 +118,15 @@ public class CyActivator extends AbstractCyActivator {
 		                                                      AppUtils.TM_ALGORITHM_INPUT_TYPE);
 		registerAllServices(bc, new NetworkTermMappingTaskFactoryImpl(swingApplication, tmAlgoDialog), tmExecProps);
 
+		// add About undern Apps => Community Detection
+		// menu
+		Properties aboutProps = new Properties();
+		aboutProps.setProperty(MENU_GRAVITY, "3.0");
+		aboutProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
+		aboutProps.setProperty(TITLE, "About");
+		registerAllServices(bc, new AboutTaskFactoryImpl(swingApplication, editorPaneFac), aboutProps);
 		
-		// add View Interactions for this Community in context menu
+                // add View Interactions for this Community in context menu
 		// displayed when user right clicks on a node
 		Properties contextMenuProps = new Properties();
 		contextMenuProps.setProperty(PREFERRED_MENU, AppUtils.CONTEXT_MENU_CD);
