@@ -9,22 +9,18 @@ import static org.cytoscape.work.ServiceProperties.MENU_GRAVITY;
 import static org.cytoscape.work.ServiceProperties.PREFERRED_MENU;
 import static org.cytoscape.work.ServiceProperties.TITLE;
 
-import java.util.List;
 import java.util.Properties;
 
 import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.edgelist.WriterTaskFactoryImpl;
-import org.cytoscape.app.communitydetection.hierarchy.HierarchyLauncherMenu;
 import org.cytoscape.app.communitydetection.hierarchy.HierarchyTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.hierarchy.JEditorPaneFactoryImpl;
 import org.cytoscape.app.communitydetection.hierarchy.LauncherDialog;
 import org.cytoscape.app.communitydetection.hierarchy.TaskListenerFactory;
-import org.cytoscape.app.communitydetection.rest.CDRestClient;
 import org.cytoscape.app.communitydetection.subnetwork.SubNetworkTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.termmap.NetworkTermMappingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.termmap.NodeTermMappingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.util.AppUtils;
-import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.io.BasicCyFileFilter;
 import org.cytoscape.io.DataCategory;
@@ -43,7 +39,6 @@ import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.SynchronousTaskManager;
-import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm;
 import org.osgi.framework.BundleContext;
 
 public class CyActivator extends AbstractCyActivator {
@@ -55,7 +50,6 @@ public class CyActivator extends AbstractCyActivator {
 	@Override
 	public void start(BundleContext bc) throws Exception {
 
-		final CyApplicationManager applicationManager = getService(bc, CyApplicationManager.class);
 		final CyNetworkFactory networkFactory = getService(bc, CyNetworkFactory.class);
 		final CyNetworkViewFactory networkViewFactory = getService(bc, CyNetworkViewFactory.class);
 		final CyNetworkManager networkManager = getService(bc, CyNetworkManager.class);
@@ -104,19 +98,20 @@ public class CyActivator extends AbstractCyActivator {
 		registerServiceListener(bc, edgeTaskFactory, "addWriterFactory", "removeWriterFactory",
 				CyNetworkViewWriterFactory.class);
 
+		// Add Run Community Detection under Apps => Community Detection
+		// menu
 		Properties taskExecProps = new Properties();
 		taskExecProps.setProperty(MENU_GRAVITY, "1.0");
-		// Registering Edge List services
 		taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
 		taskExecProps.setProperty(TITLE, "Run Community Detection");
 		LauncherDialog clusterAlgoDialog = new LauncherDialog(new JEditorPaneFactoryImpl(),
 		                                                      AppUtils.CD_ALGORITHM_INPUT_TYPE);
 		registerAllServices(bc, new HierarchyTaskFactoryImpl(swingApplication, clusterAlgoDialog), taskExecProps);
-
 		
+		// Add Run Functional Enrichment under Apps => Community Detection
+		// menu
 		Properties tmExecProps = new Properties();
 		tmExecProps.setProperty(MENU_GRAVITY, "2.0");
-		// Registering Edge List services
 		tmExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
 		tmExecProps.setProperty(TITLE, "Run Functional Enrichment");
 		LauncherDialog tmAlgoDialog = new LauncherDialog(new JEditorPaneFactoryImpl(),
@@ -124,36 +119,28 @@ public class CyActivator extends AbstractCyActivator {
 		registerAllServices(bc, new NetworkTermMappingTaskFactoryImpl(swingApplication, tmAlgoDialog), tmExecProps);
 
 		
-		/**
-		for (CommunityDetectionAlgorithm algo : tmAlgos) {
-			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU_TM + "." + algo.getDisplayName());
-			taskExecProps.setProperty(TITLE, algo.getDisplayName());
-			registerAllServices(bc, new NetworkTermMappingTaskFactoryImpl(algo, AppUtils.TYPE_NONE), taskExecProps);
-
-			taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU_TM + "." + algo.getDisplayName());
-			taskExecProps.setProperty(TITLE, AppUtils.TYPE_ABOUT_VALUE);
-			registerAllServices(bc, new NetworkTermMappingTaskFactoryImpl(algo, AppUtils.TYPE_ABOUT), taskExecProps);
-		}
-		*/
-		List<CommunityDetectionAlgorithm> tmAlgos = CDRestClient.getInstance()
-				.getAlgorithmsByType(AppUtils.TM_ALGORITHM_INPUT_TYPE);
+		// add View Interactions for this Community in context menu
+		// displayed when user right clicks on a node
 		Properties contextMenuProps = new Properties();
 		contextMenuProps.setProperty(PREFERRED_MENU, AppUtils.CONTEXT_MENU_CD);
 		contextMenuProps.setProperty(ENABLE_FOR, ENABLE_FOR_SELECTED_NODES);
-		contextMenuProps.setProperty(TITLE, "View Interactions for this Community");
+		contextMenuProps.setProperty(TITLE, "View Interactions for Selected Node");
 		contextMenuProps.put(IN_MENU_BAR, false);
 		contextMenuProps.put(IN_CONTEXT_MENU, true);
 		SubNetworkTaskFactoryImpl subnetworkfactoryImpl = new SubNetworkTaskFactoryImpl(rootNetworkManager,
 				networkManager, networkViewManager, networkViewFactory, visualMappingManager, layoutAlgorithmManager,
 				syncTaskManager, networkNaming);
 		registerAllServices(bc, subnetworkfactoryImpl, contextMenuProps);
-		for (CommunityDetectionAlgorithm algo : tmAlgos) {
-			contextMenuProps.setProperty(PREFERRED_MENU, AppUtils.CONTEXT_MENU_TM);
-			contextMenuProps.setProperty(TITLE, algo.getDisplayName());
-			registerAllServices(bc, new NodeTermMappingTaskFactoryImpl(algo), contextMenuProps);
-		}
-
-		//registerAllServices(bc, new HierarchyLauncherMenu(swingApplication));
+		
+		// add Run Functional Enrichment in context menu displayed when
+		// user right clicks on a node
+		//Properties contextMenuFunc = new Properties();
+		//contextMenuFunc.setProperty(PREFERRED_MENU, AppUtils.CONTEXT_MENU_CD);
+		//contextMenuFunc.setProperty(ENABLE_FOR, ENABLE_FOR_SELECTED_NODES);
+		//contextMenuFunc.setProperty(TITLE, "Run Functional Enrichment on Selected Nodes");
+		//contextMenuFunc.put(IN_MENU_BAR, false);
+		//contextMenuFunc.put(IN_CONTEXT_MENU, true);
+		//registerAllServices(bc, new NodeTermMappingTaskFactoryImpl(null), contextMenuFunc);
 	}
 
 }

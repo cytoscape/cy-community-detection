@@ -160,6 +160,11 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		return weightPanel;
 	}
 
+	/**
+	 * Updates the weight column Combo box with columns passed in
+	 * plus a default value denoting to not to use any column
+	 * @param columns new weight columns to use
+	 */
 	public void updateWeightColumnCombo(Set<String> columns){
 	    if (weightComboBox == null){
 		return;
@@ -286,6 +291,13 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	    }
 	}
 
+	/**
+	 * Event invoked when user interacts with algorithm combo box
+	 * to select a different algorithm. When that happens this code
+	 * switches the parameter panel/card to correspond to the 
+	 * newly selected algorithm
+	 * @param evt 
+	 */
 	@Override
 	public void itemStateChanged(ItemEvent evt) {
 		CardLayout cl = (CardLayout)(cards.getLayout());
@@ -400,7 +412,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	 * @param algorithm 
 	 */
 	private void resetAlgorithmToDefaults(final String algorithm){
-	    System.out.println("Resetting " + algorithm + " to defaults");
+	    _logger.debug("Resetting " + algorithm + " to defaults");
 	    if (algoCardMap.containsKey(algorithm) == false){
 		return;
 	    }
@@ -463,19 +475,19 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	
 	public CommunityDetectionAlgorithm getSelectedCommunityDetectionAlgorithm(){
 	    if (guiLoaded == false){
-		System.out.println("gui not loaded");
+		_logger.info("gui not loaded");
 		return null;
 	    }
 	    if (algorithmComboBox == null){
-		System.out.println("no combo box loaded");
+		_logger.info("no combo box loaded");
 		return null;
 	    }
 	    String algo = (String)algorithmComboBox.getSelectedItem();
 	    if (algo == null){
-		System.out.println("no algorithm selected in combo box");
+		_logger.info("no algorithm selected in combo box");
 		return null;
 	    }
-	    System.out.println("Algorithm: " + algo);
+	    _logger.debug("Algorithm: " + algo);
 	    return getCommunityDetectionAlgorithmByDisplayName(algo);
 	}
 	/**
@@ -541,8 +553,8 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		    public void actionPerformed(ActionEvent e) {
 			JComponent c = (JComponent)e.getSource();
 			String algorithm = c.getName();
-			System.out.println("Reset button clicked "
-				+ "on algorithm: " + algorithm);
+			_logger.debug("Reset button clicked "
+				      + "on algorithm: " + algorithm);
 			resetAlgorithmToDefaults(algorithm);
 		    }
 		});

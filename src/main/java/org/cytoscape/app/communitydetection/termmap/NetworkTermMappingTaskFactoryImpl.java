@@ -40,8 +40,7 @@ public class NetworkTermMappingTaskFactoryImpl implements NetworkTaskFactory {
 				+ "Functional Enrichment.\n"
 				+ "For more information click About menu item",
 			AppUtils.APP_NAME, JOptionPane.ERROR_MESSAGE);
-		 return new TaskIterator(new TermMappingTask("foo",
-			 AppUtils.TYPE_ABOUT, network, false));
+		 return new TaskIterator(new TermMappingTask(null, null, null, false));
 	    }
 	    if (network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_MEMBER_LIST) == null){
 		JOptionPane.showMessageDialog(_swingApplication.getJFrame(),
@@ -51,8 +50,7 @@ public class NetworkTermMappingTaskFactoryImpl implements NetworkTaskFactory {
 				+ "Functional Enrichment.\n"
 				+ "For more information click About menu item",
 			AppUtils.APP_NAME, JOptionPane.ERROR_MESSAGE);
-		 return new TaskIterator(new TermMappingTask("foo",
-			 AppUtils.TYPE_ABOUT, network, false));
+		 return new TaskIterator(new TermMappingTask(null, null, null, false));
 	    }
 	    
 	    _dialog.createGUI();
@@ -73,22 +71,13 @@ public class NetworkTermMappingTaskFactoryImpl implements NetworkTaskFactory {
 		    _logger.debug("User wants to run: " + cda.getName() +
 			    customParameters == null ? "" : " with " +
 				    customParameters.toString());
-		    
-		    JOptionPane.showMessageDialog(_swingApplication.getJFrame(),
-			"TODO get TermMappingTask updated to work with new design ",
-			AppUtils.APP_NAME, JOptionPane.ERROR_MESSAGE);
-		    return new TaskIterator(new TermMappingTask("foo",
-		    AppUtils.TYPE_ABOUT, network, false));
-		    //return new TaskIterator(new TermMappingTask(network, cda, customParameters,
-			    //_dialog.getWeightColumn()));
+
+		    return new TaskIterator(new TermMappingTask(network, cda, customParameters, false));
 		} else {
 		   _logger.error("Couldnt get algorithm from dialog...");
 		}
 	    }
-		
-	    return new TaskIterator(new TermMappingTask("foo",
-		    AppUtils.TYPE_ABOUT, network, false));
-	//return new TaskIterator(new TermMappingTask(algorithm.getName(), AppUtils.TYPE_NONE, network, false));
+	    return new TaskIterator(new TermMappingTask(null, null, null, false));
 	}
 
 	@Override

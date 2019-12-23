@@ -10,17 +10,22 @@ import org.cytoscape.model.CyNode;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionResult;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.Map;
+import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm;
 
 public class TermMappingCallable implements Callable<Boolean> {
 
-	private final String algorithm;
-	private final CyNetwork network;
-	private final CyNode node;
+	private final CommunityDetectionAlgorithm _algorithm;
+	private final Map<String, String> _customParameters;
+	private final CyNetwork _network;
+	private final CyNode _node;
 
-	public TermMappingCallable(String algorithm, CyNetwork network, CyNode node) {
-		this.algorithm = algorithm;
-		this.network = network;
-		this.node = node;
+	public TermMappingCallable(CyNetwork network, CommunityDetectionAlgorithm algorithm,
+		Map<String,String> customParameters, CyNode node) {
+		this._algorithm = algorithm;
+		this._network = network;
+		this._customParameters = customParameters;
+		this._node = node;
 	}
 
 	@Override
@@ -28,9 +33,10 @@ public class TermMappingCallable implements Callable<Boolean> {
 		if (CDRestClient.getInstance().getIsTaskCanceled()) {
 			return false;
 		}
-		String memberList = network.getRow(node).get(AppUtils.COLUMN_CD_MEMBER_LIST, String.class)
+		String memberList = _network.getRow(_node).get(AppUtils.COLUMN_CD_MEMBER_LIST, String.class)
 				.replaceAll(AppUtils.CD_MEMBER_LIST_DELIMITER, ",");
-		String URI = CDRestClient.getInstance().postCDData(algorithm, null, memberList);
+		String URI = CDRestClient.getInstance().postCDData(_algorithm.getName(),
+			_customParameters, memberList);
 		CommunityDetectionResult cdResult = CDRestClient.getInstance().getCDResult(URI, 300);
 		String name = AppUtils.TYPE_NONE_VALUE;
 		String annotatedList = "";
@@ -50,20 +56,20 @@ public class TermMappingCallable implements Callable<Boolean> {
 				}
 			}
 		}
-		network.getRow(node).set(AppUtils.COLUMN_CD_COMMUNITY_NAME, name);
-		network.getRow(node).set(AppUtils.COLUMN_CD_ANNOTATED_MEMBERS, annotatedList);
-		network.getRow(node).set(AppUtils.COLUMN_CD_ANNOTATED_MEMBERS_SIZE, counter);
-		network.getRow(node).set(AppUtils.COLUMN_CD_ANNOTATED_PVALUE, pvalue);
+		_network.getRow(_node).set(AppUtils.COLUMN_CD_COMMUNITY_NAME, name);
+		_network.getRow(_node).set(AppUtils.COLUMN_CD_ANNOTATED_MEMBERS, annotatedList);
+		_network.getRow(_node).set(AppUtils.COLUMN_CD_ANNOTATED_MEMBERS_SIZE, counter);
+		_network.getRow(_node).set(AppUtils.COLUMN_CD_ANNOTATED_PVALUE, pvalue);
 		double overlap = 0.0;
-		double inputGeneSize = network.getRow(node).get(AppUtils.COLUMN_CD_MEMBER_LIST_SIZE,
+		double inputGeneSize = _network.getRow(_node).get(AppUtils.COLUMN_CD_MEMBER_LIST_SIZE,
 			Integer.class);
 		
 		if (inputGeneSize > 0){
 		    overlap = (double)counter/inputGeneSize;
 		}
-		network.getRow(node).set(AppUtils.COLUMN_CD_ANNOTATED_OVERLAP, overlap);
+		_network.getRow(_node).set(AppUtils.COLUMN_CD_ANNOTATED_OVERLAP, overlap);
 		if (name != AppUtils.TYPE_NONE_VALUE) {
-			network.getRow(node).set(AppUtils.COLUMN_CD_LABELED, true);
+			_network.getRow(_node).set(AppUtils.COLUMN_CD_LABELED, true);
 		}
 		return true;
 	}

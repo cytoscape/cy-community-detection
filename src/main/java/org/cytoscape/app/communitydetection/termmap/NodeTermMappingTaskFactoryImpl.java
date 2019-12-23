@@ -18,16 +18,16 @@ import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm;
  */
 public class NodeTermMappingTaskFactoryImpl extends AbstractNodeViewTaskFactory implements NetworkViewTaskFactory {
 
-	private final CommunityDetectionAlgorithm algorithm;
+	private final CommunityDetectionAlgorithm _algorithm;
 
 	public NodeTermMappingTaskFactoryImpl(CommunityDetectionAlgorithm algorithm) {
-		this.algorithm = algorithm;
+		this._algorithm = algorithm;
 	}
 
 	@Override
 	public TaskIterator createTaskIterator(CyNetworkView networkView) {
 		return new TaskIterator(
-				new TermMappingTask(algorithm.getName(), AppUtils.TYPE_NONE, networkView.getModel(), true));
+				new TermMappingTask(networkView.getModel(), _algorithm, null, true));
 	}
 
 	@Override
