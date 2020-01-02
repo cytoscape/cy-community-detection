@@ -48,9 +48,9 @@ public class AboutTaskFactoryImpl implements NetworkTaskFactory {
 	sb.append("a framework, and remote service, to enable access to<br/>");
 	sb.append("other popular community detection (CD) algorithms ");
 	sb.append("capable of hierarchical construction.<br/><br/>In addition, ");
-	sb.append("this App offers access to Gene Ontology enrichment ");
-	sb.append("for annotation of community nodes to gain<br/>");
-	sb.append("biological insight. ");
+	sb.append("this App offers access to Gene Ontology enrichment (functional enrichment) ");
+	sb.append("for annotation of<br/>community nodes to gain ");
+	sb.append("biological insight.<br/><br/>");
 	sb.append("<a href=\"https://github.com/idekerlab/cy-community-detection\">Click here for more information.</a>");
 	
 	_editorPane = _editorPaneFactory.getDescriptionFrame(sb.toString());
