@@ -31,7 +31,7 @@ import org.ndexbio.communitydetection.rest.model.Task;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.TextNode;
-import org.cytoscape.app.communitydetection.hierarchy.LauncherDialog;
+import org.ndexbio.communitydetection.rest.model.ErrorResponse;
 
 /**
  * REST API client for CD service. Implements GET, POST and DELETE.
@@ -125,8 +125,16 @@ public class CDRestClient {
 			}
 		}
 		if (202 != httpPostResponse.getStatusLine().getStatusCode()) {
-			throw new Exception("POST call to " + getBaseurl() + " failed. Error code: "
-					+ httpPostResponse.getStatusLine().getStatusCode());
+		    String additionalInfo = "";
+		    try {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(httpPostResponse.getEntity().getContent()));
+			ErrorResponse eObj = mapper.readValue(reader, ErrorResponse.class);
+			additionalInfo = " : " + eObj.getMessage() + " (" + eObj.getDescription() + ")";
+		    } catch(Exception subex){
+			
+		    }
+		    throw new Exception("POST call to " + getBaseurl() + " failed. Error code: "
+					+ httpPostResponse.getStatusLine().getStatusCode() + additionalInfo);
 		}
 		BufferedReader reader = new BufferedReader(new InputStreamReader(httpPostResponse.getEntity().getContent()));
 		Task serviceTask = mapper.readValue(reader, Task.class);
