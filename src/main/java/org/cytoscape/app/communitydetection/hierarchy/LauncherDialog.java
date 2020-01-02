@@ -189,7 +189,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 
 		_weightComboBox = new JComboBox();
 		_weightComboBox.setEditable(false);
-		_weightComboBox.setToolTipText("Numeric dge column to use for "
+		_weightComboBox.setToolTipText("Numeric edge column to use for "
 			+ "edge weights in Community Detection. Select '" +
 			AppUtils.TYPE_NONE_VALUE + "' to"
 			+ " not use a column");
@@ -333,6 +333,14 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		resetConstraints.insets = new Insets(0, 5, 0, 0);
 		resetConstraints.anchor = GridBagConstraints.LINE_START;
 		algoCard.add(this.getResetButton(cda.getName()), resetConstraints);
+		
+		GridBagConstraints aboutConstraints = new GridBagConstraints();
+		aboutConstraints.gridy = 0;
+		aboutConstraints.gridx = 1;
+		aboutConstraints.insets = new Insets(0, 0, 5, 0);
+		aboutConstraints.anchor = GridBagConstraints.LINE_END;
+		algoCard.add(this.getAboutButton(cda), aboutConstraints);
+
 		_cards.add(algoCard, cda.getDisplayName());
 		this.resetAlgorithmToDefaults(cda.getName());
 	    }
@@ -644,5 +652,28 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		    }
 		});
 		return button;
+	}
+	
+	private JButton getAboutButton(final CommunityDetectionAlgorithm algorithm){
+	    JButton button = new JButton(AppUtils.ABOUT);
+	    button.setName(AppUtils.ABOUT);
+	    button.setToolTipText("Displays information about " + algorithm.getDisplayName());
+	    button.addActionListener(new ActionListener() {
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+			
+			_logger.debug("About button clicked "
+				      + "on algorithm: " + algorithm.getDisplayName());
+			JOptionPane.showMessageDialog(getParent(), getAlgorithmAboutFrame(algorithm),
+					"About " + algorithm.getDisplayName(),
+					JOptionPane.INFORMATION_MESSAGE,
+					_infoIconLarge);
+		    }
+		});
+	    return button;
+	}
+	
+	private JEditorPane getAlgorithmAboutFrame(CommunityDetectionAlgorithm algorithm){
+	    return _editorPaneFac.getDescriptionFrame(algorithm.getDescription() == null ? "No additional information available" : algorithm.getDescription());
 	}
 }
