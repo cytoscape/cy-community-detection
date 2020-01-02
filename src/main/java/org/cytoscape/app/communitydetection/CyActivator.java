@@ -116,7 +116,8 @@ public class CyActivator extends AbstractCyActivator {
 		tmExecProps.setProperty(TITLE, "Run Functional Enrichment");
 		LauncherDialog tmAlgoDialog = new LauncherDialog(new JEditorPaneFactoryImpl(),
 		                                                      AppUtils.TM_ALGORITHM_INPUT_TYPE);
-		registerAllServices(bc, new NetworkTermMappingTaskFactoryImpl(swingApplication, tmAlgoDialog), tmExecProps);
+		NetworkTermMappingTaskFactoryImpl termFac = new NetworkTermMappingTaskFactoryImpl(swingApplication, tmAlgoDialog); 
+		registerAllServices(bc, termFac, tmExecProps);
 
 		// add About undern Apps => Community Detection
 		// menu
@@ -138,16 +139,6 @@ public class CyActivator extends AbstractCyActivator {
 				networkManager, networkViewManager, networkViewFactory, visualMappingManager, layoutAlgorithmManager,
 				syncTaskManager, networkNaming);
 		registerAllServices(bc, subnetworkfactoryImpl, contextMenuProps);
-		
-		// add Run Functional Enrichment in context menu displayed when
-		// user right clicks on a node
-		//Properties contextMenuFunc = new Properties();
-		//contextMenuFunc.setProperty(PREFERRED_MENU, AppUtils.CONTEXT_MENU_CD);
-		//contextMenuFunc.setProperty(ENABLE_FOR, ENABLE_FOR_SELECTED_NODES);
-		//contextMenuFunc.setProperty(TITLE, "Run Functional Enrichment on Selected Nodes");
-		//contextMenuFunc.put(IN_MENU_BAR, false);
-		//contextMenuFunc.put(IN_CONTEXT_MENU, true);
-		//registerAllServices(bc, new NodeTermMappingTaskFactoryImpl(null), contextMenuFunc);
 	}
 
 }
