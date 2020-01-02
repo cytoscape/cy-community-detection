@@ -44,7 +44,12 @@ public class WriterTask implements CyWriter {
 			}
 		} else {
 			for (CyEdge edge : network.getEdgeList()) {
-				if ((Double) network.getRow(edge).get(weightColumn, getColumnType()) < 0) {
+				Double cellValue = (Double) network.getRow(edge).get(weightColumn, getColumnType());
+				if (cellValue == null){
+				    throw new Exception(weightColumn + " does not have a value for row with SUID: " + edge.getSUID().toString() +
+					    " Please select a column with values in all cells");
+				}
+				if (cellValue < 0) {
 					throw new Exception(weightColumn
 							+ " contains negative values. Please select a column with non-negative data values");
 				}
