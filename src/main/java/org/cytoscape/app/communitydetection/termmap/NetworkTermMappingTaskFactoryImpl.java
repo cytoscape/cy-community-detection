@@ -44,9 +44,9 @@ public class NetworkTermMappingTaskFactoryImpl implements NetworkTaskFactory {
 	    }
 	    if (network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_MEMBER_LIST) == null){
 		JOptionPane.showMessageDialog(_swingApplication.getJFrame(),
-			"A node column named " + AppUtils.COLUMN_CD_MEMBER_LIST + " of "
-				+ "type String with data\ncontaining space delimited "
-				+ "set of genes needs to exist on network to run "
+			"A node column named " + AppUtils.COLUMN_CD_MEMBER_LIST + " ("
+				+ "type String with genes delimited by spaces)\n" 
+				+ "needs to exist on network to run "
 				+ "Functional Enrichment.\n"
 				+ "For more information click About menu item",
 			AppUtils.APP_NAME, JOptionPane.ERROR_MESSAGE);
