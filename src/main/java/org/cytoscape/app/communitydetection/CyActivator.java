@@ -61,7 +61,7 @@ public class CyActivator extends AbstractCyActivator {
 		final CyNetworkNaming networkNaming = getService(bc, CyNetworkNaming.class);
 		final CySwingApplication swingApplication = getService(bc, CySwingApplication.class);
 		
-		String cyPropertyName = "project.properties";
+		String cyPropertyName = "communitydetection";
 		PropertiesReader propReader = new PropertiesReader(AppUtils.APP_NAME, cyPropertyName);
 		Properties propReaderProperties = new Properties();
 		propReaderProperties.setProperty("cyPropertyName", cyPropertyName);
