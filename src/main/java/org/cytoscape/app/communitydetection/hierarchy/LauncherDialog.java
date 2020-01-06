@@ -282,7 +282,6 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		if (pMap == null){
 		    continue;
 		}
-		CommunityDetectionRequest request = CDRestClient.getInstance().getRequestForAlgorithm(cda.getName());
 		JPanel algoCard = new JPanel();
 		algoCard.setName(cda.getName());
 		_algoCardMap.put(cda.getName(), algoCard);
@@ -302,7 +301,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		    labelConstraints.insets = new Insets(0, 5, 5, 0);
 		    algoCard.add(paramLabel, labelConstraints);
 
-		    JComponent inputComponent = getCustomParameterInput(cda.getName(), request, cp);
+		    JComponent inputComponent = getCustomParameterInput(cda.getName(), cp);
 		    if (cp.getDescription() != null){
 			inputComponent.setToolTipText(cp.getDescription());
 			paramLabel.setToolTipText(cp.getDescription());
@@ -347,30 +346,34 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	    
 	}
 	
-	private JComponent getCustomParameterInput(final String algorithm, final CommunityDetectionRequest request,
+	/**
+	 * Creates a gui component that represents an input field for the parameter passed in
+	 * @param algorithm the name of the algorithm
+	 * @param request the request
+	 * @param parameter
+	 * @return 
+	 */
+	private JComponent getCustomParameterInput(final String algorithm,
 		final CustomParameter parameter){
 	    if (parameter.getType() != null && parameter.getType().equalsIgnoreCase("flag")){
 		    JCheckBox checkBox = new JCheckBox();
 		    checkBox.setName(algorithm + INPUTDELIM + parameter.getName());
-		    if (request != null && request.getCustomParameters().containsKey(parameter.getName())){
-			checkBox.setSelected(true);
-		    }
 		    return checkBox;
 	    }
+	    JTextField textField = null;
 	    if (parameter.getDefaultValue() != null){
-		JTextField textField = null;
-		if (request != null && request.getCustomParameters().containsKey(parameter.getName())){
-		    textField = new JTextField(request.getCustomParameters().get(parameter.getName()));
-		} else {
-		    textField = new JTextField(parameter.getDefaultValue());
-		}
-		textField.setName(algorithm + INPUTDELIM + parameter.getName());
+		textField = new JTextField(parameter.getDefaultValue());
+	    } 
+	    else {
+		textField = new JTextField();
 	    }
-	    JTextField textField = new JTextField();
 	    textField.setName(algorithm + INPUTDELIM + parameter.getName());
 	    return textField;
 	}
 	
+	/**
+	 * Loads a small and large info image icon
+	 */
 	private void loadImageIcon(){
 	    try {
 		    File imgFile = File.createTempFile("info_icon", "png");
@@ -556,6 +559,13 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	    return null;
 	}
 	
+	/**
+	 * Given the display name for a Community Detection Algorithm get
+	 * the corresponding {@link org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm}
+	 * from set of algorithms loaded in {@link #createGUI()} method
+	 * @param displayName
+	 * @return algorithm that matches or null
+	 */
 	private CommunityDetectionAlgorithm getCommunityDetectionAlgorithmByDisplayName(final String displayName){
 	    for (CommunityDetectionAlgorithm cda : this._algorithmList){
 		if (cda.getDisplayName().equals(displayName)){
@@ -565,7 +575,10 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	    return null;
 	}
 	
-	
+	/**
+	 * Gets the currently selected community detection algorithm 
+	 * @return Community Detection Algorithm or null if not found
+	 */
 	public CommunityDetectionAlgorithm getSelectedCommunityDetectionAlgorithm(){
 	    if (_guiLoaded == false){
 		_logger.info("gui not loaded");
@@ -654,6 +667,12 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		return button;
 	}
 	
+	/**
+	 * Creates {@link javax.swing.JButton} about button that displays information
+	 * about algorithm passed in
+	 * @param algorithm the algorithm to display information about
+	 * @return About button with listener setup to display dialog when clicked
+	 */
 	private JButton getAboutButton(final CommunityDetectionAlgorithm algorithm){
 	    JButton button = new JButton(AppUtils.ABOUT);
 	    button.setName(AppUtils.ABOUT);
@@ -673,6 +692,13 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	    return button;
 	}
 	
+	/**
+	 * Creates {@link javax.swing.JEditorPane} with text from 
+	 * {@link org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm#getDescription()} 
+	 * method or if that is null a simple string saying no information is available
+	 * @param algorithm Algorithm to get description from
+	 * @return {@link javax.swing.JEditorPane} with text and links describing algorithm passed in
+	 */
 	private JEditorPane getAlgorithmAboutFrame(CommunityDetectionAlgorithm algorithm){
 	    return _editorPaneFac.getDescriptionFrame(algorithm.getDescription() == null ? "No additional information available" : algorithm.getDescription());
 	}
