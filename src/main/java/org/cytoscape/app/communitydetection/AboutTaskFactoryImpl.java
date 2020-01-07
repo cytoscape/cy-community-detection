@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.Properties;
 import javax.swing.ImageIcon;
 import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
@@ -43,8 +44,17 @@ public class AboutTaskFactoryImpl implements NetworkTaskFactory {
 	loadImageIcon();
 	
 	StringBuilder sb = new StringBuilder();
-	
-	sb.append("Community Detection is a Cytoscape App that includes ");
+	String version = "Unknown";
+	Properties properties = new Properties();
+	try {
+	    properties.load(getClass().getClassLoader().getResourceAsStream(AppUtils.PROP_NAME));
+	    version = properties.getProperty(AppUtils.PROP_PROJECT_VERSION, version);
+	} catch(IOException ioex){
+	    
+	}
+	sb.append("Community Detection (");
+	sb.append(version);
+	sb.append(") is a Cytoscape App that includes ");
 	sb.append("a framework, and remote service, to enable access to<br/>");
 	sb.append("other popular community detection (CD) algorithms ");
 	sb.append("capable of hierarchical construction.<br/><br/>In addition, ");
