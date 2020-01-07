@@ -61,14 +61,13 @@ public class CyActivator extends AbstractCyActivator {
 		final CyNetworkNaming networkNaming = getService(bc, CyNetworkNaming.class);
 		final CySwingApplication swingApplication = getService(bc, CySwingApplication.class);
 		
-		String cyPropertyName = "communitydetection";
-		PropertiesReader propReader = new PropertiesReader(AppUtils.APP_NAME, cyPropertyName);
+		PropertiesReader propReader = new PropertiesReader(AppUtils.APP_NAME, AppUtils.PROP_NAME);
 		Properties propReaderProperties = new Properties();
-		propReaderProperties.setProperty("cyPropertyName", cyPropertyName);
+		propReaderProperties.setProperty("cyPropertyName", AppUtils.PROP_NAME);
 		registerAllServices(bc, propReader, propReaderProperties);
 
 		final CyProperty<Properties> cyProperties = getService(bc, CyProperty.class,
-				"(cyPropertyName=" + cyPropertyName + ")");
+				"(cyPropertyName=" + AppUtils.PROP_NAME + ")");
 		PropertiesHelper.getInstance().setBaseurl(cyProperties.getProperties().getProperty(AppUtils.PROP_APP_BASEURL));
 		PropertiesHelper.getInstance()
 				.setThreadcount(cyProperties.getProperties().getProperty(AppUtils.PROP_APP_THREADCOUNT));
