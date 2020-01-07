@@ -3,6 +3,7 @@ package org.cytoscape.app.communitydetection.hierarchy;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -47,7 +48,6 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTableUtil;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm;
-import org.ndexbio.communitydetection.rest.model.CommunityDetectionRequest;
 import org.ndexbio.communitydetection.rest.model.CustomParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +60,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	private static final String SELECTED_NODES_BUTTON_LABEL = "Selected Nodes";
 	private static final String INPUTDELIM = ":::";
 	private List<CommunityDetectionAlgorithm> _algorithmList;
+	private static final float ALGO_FONTSIZE_BOOST = 4.0f;
 
 	private JPanel _cards;
 	private JEditorPaneFactory _editorPaneFac;
@@ -103,13 +104,22 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		}
 		_cards = new JPanel(new CardLayout());
 		_algorithmComboBox = new JComboBox();
+		Font comboFont = _algorithmComboBox.getFont();
+		_algorithmComboBox.setFont(comboFont.deriveFont(comboFont.getStyle() | Font.BOLD,
+			comboFont.getSize2D() + ALGO_FONTSIZE_BOOST));
 		_algorithmComboBox.setEditable(false);
+		_algorithmComboBox.setToolTipText("Algorithm to run");
 		_algorithmComboBox.addItemListener(this);
 
 		loadAlgorithmCards();
 		
 		JPanel contentPane = new JPanel();
-		contentPane.add(new JLabel("Algorithm: "));
+		JLabel aLabel = new JLabel("Algorithm: ");
+		Font aLabelFont = aLabel.getFont();
+		Font newFont = aLabelFont.deriveFont(aLabelFont.getStyle() | Font.BOLD,
+			aLabelFont.getSize2D() + ALGO_FONTSIZE_BOOST);
+		aLabel.setFont(newFont);
+		contentPane.add(aLabel);
 		
 		
 		contentPane.add(_algorithmComboBox);
