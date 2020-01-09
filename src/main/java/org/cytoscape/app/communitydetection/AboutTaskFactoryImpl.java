@@ -56,7 +56,7 @@ public class AboutTaskFactoryImpl implements NetworkTaskFactory {
 	sb.append(version);
 	sb.append(") is a Cytoscape App that includes ");
 	sb.append("a framework, and remote service, to enable access to<br/>");
-	sb.append("other popular community detection (CD) algorithms ");
+	sb.append("other popular Community Detection (CD) algorithms ");
 	sb.append("capable of hierarchical construction.<br/><br/>In addition, ");
 	sb.append("this App offers access to Gene Ontology enrichment (functional enrichment) ");
 	sb.append("for annotation of<br/>community nodes to gain ");
