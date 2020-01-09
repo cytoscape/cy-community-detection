@@ -245,6 +245,13 @@
 			<artifactId>jackson-jaxrs-base</artifactId>
 			<version>${jackson.version}</version>
 		</dependency>
+                <!--unit test-->
+                <dependency>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                    <version>${junit.version}</version>
+                    <scope>test</scope>
+                </dependency>
 	</dependencies>
 
 </project>
