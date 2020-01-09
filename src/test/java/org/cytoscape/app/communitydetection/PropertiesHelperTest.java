@@ -10,7 +10,13 @@ import org.junit.Test;
 public class PropertiesHelperTest {
     
     @Test
-    public void testfoo(){
-	assertEquals(1, 1);
+    public void testGettersAndSetters(){
+	PropertiesHelper ph = PropertiesHelper.getInstance();
+	assertNull(ph.getBaseurl());
+	assertNull(ph.getThreadcount());
+	ph.setBaseurl("url");
+	ph.setThreadcount("thread");
+	assertEquals("url", ph.getBaseurl());
+	assertEquals("thread", ph.getThreadcount());
     }
 }
