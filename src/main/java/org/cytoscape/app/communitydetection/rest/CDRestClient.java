@@ -123,7 +123,8 @@ public class CDRestClient {
 				break;
 			}
 			if (cdResult.getStatus().equals(CommunityDetectionResultStatus.FAILED_STATUS)) {
-				throw new Exception("Error fetching the result!");
+				throw new Exception("Error fetching the result" +
+					getErrorMessageFromResult(cdResult));
 			}
 		}
 		if (cdResult != null
@@ -151,7 +152,8 @@ public class CDRestClient {
 				break;
 			}
 			if (cdResult.getStatus().equals(CommunityDetectionResultStatus.FAILED_STATUS)) {
-				throw new Exception("Error fetching the result!");
+				throw new Exception("Error fetching the result" +
+					getErrorMessageFromResult(cdResult));
 			}
 			float progressRatio = totalRuntime;
 			taskMonitor.setProgress(currentProgress + (totalProgress * (float) (count + 1)) / progressRatio);
@@ -200,5 +202,27 @@ public class CDRestClient {
 		RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout * 1000)
 				.setConnectionRequestTimeout(timeout * 1000).setSocketTimeout(timeout * 1000).build();
 		return HttpClientBuilder.create().setDefaultRequestConfig(config).build();
+	}
+	
+	/**
+	 * Gets the first 50 characters from result if its not null and appends
+	 * any text from 
+	 * {@link org.ndexbio.communitydetection.rest.model.CommunityDetectionResult#getMessage()}
+	 * @param cdResult
+	 * @return 
+	 */
+	protected String getErrorMessageFromResult(CommunityDetectionResult cdResult){
+	    String errMsg = " : ";
+	    if (cdResult.getResult() != null){
+		if (cdResult.getResult().asText().length() > 50){
+		    errMsg = errMsg + cdResult.getResult().asText().substring(0, 50);
+		} else {
+		    errMsg = errMsg + cdResult.getResult().asText();
+		}
+	    }
+	    if (cdResult.getMessage() != null){
+		errMsg = errMsg + " : " + cdResult.getMessage();
+	    }
+	    return errMsg;
 	}
 }
