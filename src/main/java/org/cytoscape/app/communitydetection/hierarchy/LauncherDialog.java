@@ -3,6 +3,7 @@ package org.cytoscape.app.communitydetection.hierarchy;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -40,6 +41,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import org.cytoscape.app.communitydetection.rest.CDRestClient;
@@ -61,6 +63,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	private static final String INPUTDELIM = ":::";
 	private List<CommunityDetectionAlgorithm> _algorithmList;
 	private static final float ALGO_FONTSIZE_BOOST = 4.0f;
+	private static final double TEXT_FIELD_WIDTH = 160.0;
 
 	private JPanel _cards;
 	private JEditorPaneFactory _editorPaneFac;
@@ -79,7 +82,6 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		this._editorPaneFac = editorPaneFac;
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		this._algorithmType = algorithmType;
-		
 	}
 	
 	
@@ -104,7 +106,12 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		}
 		_cards = new JPanel(new CardLayout());
 		_algorithmComboBox = new JComboBox();
+		
+		// grab the font for the combo box
+		// and derive a new font that is larger and is bold and update
+		// the combo box to use this font
 		Font comboFont = _algorithmComboBox.getFont();
+		
 		_algorithmComboBox.setFont(comboFont.deriveFont(comboFont.getStyle() | Font.BOLD,
 			comboFont.getSize2D() + ALGO_FONTSIZE_BOOST));
 		_algorithmComboBox.setEditable(false);
@@ -115,12 +122,14 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		
 		JPanel contentPane = new JPanel();
 		JLabel aLabel = new JLabel("Algorithm: ");
+		// grab the font for the label
+		// and derive a new font that is larger and is bold and update
+		// the label to use this font
 		Font aLabelFont = aLabel.getFont();
 		Font newFont = aLabelFont.deriveFont(aLabelFont.getStyle() | Font.BOLD,
 			aLabelFont.getSize2D() + ALGO_FONTSIZE_BOOST);
 		aLabel.setFont(newFont);
 		contentPane.add(aLabel);
-		
 		
 		contentPane.add(_algorithmComboBox);
 		
@@ -307,8 +316,9 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		    GridBagConstraints labelConstraints = new GridBagConstraints();
 		    labelConstraints.gridy = rowIndex;
 		    labelConstraints.gridx = 0;
-		    labelConstraints.anchor = GridBagConstraints.LINE_END;
-		    labelConstraints.insets = new Insets(0, 5, 5, 0);
+		    labelConstraints.weightx = 1.0;
+		    labelConstraints.anchor = GridBagConstraints.NORTHEAST;
+		    labelConstraints.insets = new Insets(5, 5, 0, 5);
 		    algoCard.add(paramLabel, labelConstraints);
 
 		    JComponent inputComponent = getCustomParameterInput(cda.getName(), cp);
@@ -321,7 +331,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		    inputConstraints.gridy = rowIndex;
 		    inputConstraints.gridx = 1;
 		    inputConstraints.gridwidth = 1;
-		    inputConstraints.weightx = 1.0;
+		    inputConstraints.weightx = 0.;
 		    inputConstraints.anchor = GridBagConstraints.LINE_START;
 		    inputConstraints.insets = new Insets(0, 0, 5, 0);
 		    inputConstraints.fill = GridBagConstraints.HORIZONTAL;
@@ -331,7 +341,8 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		    GridBagConstraints infoConstraints = new GridBagConstraints();
 		    infoConstraints.gridy = rowIndex;
 		    infoConstraints.gridx = 2;
-		    infoConstraints.insets = new Insets(0, 0, 5, 0);
+		    infoConstraints.anchor = GridBagConstraints.NORTH;
+		    infoConstraints.insets = new Insets(5, 5, 5, 0);
 		    algoCard.add(getParameterInfoIcon(cp), infoConstraints);
 
 		    rowIndex++;
@@ -368,17 +379,25 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	    if (parameter.getType() != null && parameter.getType().equalsIgnoreCase("flag")){
 		    JCheckBox checkBox = new JCheckBox();
 		    checkBox.setName(algorithm + INPUTDELIM + parameter.getName());
+		    checkBox.setBorder(BorderFactory.createEmptyBorder(5, 0, 0,0));
 		    return checkBox;
 	    }
 	    JTextField textField = null;
 	    if (parameter.getDefaultValue() != null){
 		textField = new JTextField(parameter.getDefaultValue());
+		
 	    } 
 	    else {
 		textField = new JTextField();
 	    }
+	    
 	    textField.setName(algorithm + INPUTDELIM + parameter.getName());
-	    return textField;
+	    JScrollPane textScrollPane = new JScrollPane(textField, JScrollPane.VERTICAL_SCROLLBAR_NEVER,
+		    JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+	    Dimension prefSize = textScrollPane.getPreferredSize();
+	    prefSize.setSize(TEXT_FIELD_WIDTH, prefSize.getHeight()*1.1);
+	    textScrollPane.setPreferredSize(prefSize);
+	    return textScrollPane;
 	}
 	
 	/**
