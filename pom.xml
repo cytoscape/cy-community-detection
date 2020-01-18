@@ -9,7 +9,7 @@
 
 		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
 		<maven-bundle-plugin.version>4.2.1</maven-bundle-plugin.version>
-
+                <easymock.version>4.0.2</easymock.version>
 		<junit.version>4.12</junit.version>
 		<cytoscape.api.version>3.7.2</cytoscape.api.version>
 		<osgi.api.version>6.0.0</osgi.api.version>
@@ -118,6 +118,34 @@
 					</instructions>
 				</configuration>
 			</plugin>
+                        <plugin>
+                                    <groupId>org.eluder.coveralls</groupId>
+                                    <artifactId>coveralls-maven-plugin</artifactId>
+                                    <version>4.3.0</version>
+                                    <configuration>
+                                        <timestampFormat>EpochMillis</timestampFormat>
+                                    </configuration>
+                            </plugin>
+                            <plugin>
+                                <groupId>org.jacoco</groupId>
+                                <artifactId>jacoco-maven-plugin</artifactId>
+                                <version>0.8.3</version>
+                                <executions>
+                                    <execution>
+                                        <id>prepare-agent</id>
+                                        <goals>
+                                            <goal>prepare-agent</goal>
+                                        </goals>
+                                    </execution>
+                                    <execution>
+                                        <id>default-report</id>
+                                        <phase>prepare-package</phase>
+                                        <goals>
+                                            <goal>report</goal>
+                                        </goals>
+                                    </execution>
+                                </executions>
+                            </plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -147,6 +175,8 @@
 						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
+                           
+
 			</plugins>
 		</pluginManagement>
 	</build>
@@ -252,6 +282,27 @@
                     <version>${junit.version}</version>
                     <scope>test</scope>
                 </dependency>
+                <dependency>
+                    <groupId>org.easymock</groupId>
+                    <artifactId>easymock</artifactId>
+                    <version>${easymock.version}</version>
+                    <scope>test</scope>
+                </dependency>
 	</dependencies>
-
+        <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <!-- select non-aggregate reports -->
+              <report>report</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>
