@@ -26,6 +26,8 @@ import org.ndexbio.communitydetection.rest.model.Task;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.TextNode;
 import org.ndexbio.communitydetection.rest.model.ErrorResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * REST API client for CD service. Implements GET, POST and DELETE.
@@ -33,9 +35,16 @@ import org.ndexbio.communitydetection.rest.model.ErrorResponse;
  */
 public class CDRestClient {
 
+	private final static Logger _logger = LoggerFactory.getLogger(CDRestClient.class);
 	private final ObjectMapper mapper;
 	private boolean isTaskCanceled;
 	
+	/**
+	 * For failed tasks this variable sets the number of characters
+	 * to get from
+	 * {@link org.ndexbio.communitydetection.rest.model.CommunityDetectionResult#getResult()}
+	 */
+	protected final static int TRUNCATE_ERROR_MESSAGE_RESULT_LEN = 50;
 	
 	private List<CommunityDetectionAlgorithm> algorithms;
 
@@ -94,7 +103,7 @@ public class CDRestClient {
 		}
 		BufferedReader reader = new BufferedReader(new InputStreamReader(httpPostResponse.getEntity().getContent()));
 		Task serviceTask = mapper.readValue(reader, Task.class);
-		System.out.println("Task ID: " + serviceTask.getId());
+		_logger.debug("Task ID: " + serviceTask.getId());
 		return serviceTask.getId();
 	}
 
@@ -102,7 +111,7 @@ public class CDRestClient {
 		CloseableHttpClient client = getClient(10);
 		HttpResponse deleteResponse = client.execute(new HttpDelete(getBaseurl() + "/" + taskId));
 		if (200 != deleteResponse.getStatusLine().getStatusCode()) {
-			System.out.println("Could not delete task: " + taskId);
+			_logger.info("Could not delete task: " + taskId);
 		}
 	}
 
@@ -212,12 +221,18 @@ public class CDRestClient {
 	 * @return 
 	 */
 	protected String getErrorMessageFromResult(CommunityDetectionResult cdResult){
+	    if (cdResult == null){
+		return "";
+	    }
 	    String errMsg = " : ";
 	    if (cdResult.getResult() != null){
-		if (cdResult.getResult().asText().length() > 50){
-		    errMsg = errMsg + cdResult.getResult().asText().substring(0, 50);
-		} else {
-		    errMsg = errMsg + cdResult.getResult().asText();
+		if (cdResult.getResult().isTextual()){
+		    if (cdResult.getResult().asText().length() > TRUNCATE_ERROR_MESSAGE_RESULT_LEN){
+			errMsg = errMsg + cdResult.getResult().asText().substring(0,
+			        TRUNCATE_ERROR_MESSAGE_RESULT_LEN);
+		    } else {
+			errMsg = errMsg + cdResult.getResult().asText();
+		    }
 		}
 	    }
 	    if (cdResult.getMessage() != null){
