@@ -12,7 +12,7 @@ public class AppUtils {
 	public static final String TOP_MENU = "Apps.Community Detection";
 	public static final String TOP_MENU_CD = TOP_MENU + ".Community Detection";
 	public static final String TOP_MENU_TM = TOP_MENU + ".Functional Enrichment";
-	public static final String CONTEXT_MENU_CD = "Community Detection";
+	public static final String CONTEXT_MENU_CD = "Apps.Community Detection";
 	public static final String CONTEXT_MENU_TM = CONTEXT_MENU_CD + ".Functional Enrichment";
 
 	public static final String WRITE_CX_MENU_ITEM = "Export Network to CX";
