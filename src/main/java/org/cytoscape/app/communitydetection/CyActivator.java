@@ -19,6 +19,7 @@ import org.cytoscape.app.communitydetection.hierarchy.LauncherDialog;
 import org.cytoscape.app.communitydetection.hierarchy.TaskListenerFactory;
 import org.cytoscape.app.communitydetection.subnetwork.SubNetworkTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.termmap.NetworkTermMappingTaskFactoryImpl;
+import org.cytoscape.app.communitydetection.termmap.NodeTermMapppingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.io.BasicCyFileFilter;
@@ -138,6 +139,15 @@ public class CyActivator extends AbstractCyActivator {
 				networkManager, networkViewManager, networkViewFactory, visualMappingManager, layoutAlgorithmManager,
 				syncTaskManager, networkNaming);
 		registerAllServices(bc, subnetworkfactoryImpl, contextMenuProps);
+		
+		Properties enrichCMenuProps = new Properties();
+		enrichCMenuProps.setProperty(PREFERRED_MENU, AppUtils.CONTEXT_MENU_CD);
+		enrichCMenuProps.setProperty(ENABLE_FOR, ENABLE_FOR_SELECTED_NODES);
+		enrichCMenuProps.setProperty(TITLE, "Run Functional Enrichment");
+		enrichCMenuProps.put(IN_MENU_BAR, false);
+		enrichCMenuProps.put(IN_CONTEXT_MENU, true);
+		NodeTermMapppingTaskFactoryImpl nodeTermMapFac = new NodeTermMapppingTaskFactoryImpl(termFac);
+		registerAllServices(bc, nodeTermMapFac, enrichCMenuProps);
 	}
 
 }
