@@ -1,10 +1,12 @@
 package org.cytoscape.app.communitydetection.hierarchy;
 
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.JOptionPane;
+import org.cytoscape.app.communitydetection.rest.CDRestClientException;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.model.CyColumn;
@@ -21,7 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HierarchyTaskFactoryImpl implements NetworkTaskFactory {
 
-	private final static Logger _logger = LoggerFactory.getLogger(HierarchyTaskFactoryImpl.class);
+	private final static Logger LOGGER = LoggerFactory.getLogger(HierarchyTaskFactoryImpl.class);
 	private LauncherDialog _dialog;
 	private CySwingApplication _swingApplication;
 
@@ -29,7 +31,7 @@ public class HierarchyTaskFactoryImpl implements NetworkTaskFactory {
 		this._dialog = dialog;
 		this._swingApplication = swingApplication;
 	}
-
+	
 	@Override
 	public TaskIterator createTaskIterator(CyNetwork network) {
 	    if (network == null){
@@ -40,7 +42,10 @@ public class HierarchyTaskFactoryImpl implements NetworkTaskFactory {
 			AppUtils.APP_NAME, JOptionPane.ERROR_MESSAGE);
 		return new TaskIterator(new HierarchyTask(network, null, null, null));
 	    }
-	    _dialog.createGUI();
+		if (_dialog.createGUI(_swingApplication.getJFrame())== false){
+			return new TaskIterator(new HierarchyTask(network, null, null, null));
+		} 
+		
 	    _dialog.updateWeightColumnCombo(getNumericColumns(network.getDefaultEdgeTable()));
 	    Object[] options = {AppUtils.RUN, AppUtils.CANCEL};
 	    int res = JOptionPane.showOptionDialog(_swingApplication.getJFrame(),
@@ -56,13 +61,13 @@ public class HierarchyTaskFactoryImpl implements NetworkTaskFactory {
 		CommunityDetectionAlgorithm cda = this._dialog.getSelectedCommunityDetectionAlgorithm();
 		if (cda != null){   
 		    Map<String, String> customParameters = this._dialog.getAlgorithmCustomParameters(cda.getName());
-		    _logger.debug("User wants to run: " + cda.getName() +
+		    LOGGER.debug("User wants to run: " + cda.getName() +
 			    customParameters == null ? "" : " with " +
 				    customParameters.toString());
 		    return new TaskIterator(new HierarchyTask(network, cda, customParameters,
 			    _dialog.getWeightColumn()));
 		} else {
-		   _logger.error("Couldnt get algorithm from dialog...");
+		   LOGGER.error("Couldnt get algorithm from dialog...");
 		}
 	    }
 	    

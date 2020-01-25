@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Map;
+import org.cytoscape.app.communitydetection.PropertiesHelper;
 
 import org.cytoscape.app.communitydetection.edgelist.ReaderTask;
 import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactoryImpl;
@@ -61,7 +62,7 @@ public class HierarchyTask extends AbstractTask {
 		taskMonitor.setProgress(0.1);
 		taskMonitor.setStatusMessage("Network exported, retrieving the hierarchy");
 		CommunityDetectionResult cdResult = CDRestClient.getInstance().getCDResult(resultURI, taskMonitor, 0.1f, 0.8f,
-				1800);
+				PropertiesHelper.getInstance().getCommunityDetectionTimeoutMillis());
 		if (cancelled) {
 			CDRestClient.getInstance().setTaskCanceled(false);
 			return;

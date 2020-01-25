@@ -8,7 +8,16 @@ public class AppUtils {
 	public static final String PROP_APP_THREADCOUNT = "app.threadcount";
 	public static final String PROP_PROJECT_VERSION = "project.version";
 	public static final String PROP_PROJECT_NAME = "project.name";
+	public static final String PROP_CD_TASK_TIMEOUT = "communitydetection.timeout.millis";
+	public static final String PROP_FE_TASK_TIMEOUT = "functionalenrichment.timeout.millis";
+	public static final String PROP_SUBMIT_RETRY_COUNT = "submit.retry.count";
+	
+	public static final String PROP_HTTP_SOCKET_TIMEOUT = "http.socket.timeout.millis";
+	public static final String PROP_HTTP_CONNECT_TIMEOUT = "http.connect.timeout.millis";
+	public static final String PROP_HTTP_CONNECTION_REQUEST_TIMEOUT = "http.connection.request.timeout.millis";
 
+	public static final String PROP_POLL_INTERVAL_TIME = "polling.interval.time.millis";
+	
 	public static final String TOP_MENU = "Apps.Community Detection";
 	public static final String TOP_MENU_CD = TOP_MENU + ".Community Detection";
 	public static final String TOP_MENU_TM = TOP_MENU + ".Functional Enrichment";

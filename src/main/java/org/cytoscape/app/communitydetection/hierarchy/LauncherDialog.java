@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,11 +46,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import org.cytoscape.app.communitydetection.rest.CDRestClient;
+import org.cytoscape.app.communitydetection.rest.CDRestClientException;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTableUtil;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm;
+import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithms;
 import org.ndexbio.communitydetection.rest.model.CustomParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +60,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("serial")
 public class LauncherDialog extends JPanel implements ItemListener {
 
-    	private final static Logger _logger = LoggerFactory.getLogger(LauncherDialog.class);
+    	private final static Logger LOGGER = LoggerFactory.getLogger(LauncherDialog.class);
 
 	private static final String SELECTED_NODES_BUTTON_LABEL = "Selected Nodes";
 	private static final String INPUTDELIM = ":::";
@@ -85,24 +88,69 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	}
 	
 	
-	public void createGUI(){
-	    createGUI(false);
+	public boolean createGUI(Component parentWindow) {
+	    return createGUI(parentWindow, false);
+	}
+
+	protected List<CommunityDetectionAlgorithm> getCommunityDetectionAlgorithmsFromService(Component parentWindow) {
+		CommunityDetectionAlgorithms result = null;
+		
+		try {
+			result = this.getAlgorithmsFromService();
+			if (result == null){
+				return null;
+			}
+			ArrayList<CommunityDetectionAlgorithm> algorithms = new ArrayList<>();
+			for (CommunityDetectionAlgorithm algo : result.getAlgorithms().values()) {
+				if (algo.getInputDataFormat().equalsIgnoreCase(this._algorithmType)){
+					algorithms.add(algo);
+				}
+			}
+			return algorithms;
+		} catch(CDRestClientException ce){
+			JOptionPane.showMessageDialog(parentWindow,
+					"Unable to get list of algorithms from service: " + ce.getMessage() + " : " +
+							(ce.getErrorResponse() == null ? "" : ce.getErrorResponse().asJson()));
+		} catch(IOException io){
+			JOptionPane.showMessageDialog(parentWindow,
+					"Unable to get list of algorithms from service: " + io.getMessage());
+		}
+		return null;
 	}
 	
-	public void createGUI(boolean refresh){
+	/**
+	 * Gets the algorithms from CD Service by trying twice. The second time
+	 * the value is just returned or any exception is passed on.
+	 * @return Algorithms found in service or null if there are none
+	 * @throws CDRestClientException thrown if there is a problem with service call on 2nd
+	 *                               try
+	 * @throws IOException thrown if there is a problem with service call on 2nd
+	 *                     try
+	 */
+	private CommunityDetectionAlgorithms getAlgorithmsFromService() throws CDRestClientException, IOException{
+		CDRestClient client = CDRestClient.getInstance();
+		try {
+			return client.getAlgorithms(false);
+		} catch(CDRestClientException ce){
+			LOGGER.warn("Got error trying to get algorithm list from "
+					+ "CD service, trying again",
+					ce);
+		} catch(IOException ie){
+			LOGGER.warn("Got error trying to get algorithm list from "
+					+ "CD service, trying again",
+					ie);
+		}
+		return client.getAlgorithms(false);
+	}
+	public boolean createGUI(Component parentWindow, boolean refresh) {
 	    if (_guiLoaded == true && refresh==false){
-		return;
+		return true;
 	    }
 	    loadImageIcon();
 		_algoCardMap = new LinkedHashMap<>();
-		try {
-		    _algorithmList = CDRestClient.getInstance().getAlgorithmsByType(_algorithmType);
-		} catch(Exception ex){
-		    try {
-			_algorithmList = CDRestClient.getInstance().getAlgorithmsByType(_algorithmType);
-		    } catch(Exception subex){
-			
-		    }
+		_algorithmList = getCommunityDetectionAlgorithmsFromService(parentWindow);
+		if (_algorithmList == null){
+			return false;
 		}
 		_cards = new JPanel(new CardLayout());
 		_algorithmComboBox = new JComboBox();
@@ -154,6 +202,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		_guiLoaded = true;
 		loadAlgorithmCards();
 		updateWeightColumnCombo(null);
+		return true;
 	}
 	
 	private JPanel getNodeSelectionPanel(){
@@ -537,7 +586,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	 * @param algorithm 
 	 */
 	private void resetAlgorithmToDefaults(final String algorithm){
-	    _logger.debug("Resetting " + algorithm + " to defaults");
+	    LOGGER.debug("Resetting " + algorithm + " to defaults");
 	    if (_algoCardMap.containsKey(algorithm) == false){
 		return;
 	    }
@@ -610,19 +659,19 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	 */
 	public CommunityDetectionAlgorithm getSelectedCommunityDetectionAlgorithm(){
 	    if (_guiLoaded == false){
-		_logger.info("gui not loaded");
+		LOGGER.info("gui not loaded");
 		return null;
 	    }
 	    if (_algorithmComboBox == null){
-		_logger.info("no combo box loaded");
+		LOGGER.info("no combo box loaded");
 		return null;
 	    }
 	    String algo = (String)_algorithmComboBox.getSelectedItem();
 	    if (algo == null){
-		_logger.info("no algorithm selected in combo box");
+		LOGGER.info("no algorithm selected in combo box");
 		return null;
 	    }
-	    _logger.debug("Algorithm: " + algo);
+	    LOGGER.debug("Algorithm: " + algo);
 	    return getCommunityDetectionAlgorithmByDisplayName(algo);
 	}
 	/**
@@ -641,7 +690,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	 */
 	public Map<String, String> getAlgorithmCustomParameters(final String algorithm){
 	    if (_guiLoaded == false){
-		this.createGUI();
+			return null;
 	    }
 	    JPanel algoCard = _algoCardMap.get(algorithm);
 	    if (algoCard == null){
@@ -688,7 +737,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		    public void actionPerformed(ActionEvent e) {
 			JComponent c = (JComponent)e.getSource();
 			String algorithm = c.getName();
-			_logger.debug("Reset button clicked "
+			LOGGER.debug("Reset button clicked "
 				      + "on algorithm: " + algorithm);
 			resetAlgorithmToDefaults(algorithm);
 		    }
@@ -710,7 +759,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		    @Override
 		    public void actionPerformed(ActionEvent e) {
 			
-			_logger.debug("About button clicked "
+			LOGGER.debug("About button clicked "
 				      + "on algorithm: " + algorithm.getDisplayName());
 			JOptionPane.showMessageDialog(getParent(), getAlgorithmAboutFrame(algorithm),
 					"About " + algorithm.getDisplayName(),

@@ -72,6 +72,30 @@ public class CyActivator extends AbstractCyActivator {
 		PropertiesHelper.getInstance().setBaseurl(cyProperties.getProperties().getProperty(AppUtils.PROP_APP_BASEURL));
 		PropertiesHelper.getInstance()
 				.setThreadcount(cyProperties.getProperties().getProperty(AppUtils.PROP_APP_THREADCOUNT));
+		Properties cyProps = cyProperties.getProperties();
+		PropertiesHelper pHelper = PropertiesHelper.getInstance();
+		PropertiesHelper.getInstance()
+				.setCommunityDetectionTimeoutMillis(propReader.getPropertyAsInt(cyProps,
+						AppUtils.PROP_CD_TASK_TIMEOUT, 1800000));
+		PropertiesHelper.getInstance()
+				.setFunctionalEnrichmentTimeoutMillis(propReader.getPropertyAsInt(cyProps,
+						AppUtils.PROP_FE_TASK_TIMEOUT, 1800000));
+		PropertiesHelper.getInstance()
+				.setSubmitRetryCount(propReader.getPropertyAsInt(cyProps,
+						AppUtils.PROP_SUBMIT_RETRY_COUNT, 2));
+		PropertiesHelper.getInstance()
+				.setHttpSocketTimeoutMillis(propReader.getPropertyAsInt(cyProps,
+						AppUtils.PROP_HTTP_SOCKET_TIMEOUT, 10000));
+		PropertiesHelper.getInstance()
+				.setHttpConnectTimeoutMillis(propReader.getPropertyAsInt(cyProps,
+						AppUtils.PROP_HTTP_CONNECT_TIMEOUT, 10000));
+		PropertiesHelper.getInstance()
+				.setHttpConnectionRequestTimeoutMillis(propReader.getPropertyAsInt(cyProps,
+						AppUtils.PROP_HTTP_CONNECTION_REQUEST_TIMEOUT, 10000));
+		PropertiesHelper.getInstance()
+				.setPollingIntervalTimeMillis(propReader.getPropertyAsInt(cyProps,
+						AppUtils.PROP_POLL_INTERVAL_TIME, 1000));
+		
 
 		// Setting up Edge List I/O services
 		final StreamUtil streamUtil = getService(bc, StreamUtil.class);

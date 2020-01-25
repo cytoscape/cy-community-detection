@@ -2,3 +2,11 @@ app.baseurl=http://cdservice.cytoscape.org/cd/communitydetection/v1
 app.threadcount=16
 project.version=${project.version}
 project.name=${project.name}
+
+communitydetection.timeout.millis=1800000
+functionalenrichment.timeout.millis=1800000
+submit.retry.count=2
+http.socket.timeout.millis=10000
+http.connect.timeout.millis=10000
+http.connection.request.timeout.millis=10000
+polling.interval.time.millis=1000

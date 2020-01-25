@@ -11,6 +11,7 @@ import org.ndexbio.communitydetection.rest.model.CommunityDetectionResult;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Map;
+import org.cytoscape.app.communitydetection.PropertiesHelper;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm;
 
 public class TermMappingCallable implements Callable<Boolean> {
@@ -35,9 +36,12 @@ public class TermMappingCallable implements Callable<Boolean> {
 		}
 		String memberList = _network.getRow(_node).get(AppUtils.COLUMN_CD_MEMBER_LIST, String.class)
 				.replaceAll(AppUtils.CD_MEMBER_LIST_DELIMITER, ",");
-		String URI = CDRestClient.getInstance().postCDData(_algorithm.getName(),
+		String taskId = CDRestClient.getInstance().postCDData(_algorithm.getName(),
 			_customParameters, memberList);
-		CommunityDetectionResult cdResult = CDRestClient.getInstance().getCDResult(URI, 300);
+		if (taskId == null) {
+			return false;
+		}
+		CommunityDetectionResult cdResult = CDRestClient.getInstance().getCDResult(taskId, PropertiesHelper.getInstance().getFunctionalEnrichmentTimeoutMillis());
 		String name = AppUtils.TYPE_NONE_VALUE;
 		String annotatedList = "";
 		int counter = 0;

@@ -1,9 +1,12 @@
 package org.cytoscape.app.communitydetection.termmap;
 
 
+import java.io.IOException;
 import java.util.Map;
 import javax.swing.JOptionPane;
+import org.cytoscape.app.communitydetection.hierarchy.HierarchyTask;
 import org.cytoscape.app.communitydetection.hierarchy.LauncherDialog;
+import org.cytoscape.app.communitydetection.rest.CDRestClientException;
 
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.application.swing.CySwingApplication;
@@ -42,6 +45,7 @@ public class NetworkTermMappingTaskFactoryImpl implements NetworkTaskFactory {
 			AppUtils.APP_NAME, JOptionPane.ERROR_MESSAGE);
 		 return new TaskIterator(new TermMappingTask(null, null, null, false));
 	    }
+		
 	    if (network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_MEMBER_LIST) == null){
 		JOptionPane.showMessageDialog(_swingApplication.getJFrame(),
 			"A node column named " + AppUtils.COLUMN_CD_MEMBER_LIST + " ("
@@ -53,7 +57,9 @@ public class NetworkTermMappingTaskFactoryImpl implements NetworkTaskFactory {
 		 return new TaskIterator(new TermMappingTask(null, null, null, false));
 	    }
 	    
-	    _dialog.createGUI();
+	    if (_dialog.createGUI(_swingApplication.getJFrame()) == false){
+			return new TaskIterator(new TermMappingTask(null, null, null, false));
+		}
 	    _dialog.updateNodeSelectionButtons(network);
 	    Object[] options = {AppUtils.RUN, AppUtils.CANCEL};
 	    int res = JOptionPane.showOptionDialog(_swingApplication.getJFrame(),
