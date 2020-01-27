@@ -30,13 +30,13 @@ public class AppUtils {
 	public static final String EDGE_WRITER_ID = "edgeListWriterFactory";
 
 	public final static String COLUMN_SUID = "SUID";
-	public final static String COLUMN_DESCRIPTION = "Description";
+	public final static String COLUMN_DESCRIPTION = "description";
 	public final static String COLUMN_DERIVED_FROM = "prov:wasDerivedFrom";
 	public final static String COLUMN_GENERATED_BY = "prov:wasGeneratedBy";
 	public final static String COLUMN_CD_MEMBER_LIST = "CD_MemberList";
 	public final static String COLUMN_CD_MEMBER_LIST_SIZE = "CD_MemberList_Size";
 	public final static String COLUMN_CD_MEMBER_LIST_LOG_SIZE = "CD_MemberList_LogSize";
-	public final static String COLUMN_CD_ORIGINAL_NETWORK = "CD_OriginalNetwork";
+	public final static String COLUMN_CD_ORIGINAL_NETWORK = "__CD_OriginalNetwork";
 	public final static String COLUMN_CD_COMMUNITY_NAME = "CD_CommunityName";
 	public final static String COLUMN_CD_ANNOTATED_MEMBERS = "CD_AnnotatedMembers";
 	public final static String COLUMN_CD_ANNOTATED_MEMBERS_SIZE = "CD_AnnotatedMembers_Size";
