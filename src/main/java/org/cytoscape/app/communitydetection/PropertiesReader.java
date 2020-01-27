@@ -23,17 +23,4 @@ public class PropertiesReader extends AbstractConfigDirPropsReader implements Pr
 			PropertiesHelper.getInstance().updateViaProperties(props);
 		}
 	}
-	
-	protected int getPropertyAsInt(Properties props, final String propertyName, int defaultValue){
-		String propVal = props.getProperty(propertyName);
-		if (propVal == null || propVal.trim().isEmpty()){
-			return defaultValue;
-		}	
-		try {
-			return Integer.parseInt(propVal);
-		}
-		catch(NumberFormatException nfe){
-		}
-		return defaultValue;
-    }
 }

@@ -11,7 +11,6 @@ public class PropertiesHelper {
 	private int httpConnectTimeoutMillis;
 	private int httpConnectionRequestTimeoutMillis;
 	private int pollingIntervalTimeMillis;
-	private int pollingMaxRetryCount;
 	private int communityDetectionTimeoutMillis;
 	private int functionalEnrichmentTimeoutMillis;
 	private int submitRetryCount;
@@ -32,8 +31,12 @@ public class PropertiesHelper {
 	}
 
 	public void updateViaProperties(Properties props){
-		setBaseurl(props.getProperty(AppUtils.PROP_APP_BASEURL));
-		setThreadcount(props.getProperty(AppUtils.PROP_APP_THREADCOUNT));
+		if (props == null){
+			props = new Properties();
+		}
+		setBaseurl(props.getProperty(AppUtils.PROP_APP_BASEURL,
+				"http://cdservice.cytoscape.org/cd/communitydetection/v1"));
+		setThreadcount(props.getProperty(AppUtils.PROP_APP_THREADCOUNT, "4"));
 		setCommunityDetectionTimeoutMillis(getPropertyAsInt(props,
 								AppUtils.PROP_CD_TASK_TIMEOUT, 1800000));
 		setFunctionalEnrichmentTimeoutMillis(getPropertyAsInt(props,
@@ -126,24 +129,6 @@ public class PropertiesHelper {
 		this.pollingIntervalTimeMillis = pollingIntervalTimeMillis;
 	}
 
-	/**
-	 * Gets number of retries to perform when checking for completion of a 
-	 * task
-	 * @return 
-	 */
-	public int getPollingMaxRetryCount() {
-		return pollingMaxRetryCount;
-	}
-
-	/**
-	 * Sets number of retries to perform when checking for completion of a 
-	 * task
-	 * @param pollingMaxRetryCount
-	 */
-	public void setPollingMaxRetryCount(int pollingRetryCount) {
-		this.pollingMaxRetryCount = pollingRetryCount;
-	}
-
 	public int getCommunityDetectionTimeoutMillis() {
 		return communityDetectionTimeoutMillis;
 	}
@@ -168,8 +153,19 @@ public class PropertiesHelper {
 		this.submitRetryCount = submitRetryCount;
 	}
 	
+	/**
+	 * Gets property as {@code int} from {@code props} passed in
+	 * @param props {@link java.util.Properties} to extract the value from using {@code propertyName} as key
+	 * @param propertyName Name of Property
+	 * @param defaultValue Value to return if there is an error parsing the value, 
+	 *                     no property is found, or there was an error converting the value to
+	 * @return value of property
+	 */
 	protected int getPropertyAsInt(Properties props, final String propertyName, int defaultValue){
-		String propVal = props.getProperty(propertyName);
+		String propVal = null;
+		if (props != null){
+			propVal = props.getProperty(propertyName);
+		}
 		if (propVal == null || propVal.trim().isEmpty()){
 			return defaultValue;
 		}	
