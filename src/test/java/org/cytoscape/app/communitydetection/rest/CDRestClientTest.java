@@ -641,6 +641,21 @@ public class CDRestClientTest {
 	}
 	
 	@Test
+	public void testPostCDDataTaskCanceled() throws IOException, CDRestClientException {
+		HttpClientFactory mockFac = mock(HttpClientFactory.class);
+		PropertiesHelper.getInstance().setBaseurl("http://foo");
+		PropertiesHelper.getInstance().setSubmitRetryCount(1);
+		CDRestClient client = CDRestClient.getInstance();
+		client.setAlternateHttpClientFactory(mockFac);
+		try {
+			client.setTaskCanceled(true);
+			assertNull(client.postCDData("foo", null, "somedata"));
+		} finally {
+			client.setTaskCanceled(true);			
+		}
+	}
+	
+	@Test
 	public void testPostCDDataSuccessFirstTimeWithCustomParams() throws IOException, CDRestClientException {
 		HttpClientFactory mockFac = mock(HttpClientFactory.class);
 		HttpClient mockClient = mock(HttpClient.class);
