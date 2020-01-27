@@ -7,8 +7,10 @@ import java.util.Map;
 import org.cytoscape.app.communitydetection.PropertiesHelper;
 
 import org.cytoscape.app.communitydetection.edgelist.ReaderTask;
+import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactory;
 import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.edgelist.WriterTask;
+import org.cytoscape.app.communitydetection.edgelist.WriterTaskFactory;
 import org.cytoscape.app.communitydetection.edgelist.WriterTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.rest.CDRestClient;
 import org.cytoscape.io.write.CyWriter;
@@ -30,14 +32,22 @@ public class HierarchyTask extends AbstractTask {
 	private final CommunityDetectionAlgorithm algorithm;
 	private final String weightColumn;
 	private final Map<String, String> customParameters;
+	private WriterTaskFactory _writerFactory;
+	private ReaderTaskFactory _readerFactory;
 	
 
-	public HierarchyTask(CyNetwork network, CommunityDetectionAlgorithm algorithm, Map<String, String> customParameters,
+	public HierarchyTask(ReaderTaskFactory readerFactory, CyNetwork network, CommunityDetectionAlgorithm algorithm, Map<String, String> customParameters,
 		final String weightColumn){
 	    this.network = network;
 	    this.algorithm = algorithm;
 	    this.weightColumn = weightColumn;
-	    this.customParameters = customParameters;    
+	    this.customParameters = customParameters;
+		_writerFactory = new WriterTaskFactoryImpl();
+		_readerFactory = readerFactory;
+	}
+	
+	protected void setAlternateWriterTaskFactory(WriterTaskFactory altFactory){
+		_writerFactory = altFactory;
 	}
 
 	@Override
@@ -49,9 +59,8 @@ public class HierarchyTask extends AbstractTask {
 		taskMonitor.setTitle("Community Detection: Creating Hierarchy Network");
 		taskMonitor.setStatusMessage("Exporting the network");
 		ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-		WriterTaskFactoryImpl writerFactory = (WriterTaskFactoryImpl) TaskListenerFactory.getInstance()
-				.getEdgeListWriterFactory();
-		CyWriter writer = writerFactory.createWriter(outStream, network, weightColumn);
+		
+		CyWriter writer = _writerFactory.createWriter(outStream, network, weightColumn);
 		writer.run(taskMonitor);
 		String resultURI = CDRestClient.getInstance().postCDData(algorithm.getName(),
 			this.customParameters, outStream.toString());
@@ -72,9 +81,8 @@ public class HierarchyTask extends AbstractTask {
 		taskMonitor.setProgress(0.9);
 		System.out.printf("CD app: Hierarchy edge list received in %d ms\n", (System.currentTimeMillis() - startTime));
 		taskMonitor.setStatusMessage("Received hierarchy, creating a new network");
-		ReaderTaskFactoryImpl readerFactory = (ReaderTaskFactoryImpl) TaskListenerFactory.getInstance()
-				.getEdgeListReaderFactory();
-		TaskIterator iterator = readerFactory.createTaskIterator(inStream, null, network.getSUID());
+
+		TaskIterator iterator = _readerFactory.createTaskIterator(inStream, null, network.getSUID());
 		ReaderTask reader = (ReaderTask) iterator.next();
 		reader.run(taskMonitor);
 		

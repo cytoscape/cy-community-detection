@@ -14,29 +14,14 @@ import org.cytoscape.view.model.CyNetworkView;
  * {@link WriterTask}.
  *
  */
-public class WriterTaskFactoryImpl implements CyNetworkViewWriterFactory {
+public class WriterTaskFactoryImpl implements WriterTaskFactory {
 
-	private final CyFileFilter fileFilter;
 
-	public WriterTaskFactoryImpl(CyFileFilter fileFilter) {
-		this.fileFilter = fileFilter;
+	public WriterTaskFactoryImpl(){
+
 	}
 
 	@Override
-	public CyFileFilter getFileFilter() {
-		return fileFilter;
-	}
-
-	@Override
-	public CyWriter createWriter(OutputStream os, CyNetworkView view) {
-		return new WriterTask(os, view.getModel(), AppUtils.TYPE_NONE);
-	}
-
-	@Override
-	public CyWriter createWriter(OutputStream os, CyNetwork network) {
-		return new WriterTask(os, network, AppUtils.TYPE_NONE);
-	}
-
 	public CyWriter createWriter(OutputStream os, CyNetwork network, String attribute) {
 		return new WriterTask(os, network, attribute);
 	}

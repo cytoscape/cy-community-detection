@@ -1,12 +1,11 @@
 package org.cytoscape.app.communitydetection.hierarchy;
 
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.JOptionPane;
-import org.cytoscape.app.communitydetection.rest.CDRestClientException;
+import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactory;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.model.CyColumn;
@@ -26,10 +25,13 @@ public class HierarchyTaskFactoryImpl implements NetworkTaskFactory {
 	private final static Logger LOGGER = LoggerFactory.getLogger(HierarchyTaskFactoryImpl.class);
 	private LauncherDialog _dialog;
 	private CySwingApplication _swingApplication;
+	private ReaderTaskFactory _readerFactory;
 
-	public HierarchyTaskFactoryImpl(CySwingApplication swingApplication, LauncherDialog dialog) {
+	public HierarchyTaskFactoryImpl(CySwingApplication swingApplication, LauncherDialog dialog,
+			ReaderTaskFactory readerFactory) {
 		this._dialog = dialog;
 		this._swingApplication = swingApplication;
+		this._readerFactory = readerFactory;
 	}
 	
 	@Override
@@ -40,10 +42,10 @@ public class HierarchyTaskFactoryImpl implements NetworkTaskFactory {
 				+ "Community Detection. "
 				+ "For more information click About menu item",
 			AppUtils.APP_NAME, JOptionPane.ERROR_MESSAGE);
-		return new TaskIterator(new HierarchyTask(network, null, null, null));
+		return new TaskIterator(new HierarchyTask(null, network, null, null, null));
 	    }
 		if (_dialog.createGUI(_swingApplication.getJFrame())== false){
-			return new TaskIterator(new HierarchyTask(network, null, null, null));
+			return new TaskIterator(new HierarchyTask(null, network, null, null, null));
 		} 
 		
 	    _dialog.updateWeightColumnCombo(getNumericColumns(network.getDefaultEdgeTable()));
@@ -64,14 +66,14 @@ public class HierarchyTaskFactoryImpl implements NetworkTaskFactory {
 		    LOGGER.debug("User wants to run: " + cda.getName() +
 			    customParameters == null ? "" : " with " +
 				    customParameters.toString());
-		    return new TaskIterator(new HierarchyTask(network, cda, customParameters,
+		    return new TaskIterator(new HierarchyTask(this._readerFactory, network, cda, customParameters,
 			    _dialog.getWeightColumn()));
 		} else {
 		   LOGGER.error("Couldnt get algorithm from dialog...");
 		}
 	    }
 	    
-	    return new TaskIterator(new HierarchyTask(network, null, null, null));
+	    return new TaskIterator(new HierarchyTask(null, network, null, null, null));
 	}
 
 	/**

@@ -21,7 +21,7 @@ import org.cytoscape.work.TaskIterator;
  * {@link ReaderTask}.
  * 
  */
-public class ReaderTaskFactoryImpl extends AbstractInputStreamTaskFactory {
+public class ReaderTaskFactoryImpl implements ReaderTaskFactory {
 
 	private final CyNetworkViewFactory cyNetworkViewFactory;
 	private final CyNetworkFactory cyNetworkFactory;
@@ -36,13 +36,12 @@ public class ReaderTaskFactoryImpl extends AbstractInputStreamTaskFactory {
 
 	private ReaderTask readerTask;
 
-	public ReaderTaskFactoryImpl(CyFileFilter filter, CyNetworkViewFactory cyNetworkViewFactory,
+	public ReaderTaskFactoryImpl(CyNetworkViewFactory cyNetworkViewFactory,
 			CyNetworkFactory cyNetworkFactory, CyNetworkManager cyNetworkManager,
 			CyNetworkViewManager cyNetworkViewManager, CyRootNetworkManager cyRootNetworkManager,
 			VisualMappingManager visualMappingManager, LoadVizmapFileTaskFactory vizmapFileTaskFactory,
 			CyLayoutAlgorithmManager layoutManager, SynchronousTaskManager<?> syncTaskManager,
 			CyNetworkNaming networkNaming) {
-		super(filter);
 		this.cyNetworkManager = cyNetworkManager;
 		this.cyRootNetworkManager = cyRootNetworkManager;
 		this.cyNetworkFactory = cyNetworkFactory;
@@ -55,15 +54,11 @@ public class ReaderTaskFactoryImpl extends AbstractInputStreamTaskFactory {
 		this.networkNaming = networkNaming;
 	}
 
+	@Override
 	public TaskIterator createTaskIterator(InputStream inputStream, String collectionName, Long originalNetSUID) {
 		readerTask = new ReaderTask(inputStream, cyNetworkViewFactory, cyNetworkFactory, cyNetworkManager,
 				cyNetworkViewManager, cyRootNetworkManager, visualMappingManager, vizmapFileTaskFactory, layoutManager,
 				syncTaskManager, networkNaming, originalNetSUID);
-		return this.createTaskIterator(inputStream, collectionName);
-	}
-
-	@Override
-	public TaskIterator createTaskIterator(InputStream inputStream, String collectionName) {
 		return new TaskIterator(readerTask);
 	}
 }

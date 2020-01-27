@@ -2,7 +2,6 @@ package org.cytoscape.app.communitydetection;
 
 import static org.cytoscape.application.swing.ActionEnableSupport.ENABLE_FOR_SELECTED_NODES;
 import static org.cytoscape.work.ServiceProperties.ENABLE_FOR;
-import static org.cytoscape.work.ServiceProperties.ID;
 import static org.cytoscape.work.ServiceProperties.IN_CONTEXT_MENU;
 import static org.cytoscape.work.ServiceProperties.IN_MENU_BAR;
 import static org.cytoscape.work.ServiceProperties.MENU_GRAVITY;
@@ -10,24 +9,17 @@ import static org.cytoscape.work.ServiceProperties.PREFERRED_MENU;
 import static org.cytoscape.work.ServiceProperties.TITLE;
 
 import java.util.Properties;
-
 import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactoryImpl;
-import org.cytoscape.app.communitydetection.edgelist.WriterTaskFactoryImpl;
+
 import org.cytoscape.app.communitydetection.hierarchy.HierarchyTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.hierarchy.JEditorPaneFactoryImpl;
 import org.cytoscape.app.communitydetection.hierarchy.LauncherDialog;
-import org.cytoscape.app.communitydetection.hierarchy.TaskListenerFactory;
 import org.cytoscape.app.communitydetection.subnetwork.SubNetworkTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.termmap.NetworkTermMappingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.termmap.NodeTermMapppingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.app.communitydetection.util.ShowDialogUtil;
 import org.cytoscape.application.swing.CySwingApplication;
-import org.cytoscape.io.BasicCyFileFilter;
-import org.cytoscape.io.DataCategory;
-import org.cytoscape.io.read.InputStreamTaskFactory;
-import org.cytoscape.io.util.StreamUtil;
-import org.cytoscape.io.write.CyNetworkViewWriterFactory;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
@@ -48,6 +40,17 @@ public class CyActivator extends AbstractCyActivator {
 		super();
 	}
 
+	private void loadPropertyReaderService(BundleContext bc) throws Exception {
+		PropertiesReader propReader = new PropertiesReader(AppUtils.APP_NAME, AppUtils.PROP_NAME);
+		Properties propReaderProperties = new Properties();
+		propReaderProperties.setProperty("cyPropertyName", AppUtils.PROP_NAME);
+		registerAllServices(bc, propReader, propReaderProperties);
+
+		final CyProperty<Properties> cyProperties = getService(bc, CyProperty.class,
+				"(cyPropertyName=" + AppUtils.PROP_NAME + ")");
+		PropertiesHelper.getInstance().updateViaProperties(cyProperties.getProperties());
+	}
+	
 	@Override
 	public void start(BundleContext bc) throws Exception {
 
@@ -63,65 +66,14 @@ public class CyActivator extends AbstractCyActivator {
 		final CyNetworkNaming networkNaming = getService(bc, CyNetworkNaming.class);
 		final CySwingApplication swingApplication = getService(bc, CySwingApplication.class);
 		
-		PropertiesReader propReader = new PropertiesReader(AppUtils.APP_NAME, AppUtils.PROP_NAME);
-		Properties propReaderProperties = new Properties();
-		propReaderProperties.setProperty("cyPropertyName", AppUtils.PROP_NAME);
-		registerAllServices(bc, propReader, propReaderProperties);
-
-		final CyProperty<Properties> cyProperties = getService(bc, CyProperty.class,
-				"(cyPropertyName=" + AppUtils.PROP_NAME + ")");
-		PropertiesHelper.getInstance().setBaseurl(cyProperties.getProperties().getProperty(AppUtils.PROP_APP_BASEURL));
-		PropertiesHelper.getInstance()
-				.setThreadcount(cyProperties.getProperties().getProperty(AppUtils.PROP_APP_THREADCOUNT));
-		Properties cyProps = cyProperties.getProperties();
-		PropertiesHelper pHelper = PropertiesHelper.getInstance();
-		PropertiesHelper.getInstance()
-				.setCommunityDetectionTimeoutMillis(propReader.getPropertyAsInt(cyProps,
-						AppUtils.PROP_CD_TASK_TIMEOUT, 1800000));
-		PropertiesHelper.getInstance()
-				.setFunctionalEnrichmentTimeoutMillis(propReader.getPropertyAsInt(cyProps,
-						AppUtils.PROP_FE_TASK_TIMEOUT, 1800000));
-		PropertiesHelper.getInstance()
-				.setSubmitRetryCount(propReader.getPropertyAsInt(cyProps,
-						AppUtils.PROP_SUBMIT_RETRY_COUNT, 2));
-		PropertiesHelper.getInstance()
-				.setHttpSocketTimeoutMillis(propReader.getPropertyAsInt(cyProps,
-						AppUtils.PROP_HTTP_SOCKET_TIMEOUT, 10000));
-		PropertiesHelper.getInstance()
-				.setHttpConnectTimeoutMillis(propReader.getPropertyAsInt(cyProps,
-						AppUtils.PROP_HTTP_CONNECT_TIMEOUT, 10000));
-		PropertiesHelper.getInstance()
-				.setHttpConnectionRequestTimeoutMillis(propReader.getPropertyAsInt(cyProps,
-						AppUtils.PROP_HTTP_CONNECTION_REQUEST_TIMEOUT, 10000));
-		PropertiesHelper.getInstance()
-				.setPollingIntervalTimeMillis(propReader.getPropertyAsInt(cyProps,
-						AppUtils.PROP_POLL_INTERVAL_TIME, 1000));
+		// sets up the PropertiesHelper and links it to properties that a user can
+		// view and edit in Edit => Preferences menu
+		loadPropertyReaderService(bc);
 		
-
-		// Setting up Edge List I/O services
-		final StreamUtil streamUtil = getService(bc, StreamUtil.class);
-
-		final BasicCyFileFilter edgeFilter = new BasicCyFileFilter(new String[] {}, new String[] { "text/edgelist" },
-				"Adjacency List", DataCategory.NETWORK, streamUtil);
-
-		final Properties writerProperties = new Properties();
-		writerProperties.put(ID, AppUtils.EDGE_WRITER_ID);
-		final WriterTaskFactoryImpl writerTaskWrapper = new WriterTaskFactoryImpl(edgeFilter);
-		registerService(bc, writerTaskWrapper, CyNetworkViewWriterFactory.class, writerProperties);
-
-		final Properties readerProperties = new Properties();
-		readerProperties.put(ID, AppUtils.EDGE_READER_ID);
-		final ReaderTaskFactoryImpl readerTaskWrapper = new ReaderTaskFactoryImpl(edgeFilter, networkViewFactory,
+		final ReaderTaskFactoryImpl readerTaskFactory = new ReaderTaskFactoryImpl(networkViewFactory,
 				networkFactory, networkManager, networkViewManager, rootNetworkManager, visualMappingManager,
 				vizmapFileTaskFactory, layoutAlgorithmManager, syncTaskManager, networkNaming);
-		registerService(bc, readerTaskWrapper, InputStreamTaskFactory.class, readerProperties);
-
-		TaskListenerFactory edgeTaskFactory = TaskListenerFactory.getInstance();
-		registerServiceListener(bc, edgeTaskFactory, "addReaderFactory", "removeReaderFactory",
-				InputStreamTaskFactory.class);
-		registerServiceListener(bc, edgeTaskFactory, "addWriterFactory", "removeWriterFactory",
-				CyNetworkViewWriterFactory.class);
-
+		
 		JEditorPaneFactoryImpl editorPaneFac = new JEditorPaneFactoryImpl();
 		// Add Run Community Detection under Apps => Community Detection
 		// menu
@@ -131,7 +83,7 @@ public class CyActivator extends AbstractCyActivator {
 		taskExecProps.setProperty(TITLE, "Run Community Detection");
 		LauncherDialog clusterAlgoDialog = new LauncherDialog(editorPaneFac,
 		                                                      AppUtils.CD_ALGORITHM_INPUT_TYPE);
-		registerAllServices(bc, new HierarchyTaskFactoryImpl(swingApplication, clusterAlgoDialog), taskExecProps);
+		registerAllServices(bc, new HierarchyTaskFactoryImpl(swingApplication, clusterAlgoDialog, readerTaskFactory), taskExecProps);
 		
 		// Add Run Functional Enrichment under Apps => Community Detection
 		// menu
