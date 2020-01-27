@@ -21,6 +21,7 @@ import org.cytoscape.app.communitydetection.subnetwork.SubNetworkTaskFactoryImpl
 import org.cytoscape.app.communitydetection.termmap.NetworkTermMappingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.termmap.NodeTermMapppingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.util.AppUtils;
+import org.cytoscape.app.communitydetection.util.ShowDialogUtil;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.io.BasicCyFileFilter;
 import org.cytoscape.io.DataCategory;
@@ -143,13 +144,14 @@ public class CyActivator extends AbstractCyActivator {
 		NetworkTermMappingTaskFactoryImpl termFac = new NetworkTermMappingTaskFactoryImpl(swingApplication, tmAlgoDialog); 
 		registerAllServices(bc, termFac, tmExecProps);
 
+		ShowDialogUtil dialogUtil = new ShowDialogUtil();
 		// add About undern Apps => Community Detection
 		// menu
 		Properties aboutProps = new Properties();
 		aboutProps.setProperty(MENU_GRAVITY, "3.0");
 		aboutProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
 		aboutProps.setProperty(TITLE, "About");
-		registerAllServices(bc, new AboutTaskFactoryImpl(swingApplication, editorPaneFac), aboutProps);
+		registerAllServices(bc, new AboutTaskFactoryImpl(swingApplication, editorPaneFac, dialogUtil), aboutProps);
 		
                 // add View Interactions for this Community in context menu
 		// displayed when user right clicks on a node

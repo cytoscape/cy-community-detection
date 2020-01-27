@@ -12,6 +12,7 @@ import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
 import org.cytoscape.app.communitydetection.hierarchy.JEditorPaneFactory;
 import org.cytoscape.app.communitydetection.util.AppUtils;
+import org.cytoscape.app.communitydetection.util.ShowDialogUtil;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.task.NetworkTaskFactory;
@@ -26,14 +27,15 @@ public class AboutTaskFactoryImpl implements NetworkTaskFactory {
 
     private CySwingApplication _swingApplication;
     private JEditorPaneFactory _editorPaneFactory;
+	private ShowDialogUtil _dialogUtil;
     private JEditorPane _editorPane;
     private ImageIcon _aboutIcon;
     
     public AboutTaskFactoryImpl(CySwingApplication swingApplication,
-	    JEditorPaneFactory editorPaneFactory){
-	_swingApplication = swingApplication;
-	_editorPaneFactory = editorPaneFactory;
-	
+	    JEditorPaneFactory editorPaneFactory, ShowDialogUtil dialogUtil){
+		_swingApplication = swingApplication;
+		_editorPaneFactory = editorPaneFactory;
+		_dialogUtil = dialogUtil;
     }
     
     private void createAboutEditorPaneIfNeeded(){
@@ -61,7 +63,7 @@ public class AboutTaskFactoryImpl implements NetworkTaskFactory {
 	sb.append("this App offers access to Gene Ontology enrichment (functional enrichment) ");
 	sb.append("for annotation of<br/>community nodes to gain ");
 	sb.append("biological insight.<br/><br/>");
-	sb.append("<a href=\"https://github.com/idekerlab/cy-community-detection\">Click here for more information.</a>");
+	sb.append("<a href=\"https://github.com/idekerlab/cy-community-detection\">Click here for more information</a>");
 	
 	_editorPane = _editorPaneFactory.getDescriptionFrame(sb.toString());
     }
@@ -86,11 +88,11 @@ public class AboutTaskFactoryImpl implements NetworkTaskFactory {
      */
     @Override
     public TaskIterator createTaskIterator(CyNetwork network) {
-	createAboutEditorPaneIfNeeded();
-	JOptionPane.showMessageDialog(_swingApplication.getJFrame(),
-			_editorPane,
-			AppUtils.APP_NAME, JOptionPane.INFORMATION_MESSAGE, _aboutIcon);
-	return new TaskIterator(new AboutTask());
+		createAboutEditorPaneIfNeeded();
+		_dialogUtil.showMessageDialog(_swingApplication.getJFrame(),
+			_editorPane, AppUtils.APP_NAME,
+			JOptionPane.INFORMATION_MESSAGE, _aboutIcon);
+		return new TaskIterator(new AboutTask());
     }
 
     /**
