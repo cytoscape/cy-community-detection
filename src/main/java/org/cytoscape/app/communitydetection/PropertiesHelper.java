@@ -1,5 +1,8 @@
 package org.cytoscape.app.communitydetection;
 
+import java.util.Properties;
+import org.cytoscape.app.communitydetection.util.AppUtils;
+
 public class PropertiesHelper {
 
 	private String baseurl;
@@ -28,6 +31,25 @@ public class PropertiesHelper {
 		return SingletonHelper.INSTANCE;
 	}
 
+	public void updateViaProperties(Properties props){
+		setBaseurl(props.getProperty(AppUtils.PROP_APP_BASEURL));
+		setThreadcount(props.getProperty(AppUtils.PROP_APP_THREADCOUNT));
+		setCommunityDetectionTimeoutMillis(getPropertyAsInt(props,
+								AppUtils.PROP_CD_TASK_TIMEOUT, 1800000));
+		setFunctionalEnrichmentTimeoutMillis(getPropertyAsInt(props,
+								AppUtils.PROP_FE_TASK_TIMEOUT, 1800000));
+		setSubmitRetryCount(getPropertyAsInt(props,
+								AppUtils.PROP_SUBMIT_RETRY_COUNT, 2));
+		setHttpSocketTimeoutMillis(getPropertyAsInt(props,
+								AppUtils.PROP_HTTP_SOCKET_TIMEOUT, 10000));
+		setHttpConnectTimeoutMillis(getPropertyAsInt(props,
+								AppUtils.PROP_HTTP_CONNECT_TIMEOUT, 10000));
+		setHttpConnectionRequestTimeoutMillis(getPropertyAsInt(props,
+								AppUtils.PROP_HTTP_CONNECTION_REQUEST_TIMEOUT, 10000));
+		setPollingIntervalTimeMillis(getPropertyAsInt(props,
+								AppUtils.PROP_POLL_INTERVAL_TIME, 1000));
+	}
+	
 	/**
 	 * Gets REST endpoint for CD Service
 	 * @return 
@@ -145,4 +167,17 @@ public class PropertiesHelper {
 	public void setSubmitRetryCount(int submitRetryCount) {
 		this.submitRetryCount = submitRetryCount;
 	}
+	
+	protected int getPropertyAsInt(Properties props, final String propertyName, int defaultValue){
+		String propVal = props.getProperty(propertyName);
+		if (propVal == null || propVal.trim().isEmpty()){
+			return defaultValue;
+		}	
+		try {
+			return Integer.parseInt(propVal);
+		}
+		catch(NumberFormatException nfe){
+		}
+		return defaultValue;
+    }
 }
