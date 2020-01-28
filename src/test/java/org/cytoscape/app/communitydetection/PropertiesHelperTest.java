@@ -26,24 +26,28 @@ public class PropertiesHelperTest {
 	}
     @Test
     public void testGettersAndSetters(){
-	PropertiesHelper ph = PropertiesHelper.getInstance();
-		
-	ph.setBaseurl("url");
-	ph.setThreadcount("thread");
-	ph.setHttpSocketTimeoutMillis(1);
-	ph.setHttpConnectTimeoutMillis(2);
-	ph.setHttpConnectionRequestTimeoutMillis(3);
-	ph.setSubmitRetryCount(5);
-	ph.setCommunityDetectionTimeoutMillis(6);
-	ph.setFunctionalEnrichmentTimeoutMillis(7);
-	assertEquals("url", ph.getBaseurl());
-	assertEquals("thread", ph.getThreadcount());
-	assertEquals(1, ph.getHttpSocketTimeoutMillis());
-	assertEquals(2, ph.getHttpConnectTimeoutMillis());
-	assertEquals(3, ph.getHttpConnectionRequestTimeoutMillis());
-	assertEquals(5, ph.getSubmitRetryCount());
-	assertEquals(6, ph.getCommunityDetectionTimeoutMillis());
-	assertEquals(7, ph.getFunctionalEnrichmentTimeoutMillis());
+		PropertiesHelper ph = PropertiesHelper.getInstance();
+
+		ph.setAppName("appy");
+		ph.setAppVersion("version");
+		ph.setBaseurl("url");
+		ph.setThreadcount("thread");
+		ph.setHttpSocketTimeoutMillis(1);
+		ph.setHttpConnectTimeoutMillis(2);
+		ph.setHttpConnectionRequestTimeoutMillis(3);
+		ph.setSubmitRetryCount(5);
+		ph.setCommunityDetectionTimeoutMillis(6);
+		ph.setFunctionalEnrichmentTimeoutMillis(7);
+		assertEquals("appy", ph.getAppName());
+		assertEquals("version", ph.getAppVersion());
+		assertEquals("url", ph.getBaseurl());
+		assertEquals("thread", ph.getThreadcount());
+		assertEquals(1, ph.getHttpSocketTimeoutMillis());
+		assertEquals(2, ph.getHttpConnectTimeoutMillis());
+		assertEquals(3, ph.getHttpConnectionRequestTimeoutMillis());
+		assertEquals(5, ph.getSubmitRetryCount());
+		assertEquals(6, ph.getCommunityDetectionTimeoutMillis());
+		assertEquals(7, ph.getFunctionalEnrichmentTimeoutMillis());
     }
 	
 	@Test

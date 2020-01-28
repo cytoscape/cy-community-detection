@@ -1,4 +1,4 @@
-package org.cytoscape.app.communitydetection.iquery;
+package org.cytoscape.app.communitydetection;
 
 import org.cytoscape.work.TaskMonitor;
 import static org.junit.Assert.*;
@@ -9,11 +9,11 @@ import org.junit.Test;
  *
  * @author churas
  */
-public class IQueryTaskTest {
+public class DoNothingTaskTest {
 	
 	@Test
 	public void testRun(){
-		IQueryTask task = new IQueryTask();
+		DoNothingTask task = new DoNothingTask();
 		TaskMonitor mockMonitor = mock(TaskMonitor.class);
 		try {
 			task.run(mockMonitor);

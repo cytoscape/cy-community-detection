@@ -8,7 +8,7 @@ import org.cytoscape.work.TaskMonitor;
  *
  * @author churas
  */
-public class AboutTask  extends AbstractTask{
+public class DoNothingTask  extends AbstractTask{
 
     @Override
     public void run(TaskMonitor taskMonitor) throws Exception {

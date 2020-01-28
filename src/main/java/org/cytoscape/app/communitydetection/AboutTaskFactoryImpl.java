@@ -92,7 +92,7 @@ public class AboutTaskFactoryImpl implements NetworkTaskFactory {
 		_dialogUtil.showMessageDialog(_swingApplication.getJFrame(),
 			_editorPane, AppUtils.APP_NAME,
 			JOptionPane.INFORMATION_MESSAGE, _aboutIcon);
-		return new TaskIterator(new AboutTask());
+		return new TaskIterator(new DoNothingTask());
     }
 
     /**

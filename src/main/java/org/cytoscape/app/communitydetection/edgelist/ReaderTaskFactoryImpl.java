@@ -2,7 +2,6 @@ package org.cytoscape.app.communitydetection.edgelist;
 
 import java.io.InputStream;
 
-import org.cytoscape.io.CyFileFilter;
 import org.cytoscape.io.read.AbstractInputStreamTaskFactory;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
