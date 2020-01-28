@@ -5,6 +5,7 @@ public class AppUtils {
 	public static final String APP_NAME = "CyCommunityDetection";
 	public static final String PROP_NAME = "communitydetection";
 	public static final String PROP_APP_BASEURL = "app.baseurl";
+	public static final String PROP_IQUERY_URL = "iquery.url";
 	public static final String PROP_APP_THREADCOUNT = "app.threadcount";
 	public static final String PROP_PROJECT_VERSION = "project.version";
 	public static final String PROP_PROJECT_NAME = "project.name";
@@ -50,6 +51,13 @@ public class AppUtils {
 
 	public final static String EDGE_LIST_SPLIT_PATTERN = ",";
 	public final static String CD_MEMBER_LIST_DELIMITER = "[\\s,]+";
+
+	/**
+	 * Query variable to send genes to iQuery web application
+	 */
+	public final static String CD_IQUERY_GENES_QUERY_PREFIX = "?genes=";
+	
+	public final static String CD_IQUERY_SPACE_DELIM="%20";
 
 	public final static String TYPE_NONE = "none";
 	public final static String TYPE_WEIGHTED = "weighted";

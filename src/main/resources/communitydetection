@@ -1,4 +1,5 @@
 app.baseurl=http://cdservice.cytoscape.org/cd/communitydetection/v1
+iquery.url=http://iquery.ndexbio.org
 app.threadcount=4
 project.version=${project.version}
 project.name=${project.name}

@@ -14,6 +14,7 @@ import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.hierarchy.HierarchyTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.hierarchy.JEditorPaneFactoryImpl;
 import org.cytoscape.app.communitydetection.hierarchy.LauncherDialog;
+import org.cytoscape.app.communitydetection.iquery.IQueryTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.subnetwork.SubNetworkTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.termmap.NetworkTermMappingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.termmap.NodeTermMapppingTaskFactoryImpl;
@@ -126,6 +127,17 @@ public class CyActivator extends AbstractCyActivator {
 		enrichCMenuProps.put(IN_CONTEXT_MENU, true);
 		NodeTermMapppingTaskFactoryImpl nodeTermMapFac = new NodeTermMapppingTaskFactoryImpl(termFac);
 		registerAllServices(bc, nodeTermMapFac, enrichCMenuProps);
+		
+		Properties iQueryCMenuProps = new Properties();
+		iQueryCMenuProps.setProperty(PREFERRED_MENU, AppUtils.CONTEXT_MENU_CD);
+		iQueryCMenuProps.setProperty(ENABLE_FOR, ENABLE_FOR_SELECTED_NODES);
+		iQueryCMenuProps.setProperty(TITLE, "View Terms for Selected Node in iQuery");
+		iQueryCMenuProps.put(IN_MENU_BAR, false);
+		iQueryCMenuProps.put(IN_CONTEXT_MENU, true);
+		IQueryTaskFactoryImpl iQueryFac = new IQueryTaskFactoryImpl(swingApplication, dialogUtil);
+		registerAllServices(bc, iQueryFac, iQueryCMenuProps);
+		
+		
 	}
 
 }

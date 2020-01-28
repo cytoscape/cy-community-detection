@@ -11,7 +11,7 @@
 		<maven-bundle-plugin.version>4.2.1</maven-bundle-plugin.version>
 		<junit.version>4.12</junit.version>
                 <mockito.version>3.2.4</mockito.version>
-		<cytoscape.api.version>3.7.2</cytoscape.api.version>
+		<cytoscape.api.version>3.7.1</cytoscape.api.version>
 		<osgi.api.version>6.0.0</osgi.api.version>
 		<jackson.version>2.10.1</jackson.version>
 		<jackson-databind.version>2.10.1</jackson-databind.version>
@@ -289,6 +289,48 @@
                     <version>${mockito.version}</version>
                     <scope>test</scope>
                 </dependency>
+                <!--
+                <dependency>
+			<groupId>org.cytoscape</groupId>
+			<artifactId>app-api</artifactId>
+			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
+		</dependency> -->
+                <dependency>
+                    <groupId>org.cytoscape</groupId>
+                    <artifactId>model-impl</artifactId>
+                    <version>${cytoscape.api.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.cytoscape</groupId>
+                    <artifactId>model-impl</artifactId>
+                    <version>${cytoscape.api.version}</version>
+                    <type>test-jar</type>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.cytoscape</groupId>
+                    <artifactId>event-api</artifactId>
+                    <version>${cytoscape.api.version}</version>
+                    <type>test-jar</type>
+                    <scope>test</scope>
+		</dependency>
+                <!--
+                <dependency>
+                    <groupId>org.cytoscape</groupId>
+                    <artifactId>viewmodel-impl</artifactId>
+                    <version>${cytoscape.api.version}</version>
+                    <type>test-jar</type>
+                    <scope>test</scope>
+		</dependency>
+                <dependency>
+                    <groupId>org.cytoscape</groupId>
+                    <artifactId>ding-presentation-impl</artifactId>
+                    <version>${cytoscape.api.version}</version>
+                    <type>test-jar</type>
+                    <scope>test</scope>
+		</dependency>-->
 	</dependencies>
         <reporting>
     <plugins>

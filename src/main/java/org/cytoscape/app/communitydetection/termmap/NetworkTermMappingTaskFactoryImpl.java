@@ -1,12 +1,9 @@
 package org.cytoscape.app.communitydetection.termmap;
 
 
-import java.io.IOException;
 import java.util.Map;
 import javax.swing.JOptionPane;
-import org.cytoscape.app.communitydetection.hierarchy.HierarchyTask;
 import org.cytoscape.app.communitydetection.hierarchy.LauncherDialog;
-import org.cytoscape.app.communitydetection.rest.CDRestClientException;
 
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.application.swing.CySwingApplication;
@@ -24,7 +21,7 @@ import org.slf4j.LoggerFactory;
  */
 public class NetworkTermMappingTaskFactoryImpl implements NetworkTaskFactory {
 
-	private final static Logger _logger = LoggerFactory.getLogger(NetworkTermMappingTaskFactoryImpl.class);
+	private final static Logger LOGGER = LoggerFactory.getLogger(NetworkTermMappingTaskFactoryImpl.class);
 
 	private LauncherDialog _dialog;
 	private CySwingApplication _swingApplication;
@@ -41,7 +38,7 @@ public class NetworkTermMappingTaskFactoryImpl implements NetworkTaskFactory {
 		JOptionPane.showMessageDialog(_swingApplication.getJFrame(),
 			"A network must be selected in Cytoscape to run "
 				+ "Functional Enrichment.\n"
-				+ "For more information click About menu item",
+				+ "For more information visit About menu item under Apps => Community Detection",
 			AppUtils.APP_NAME, JOptionPane.ERROR_MESSAGE);
 		 return new TaskIterator(new TermMappingTask(null, null, null, false));
 	    }
@@ -52,7 +49,7 @@ public class NetworkTermMappingTaskFactoryImpl implements NetworkTaskFactory {
 				+ "type String with genes delimited by spaces)\n" 
 				+ "needs to exist on network to run "
 				+ "Functional Enrichment.\n"
-				+ "For more information click About menu item",
+				+ "For more information click About menu item under Apps => Community Detection",
 			AppUtils.APP_NAME, JOptionPane.ERROR_MESSAGE);
 		 return new TaskIterator(new TermMappingTask(null, null, null, false));
 	    }
@@ -75,14 +72,14 @@ public class NetworkTermMappingTaskFactoryImpl implements NetworkTaskFactory {
 		CommunityDetectionAlgorithm cda = this._dialog.getSelectedCommunityDetectionAlgorithm();
 		if (cda != null){   
 		    Map<String, String> customParameters = this._dialog.getAlgorithmCustomParameters(cda.getName());
-		    _logger.debug("User wants to run: " + cda.getName() +
+		    LOGGER.debug("User wants to run: " + cda.getName() +
 			    customParameters == null ? "" : " with " +
 				    customParameters.toString());
 
 		    return new TaskIterator(new TermMappingTask(network, cda, customParameters,
 			    _dialog.runOnSelectedNodes()));
 		} else {
-		   _logger.error("Couldnt get algorithm from dialog...");
+		   LOGGER.error("Couldnt get algorithm from dialog...");
 		}
 	    }
 	    return new TaskIterator(new TermMappingTask(null, null, null, false));

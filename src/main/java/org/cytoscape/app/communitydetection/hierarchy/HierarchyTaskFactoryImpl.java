@@ -40,7 +40,7 @@ public class HierarchyTaskFactoryImpl implements NetworkTaskFactory {
 		JOptionPane.showMessageDialog(_swingApplication.getJFrame(),
 			"A network must be selected in Cytoscape to Run "
 				+ "Community Detection. "
-				+ "For more information click About menu item",
+				+ "For more information click About menu item under Apps => Community Detection",
 			AppUtils.APP_NAME, JOptionPane.ERROR_MESSAGE);
 		return new TaskIterator(new HierarchyTask(null, network, null, null, null));
 	    }
@@ -69,7 +69,7 @@ public class HierarchyTaskFactoryImpl implements NetworkTaskFactory {
 		    return new TaskIterator(new HierarchyTask(this._readerFactory, network, cda, customParameters,
 			    _dialog.getWeightColumn()));
 		} else {
-		   LOGGER.error("Couldnt get algorithm from dialog...");
+		   LOGGER.error("Unable to get algorithm from dialog...");
 		}
 	    }
 	    

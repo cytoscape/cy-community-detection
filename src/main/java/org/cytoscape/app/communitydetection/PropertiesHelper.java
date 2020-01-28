@@ -7,6 +7,7 @@ import org.cytoscape.app.communitydetection.util.AppUtils;
 public class PropertiesHelper {
 
 	private String baseurl;
+	private String iQueryurl;
 	private String threadcount;
 	private String appName;
 	private String appVersion;
@@ -47,6 +48,8 @@ public class PropertiesHelper {
 		}
 		setBaseurl(props.getProperty(AppUtils.PROP_APP_BASEURL,
 				"http://cdservice.cytoscape.org/cd/communitydetection/v1"));
+		setiQueryurl(props.getProperty(AppUtils.PROP_IQUERY_URL,
+				"http://iquery.ndexbio.org"));
 		setThreadcount(props.getProperty(AppUtils.PROP_APP_THREADCOUNT, "4"));
 		setCommunityDetectionTimeoutMillis(getPropertyAsInt(props,
 								AppUtils.PROP_CD_TASK_TIMEOUT, 1800000));
@@ -80,6 +83,23 @@ public class PropertiesHelper {
 		this.baseurl = baseurl;
 	}
 
+	/**
+	 * Gets base URL of iQuery web application
+	 * @return URL as string ie http://iquery.ndexbio.org
+	 */
+	public String getiQueryurl() {
+		return iQueryurl;
+	}
+
+	/**
+	 * Sets base URL of iQuery web application
+	 * @param iQueryurl 
+	 */
+	public void setiQueryurl(String iQueryurl) {
+		this.iQueryurl = iQueryurl;
+	}
+
+	
 	/**
 	 * Gets number of parallel term mapping tasks to invoke
 	 * when running functional enrichment tasks

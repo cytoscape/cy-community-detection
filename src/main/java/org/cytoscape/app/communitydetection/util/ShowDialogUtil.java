@@ -15,4 +15,8 @@ public class ShowDialogUtil {
 			Object message, String title, int messageType, Icon icon){
 		JOptionPane.showMessageDialog(parentComponent, message, title, messageType, icon);
 	}
+	
+	public void showMessageDialog(Component parentComponent, Object message){
+		JOptionPane.showMessageDialog(parentComponent, message);
+	}
 }
