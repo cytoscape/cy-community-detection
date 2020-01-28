@@ -160,6 +160,14 @@ public class TermMappingTask extends AbstractTask {
 		_network.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_COMMUNITY_NAME,
 			String.class, false, null);
 	    }
+		if (_network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_ANNOTATED_ALGORITHM) == null) {
+		_network.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_ANNOTATED_ALGORITHM,
+			String.class, false, null);
+	    }
+		if (_network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_NONANNOTATED_MEMBERS) == null) {
+		_network.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_NONANNOTATED_MEMBERS,
+			String.class, false, null);
+	    }
 	    if (_network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_ANNOTATED_MEMBERS) == null) {
 		_network.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_ANNOTATED_MEMBERS,
 			String.class, false, null);

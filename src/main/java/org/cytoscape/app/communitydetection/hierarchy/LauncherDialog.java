@@ -44,6 +44,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.JViewport;
 
 import org.cytoscape.app.communitydetection.rest.CDRestClient;
 import org.cytoscape.app.communitydetection.rest.CDRestClientException;
@@ -63,7 +64,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
     	private final static Logger LOGGER = LoggerFactory.getLogger(LauncherDialog.class);
 
 	private static final String SELECTED_NODES_BUTTON_LABEL = "Selected Nodes";
-	private static final String INPUTDELIM = ":::";
+	public static final String INPUTDELIM = ":::";
 	private List<CommunityDetectionAlgorithm> _algorithmList;
 	private static final float ALGO_FONTSIZE_BOOST = 4.0f;
 	private static final double TEXT_FIELD_WIDTH = 160.0;
@@ -425,24 +426,27 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	 */
 	private JComponent getCustomParameterInput(final String algorithm,
 		final CustomParameter parameter){
+		String componentName = algorithm + INPUTDELIM + parameter.getName();
 	    if (parameter.getType() != null && parameter.getType().equalsIgnoreCase("flag")){
 		    JCheckBox checkBox = new JCheckBox();
-		    checkBox.setName(algorithm + INPUTDELIM + parameter.getName());
+		    checkBox.setName(componentName);
 		    checkBox.setBorder(BorderFactory.createEmptyBorder(5, 0, 0,0));
 		    return checkBox;
 	    }
 	    JTextField textField = null;
 	    if (parameter.getDefaultValue() != null){
-		textField = new JTextField(parameter.getDefaultValue());
-		
+			textField = new JTextField(parameter.getDefaultValue());
 	    } 
 	    else {
-		textField = new JTextField();
+			textField = new JTextField();
 	    }
 	    
-	    textField.setName(algorithm + INPUTDELIM + parameter.getName());
+	    textField.setName(componentName);
 	    JScrollPane textScrollPane = new JScrollPane(textField, JScrollPane.VERTICAL_SCROLLBAR_NEVER,
 		    JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		// set the name so we can find this component later even though
+		// we need the text field within.
+		textScrollPane.setName(componentName);
 	    Dimension prefSize = textScrollPane.getPreferredSize();
 	    prefSize.setSize(TEXT_FIELD_WIDTH, prefSize.getHeight()*1.1);
 	    textScrollPane.setPreferredSize(prefSize);
@@ -597,7 +601,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	    Map<String, CustomParameter> pMap = cda.getCustomParameterMap();
 	    JPanel algoCard = _algoCardMap.get(algorithm);
 	    for (Component c : algoCard.getComponents()){
-		if (c.getName() == null || !c.getName().startsWith(algorithm + ":::")){
+		if (c.getName() == null || !c.getName().startsWith(algorithm + INPUTDELIM)){
 		    continue;
 		}
 		String paramName = c.getName().replaceAll("^.*" + INPUTDELIM, "");
@@ -605,6 +609,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		    continue;
 		}
 		CustomParameter cp = pMap.get(paramName);
+		c = getTextFieldFromJScrollPane(c);
 		
 		if (c instanceof JTextField){
 		    JTextField tField = (JTextField)c;
@@ -619,7 +624,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		}
 	    }
 	}
-	
+
 	/**
 	 * Given 'algorithm' internal name, this method returns 
 	 * {@link org.ndexbio.communitydetection.reste.model.CommunityDetectionAlgorithm}
@@ -699,10 +704,12 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	    Map<String, String> cParam = new LinkedHashMap<String, String>();
 	    
 	    for (Component c : algoCard.getComponents()){
-		if (c.getName() == null || !c.getName().startsWith(algorithm + ":::")){
+		if (c.getName() == null || !c.getName().startsWith(algorithm + INPUTDELIM)){
 		    continue;
 		}
 		String paramName = c.getName().replaceAll("^.*" + INPUTDELIM, "");
+		
+		c = getTextFieldFromJScrollPane(c);
 		
 		if (c instanceof JTextField){
 		    JTextField tField = (JTextField)c;
@@ -718,6 +725,25 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		}
 	    }
 	    return cParam;
+	}
+	
+	private Component getTextFieldFromJScrollPane(Component c){
+		if (c instanceof JScrollPane){
+			LOGGER.debug("Found a scrollpane with name: " + c.getName());
+			JScrollPane scrollPane = (JScrollPane)c;
+			JViewport viewport = scrollPane.getViewport();
+			for (Component textComp : viewport.getComponents()){
+				LOGGER.debug("Found a component under JScrollPane with name: " +
+						(textComp.getName() == null ? "null" : textComp.getName()));
+
+				if (textComp instanceof JTextField){
+					return textComp;
+				}
+			}
+		}
+		LOGGER.debug("Didnt find a scrollpane, returning original component named: " +
+				(c.getName() == null ? "null" : c.getName()));
+		return c;
 	}
 
 	/**

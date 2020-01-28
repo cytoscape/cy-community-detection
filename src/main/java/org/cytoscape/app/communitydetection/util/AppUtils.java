@@ -38,10 +38,13 @@ public class AppUtils {
 	public final static String COLUMN_CD_MEMBER_LIST_LOG_SIZE = "CD_MemberList_LogSize";
 	public final static String COLUMN_CD_ORIGINAL_NETWORK = "__CD_OriginalNetwork";
 	public final static String COLUMN_CD_COMMUNITY_NAME = "CD_CommunityName";
+	public final static String COLUMN_CD_ANNOTATED_ALGORITHM = "CD_AnnotatedAlgorithm";
 	public final static String COLUMN_CD_ANNOTATED_MEMBERS = "CD_AnnotatedMembers";
 	public final static String COLUMN_CD_ANNOTATED_MEMBERS_SIZE = "CD_AnnotatedMembers_Size";
 	public final static String COLUMN_CD_ANNOTATED_OVERLAP = "CD_AnnotatedMembers_Overlap";
 	public final static String COLUMN_CD_ANNOTATED_PVALUE = "CD_AnnotatedMembers_Pvalue";
+	public final static String COLUMN_CD_NONANNOTATED_MEMBERS = "CD_NonAnnotatedMembers";
+	
 	
 	public final static String COLUMN_CD_LABELED = "CD_Labeled";
 

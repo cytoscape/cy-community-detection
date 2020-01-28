@@ -201,7 +201,6 @@ public class CDRestClient {
 				     " RetryLimit => " + Long.toString(retryLimit));
 		while(retryLimit < 0 || retryCount < retryLimit){
 			this.threadSleep(waitTime);
-			System.out.println(taskId + " trying");
 			if (isTaskCanceled) {
 				LOGGER.debug("User canceled task: " + taskId);
 				silentlyDeleteTask(taskId);

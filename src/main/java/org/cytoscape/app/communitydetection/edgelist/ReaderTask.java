@@ -235,7 +235,9 @@ public class ReaderTask extends AbstractCyNetworkReader {
 		} else {
 		   description.append("no column used\n");
 		}
-		description.append("CustomParameters: " + customParameters + "\n");
+		description.append("CustomParameters: ");
+		description.append(customParameters);
+		description.append("\n");
 		String UUID = originalNetwork.getRow(originalNetwork, CyNetwork.HIDDEN_ATTRS).get("NDEx UUID", String.class);
 		if (UUID != null) {
 			description.append("Original network's NDEx UUID: " + UUID);

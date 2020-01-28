@@ -63,7 +63,7 @@ public class HierarchyTaskFactoryImpl implements NetworkTaskFactory {
 		CommunityDetectionAlgorithm cda = this._dialog.getSelectedCommunityDetectionAlgorithm();
 		if (cda != null){   
 		    Map<String, String> customParameters = this._dialog.getAlgorithmCustomParameters(cda.getName());
-		    LOGGER.debug("User wants to run: " + cda.getName() +
+		    LOGGER.info("User wants to run: " + cda.getName() +
 			    customParameters == null ? "" : " with " +
 				    customParameters.toString());
 		    return new TaskIterator(new HierarchyTask(this._readerFactory, network, cda, customParameters,

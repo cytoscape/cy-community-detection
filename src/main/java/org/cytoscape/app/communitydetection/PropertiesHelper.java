@@ -1,5 +1,6 @@
 package org.cytoscape.app.communitydetection;
 
+import java.io.IOException;
 import java.util.Properties;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 
@@ -7,6 +8,8 @@ public class PropertiesHelper {
 
 	private String baseurl;
 	private String threadcount;
+	private String appName;
+	private String appVersion;
 	private int httpSocketTimeoutMillis;
 	private int httpConnectTimeoutMillis;
 	private int httpConnectionRequestTimeoutMillis;
@@ -16,6 +19,14 @@ public class PropertiesHelper {
 	private int submitRetryCount;
 
 	private PropertiesHelper() {
+		Properties properties = new Properties();
+		try {
+			properties.load(getClass().getClassLoader().getResourceAsStream(AppUtils.PROP_NAME));
+			appName = properties.getProperty(AppUtils.PROP_PROJECT_NAME, AppUtils.APP_NAME);
+			appVersion = properties.getProperty(AppUtils.PROP_PROJECT_VERSION, "Unknown");
+		} catch(IOException io){
+			
+		}
 	}
 
 	private static class SingletonHelper {
@@ -152,6 +163,23 @@ public class PropertiesHelper {
 	public void setSubmitRetryCount(int submitRetryCount) {
 		this.submitRetryCount = submitRetryCount;
 	}
+
+	public String getAppName() {
+		return appName;
+	}
+
+	public void setAppName(String appName) {
+		this.appName = appName;
+	}
+
+	public String getAppVersion() {
+		return appVersion;
+	}
+
+	public void setAppVersion(String appVersion) {
+		this.appVersion = appVersion;
+	}
+	
 	
 	/**
 	 * Gets property as {@code int} from {@code props} passed in
