@@ -8,7 +8,6 @@ import org.cytoscape.app.communitydetection.PropertiesHelper;
 
 import org.cytoscape.app.communitydetection.edgelist.ReaderTask;
 import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactory;
-import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.edgelist.WriterTask;
 import org.cytoscape.app.communitydetection.edgelist.WriterTaskFactory;
 import org.cytoscape.app.communitydetection.edgelist.WriterTaskFactoryImpl;
