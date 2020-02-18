@@ -199,9 +199,10 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		if (weightPanel != null){
 		    add(weightPanel, BorderLayout.CENTER);
 		}
+		
 		add(masterPanel, BorderLayout.CENTER);
+		add(this.getDisclaimerPanel(), BorderLayout.CENTER);
 		_guiLoaded = true;
-		loadAlgorithmCards();
 		updateWeightColumnCombo(null);
 		return true;
 	}
@@ -233,6 +234,24 @@ public class LauncherDialog extends JPanel implements ItemListener {
             nodePanel.add(_selectedButton);
 	    return nodePanel;
 	}
+
+	/**
+	 * Gets a panel to show the disclaimer text
+	 * @return JPanel with a label containing a disclaimer
+	 */
+	private JPanel getDisclaimerPanel(){
+		JPanel disclaimPanel = new JPanel();
+		disclaimPanel.setLayout(new GridBagLayout());
+		GridBagConstraints labelConstraints = new GridBagConstraints();
+		labelConstraints.gridy = 0;
+		labelConstraints.gridx = 0;
+		labelConstraints.anchor = GridBagConstraints.WEST;
+		labelConstraints.fill = GridBagConstraints.NONE;
+		labelConstraints.insets = new Insets(0, 0, 0, 0);
+		disclaimPanel.add(new JLabel("NOTE: This service is experimental"), labelConstraints);
+		return disclaimPanel;
+	}
+
 	/**
 	 * Creates column weight panel if algorithm type is community detection
 	 * otherwise return null cause the dialog is for functional enrichment
