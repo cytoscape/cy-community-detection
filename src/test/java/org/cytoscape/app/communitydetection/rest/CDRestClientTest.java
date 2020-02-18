@@ -302,9 +302,9 @@ public class CDRestClientTest {
     public void testgetErrorMessageFromResultWithEmptyResultInRequest(){
 	CommunityDetectionResult cdr = new CommunityDetectionResult();
 	CDRestClient client = CDRestClient.getInstance();
-	assertEquals(" : ", client.getErrorMessageFromResult(cdr));
+	assertEquals("", client.getErrorMessageFromResult(cdr));
 	cdr.setMessage("mymessage");
-	assertEquals(" :  : mymessage", client.getErrorMessageFromResult(cdr));
+	assertEquals("mymessage", client.getErrorMessageFromResult(cdr));
     }
     
     @Test
@@ -314,7 +314,7 @@ public class CDRestClientTest {
 	cdr.setResult(new TextNode("hello"));
 	assertEquals(" : hello", client.getErrorMessageFromResult(cdr));
 	cdr.setMessage("mymessage");
-	assertEquals(" : hello : mymessage", client.getErrorMessageFromResult(cdr));
+	assertEquals("mymessage : hello", client.getErrorMessageFromResult(cdr));
     }
     
     @Test
@@ -322,9 +322,9 @@ public class CDRestClientTest {
 	CommunityDetectionResult cdr = new CommunityDetectionResult();
 	CDRestClient client = CDRestClient.getInstance();
 	cdr.setResult(BooleanNode.TRUE);
-	assertEquals(" : ", client.getErrorMessageFromResult(cdr));
+	assertEquals("", client.getErrorMessageFromResult(cdr));
 	cdr.setMessage("mymessage");
-	assertEquals(" :  : mymessage", client.getErrorMessageFromResult(cdr));
+	assertEquals("mymessage", client.getErrorMessageFromResult(cdr));
     }
     
     @Test
@@ -338,9 +338,9 @@ public class CDRestClientTest {
 	CommunityDetectionResult cdr = new CommunityDetectionResult();
 	CDRestClient client = CDRestClient.getInstance();
 	cdr.setResult(new TextNode(tooLongStr));
-	assertEquals(" : " + truncStr, client.getErrorMessageFromResult(cdr));
+	assertEquals(" : " + truncStr + "...", client.getErrorMessageFromResult(cdr));
 	cdr.setMessage("mymessage");
-	assertEquals(" : " + truncStr + " : mymessage", client.getErrorMessageFromResult(cdr));
+	assertEquals("mymessage : " + truncStr + "...", client.getErrorMessageFromResult(cdr));
     }
 	
 	@Test
@@ -500,8 +500,7 @@ public class CDRestClientTest {
 			fail("Expected Exception");
 		} catch(CDRestClientException ce){
 			CommunityDetectionResult res = ce.getResult();
-			assertEquals("Error fetching the result:" +
-					client.getErrorMessageFromResult(res), ce.getMessage());
+			assertEquals(client.getErrorMessageFromResult(res), ce.getMessage());
 			assertEquals(88, res.getProgress());
 			assertEquals(CommunityDetectionResult.FAILED_STATUS, res.getStatus());
 			assertEquals("i failed", res.getMessage());

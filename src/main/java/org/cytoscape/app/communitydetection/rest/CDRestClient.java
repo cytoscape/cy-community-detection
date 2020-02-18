@@ -48,7 +48,7 @@ public class CDRestClient {
 	 * to get from
 	 * {@link org.ndexbio.communitydetection.rest.model.CommunityDetectionResult#getResult()}
 	 */
-	protected final static int TRUNCATE_ERROR_MESSAGE_RESULT_LEN = 50;
+	protected final static int TRUNCATE_ERROR_MESSAGE_RESULT_LEN = 255;
 
 	private CDRestClient() {
 		mapper = new ObjectMapper();
@@ -278,20 +278,21 @@ public class CDRestClient {
 	    if (cdResult == null){
 		return "";
 	    }
-	    String errMsg = " : ";
+	    String errMsg = "";
+		if (cdResult.getMessage() != null){
+			errMsg = cdResult.getMessage();
+	    }
 	    if (cdResult.getResult() != null){
 		if (cdResult.getResult().isTextual()){
 		    if (cdResult.getResult().asText().length() > TRUNCATE_ERROR_MESSAGE_RESULT_LEN){
-			errMsg = errMsg + cdResult.getResult().asText().substring(0,
-			        TRUNCATE_ERROR_MESSAGE_RESULT_LEN);
+			errMsg = errMsg + " : " + cdResult.getResult().asText().substring(0,
+			        TRUNCATE_ERROR_MESSAGE_RESULT_LEN) + "...";
 		    } else {
-			errMsg = errMsg + cdResult.getResult().asText();
+			errMsg = errMsg + " : " + cdResult.getResult().asText();
 		    }
 		}
 	    }
-	    if (cdResult.getMessage() != null){
-		errMsg = errMsg + " : " + cdResult.getMessage();
-	    }
+	    
 	    return errMsg;
 	}
 	
@@ -366,8 +367,7 @@ public class CDRestClient {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(httpGetResponse.getEntity().getContent()));
 		CommunityDetectionResult cdResult = mapper.readValue(reader, CommunityDetectionResult.class);
 		if (cdResult.getStatus().equals(CommunityDetectionResultStatus.FAILED_STATUS)) {
-			throw new CDRestClientException("Error fetching the result:" +
-				getErrorMessageFromResult(cdResult), cdResult);
+			throw new CDRestClientException(getErrorMessageFromResult(cdResult), cdResult);
 		}
 		return cdResult;
 	}
