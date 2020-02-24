@@ -108,7 +108,6 @@ public class CDRestClient {
 
 		HttpResponse httpPostResponse = null;
 		int statusCode = 0;
-		LOGGER.debug(data);
 		for (int count = 0; count < PropertiesHelper.getInstance().getSubmitRetryCount(); count++) {
 			if (isTaskCanceled == true){
 				return null;

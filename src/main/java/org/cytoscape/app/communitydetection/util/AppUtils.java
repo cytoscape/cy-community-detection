@@ -45,6 +45,8 @@ public class AppUtils {
 	public final static String COLUMN_CD_ANNOTATED_OVERLAP = "CD_AnnotatedMembers_Overlap";
 	public final static String COLUMN_CD_ANNOTATED_PVALUE = "CD_AnnotatedMembers_Pvalue";
 	public final static String COLUMN_CD_NONANNOTATED_MEMBERS = "CD_NonAnnotatedMembers";
+	public final static String COLUMN_CD_ANNOTATED_SOURCE = "CD_AnnotatedMembers_SourceDB";
+	public final static String COLUMN_CD_ANNOTATED_SOURCE_TERM = "CD_AnnotatedMembers_SourceTerm";
 	
 	
 	public final static String COLUMN_CD_LABELED = "CD_Labeled";

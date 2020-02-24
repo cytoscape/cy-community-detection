@@ -10,6 +10,8 @@ import org.cytoscape.model.CyNode;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionResult;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashSet;
 import java.util.Map;
 import org.cytoscape.app.communitydetection.PropertiesHelper;
@@ -100,11 +102,25 @@ public class TermMappingCallable implements Callable<Boolean> {
 		StringBuilder annotatedList = new StringBuilder();
 		int counter = 0;
 		double pvalue = Double.NaN;
+		double jaccard = Double.NaN;
+		boolean jaccardSet = false;
+		String sourcedb = null;
+		String sourceterm = null;
 		String term = null;
 		HashSet<String> intersectedTermsHash = null;
 		if (cdResult != null && cdResult.getResult() != null && cdResult.getResult().size() > 0) {
 			name = cdResult.getResult().get("name").asText(name);
 			pvalue = cdResult.getResult().get("p_value").asDouble();
+			if (cdResult.getResult().has("jaccard")){
+				jaccard = cdResult.getResult().get("jaccard").asDouble();
+				jaccardSet = true;
+			}
+			if (cdResult.getResult().has("source")){
+				sourcedb = cdResult.getResult().get("source").asText();
+			}
+			if (cdResult.getResult().has("native")){
+				sourceterm = cdResult.getResult().get("native").asText();
+			}
 			intersectedTermsHash = new HashSet<>();
 			if (cdResult.getResult().get("intersections").size() > 0) {
 				Iterator<JsonNode> iterator = cdResult.getResult().get("intersections").elements();
@@ -119,6 +135,8 @@ public class TermMappingCallable implements Callable<Boolean> {
 				}
 			}
 		}
+		_network.getRow(_node).set(AppUtils.COLUMN_CD_ANNOTATED_SOURCE, sourcedb);
+		_network.getRow(_node).set(AppUtils.COLUMN_CD_ANNOTATED_SOURCE_TERM, sourceterm);
 		_network.getRow(_node).set(AppUtils.COLUMN_CD_COMMUNITY_NAME, name);
 		_network.getRow(_node).set(AppUtils.COLUMN_CD_ANNOTATED_ALGORITHM, getAnnotatedAlgorithmString());
 		_network.getRow(_node).set(AppUtils.COLUMN_CD_NONANNOTATED_MEMBERS, 
@@ -134,7 +152,13 @@ public class TermMappingCallable implements Callable<Boolean> {
 		if (inputGeneSize > 0){
 		    overlap = (double)counter/inputGeneSize;
 		}
-		_network.getRow(_node).set(AppUtils.COLUMN_CD_ANNOTATED_OVERLAP, overlap);
+		if (jaccardSet == true){
+			_network.getRow(_node).set(AppUtils.COLUMN_CD_ANNOTATED_OVERLAP, jaccard);
+		} else {
+			BigDecimal bd = new BigDecimal(Double.toString(overlap));
+			BigDecimal roundbd = bd.setScale(3, RoundingMode.HALF_UP);
+			_network.getRow(_node).set(AppUtils.COLUMN_CD_ANNOTATED_OVERLAP, roundbd.doubleValue());
+		}
 		if (name != AppUtils.TYPE_NONE_VALUE) {
 			_network.getRow(_node).set(AppUtils.COLUMN_CD_LABELED, true);
 		}

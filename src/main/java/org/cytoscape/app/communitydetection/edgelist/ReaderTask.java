@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -285,7 +287,9 @@ public class ReaderTask extends AbstractCyNetworkReader {
 			if (memberList != null) {
 				hierarchyNetwork.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST, memberList.toString());
 				hierarchyNetwork.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST_SIZE, memberNodes.size());
-				hierarchyNetwork.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST_LOG_SIZE, log2(memberNodes.size()));
+				BigDecimal bd = new BigDecimal(Double.toString(log2(memberNodes.size())));
+				BigDecimal roundbd = bd.setScale(3, RoundingMode.HALF_UP);
+				hierarchyNetwork.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST_LOG_SIZE, roundbd.doubleValue());
 			}
 		}
 		HierarchyHelper.getInstance().clearAll();

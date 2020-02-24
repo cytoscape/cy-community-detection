@@ -184,6 +184,14 @@ public class TermMappingTask extends AbstractTask {
 		_network.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_ANNOTATED_PVALUE,
 			Double.class, false, 0.0);
 	    }
+		if (_network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_ANNOTATED_SOURCE) == null) {
+		_network.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_ANNOTATED_SOURCE,
+			String.class, false, null);
+	    }
+		if (_network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_ANNOTATED_SOURCE_TERM) == null) {
+		_network.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_ANNOTATED_SOURCE_TERM,
+			String.class, false, null);
+	    }
 	    if (_network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_LABELED) == null) {
 		_network.getDefaultNodeTable().createColumn(AppUtils.COLUMN_CD_LABELED,
 			Boolean.class, true, false);

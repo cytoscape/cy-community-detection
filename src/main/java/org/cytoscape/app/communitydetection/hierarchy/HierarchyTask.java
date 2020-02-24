@@ -78,8 +78,8 @@ public class HierarchyTask extends AbstractTask {
 		InputStream inStream = new ByteArrayInputStream(
 				cdResult.getResult().asText().trim().replace(';', '\n').getBytes());
 		taskMonitor.setProgress(0.9);
-		System.out.printf("CD app: Hierarchy edge list received in %d ms\n", (System.currentTimeMillis() - startTime));
-		taskMonitor.setStatusMessage("Received hierarchy, creating a new network");
+		taskMonitor.setStatusMessage("Received hierarchy in " +
+				Long.toString((System.currentTimeMillis() - startTime)) + " ms, creating a new network");
 
 		TaskIterator iterator = _readerFactory.createTaskIterator(inStream, null, network.getSUID());
 		ReaderTask reader = (ReaderTask) iterator.next();
@@ -87,12 +87,14 @@ public class HierarchyTask extends AbstractTask {
 		
 		reader.setNetworkAttributes(weightColumn, algorithm, cdResult, this.customParameters);
 		taskMonitor.setProgress(0.95);
-		System.out.printf("CD app: Newtork created in %d ms\n", (System.currentTimeMillis() - startTime));
+		taskMonitor.setStatusMessage("Network created in " +
+				Long.toString((System.currentTimeMillis() - startTime)) + " ms");
 
 		taskMonitor.setStatusMessage("Creating a view for the network");
 		reader.buildCyNetworkView(reader.getNetworks()[0]);
 		taskMonitor.setProgress(1.0);
-		System.out.printf("CD app: Total time: %d ms\n", (System.currentTimeMillis() - startTime));
+		taskMonitor.setStatusMessage("Total time " +
+				Long.toString((System.currentTimeMillis() - startTime)) + " ms");
 	}
 
 	@Override
