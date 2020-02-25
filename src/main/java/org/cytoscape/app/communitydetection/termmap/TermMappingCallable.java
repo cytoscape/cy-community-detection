@@ -118,8 +118,8 @@ public class TermMappingCallable implements Callable<Boolean> {
 			if (cdResult.getResult().has("source")){
 				sourcedb = cdResult.getResult().get("source").asText();
 			}
-			if (cdResult.getResult().has("native")){
-				sourceterm = cdResult.getResult().get("native").asText();
+			if (cdResult.getResult().has("sourceTermId")){
+				sourceterm = cdResult.getResult().get("sourceTermId").asText();
 			}
 			intersectedTermsHash = new HashSet<>();
 			if (cdResult.getResult().get("intersections").size() > 0) {
