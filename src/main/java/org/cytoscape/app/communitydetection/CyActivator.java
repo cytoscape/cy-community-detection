@@ -34,9 +34,12 @@ import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.SynchronousTaskManager;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CyActivator extends AbstractCyActivator {
 
+	private final static Logger LOGGER = LoggerFactory.getLogger(CyActivator.class);
 	public CyActivator() {
 		super();
 	}
@@ -71,6 +74,8 @@ public class CyActivator extends AbstractCyActivator {
 		// view and edit in Edit => Preferences menu
 		loadPropertyReaderService(bc);
 		
+		ShowDialogUtil dialogUtil = new ShowDialogUtil();
+		
 		final ReaderTaskFactoryImpl readerTaskFactory = new ReaderTaskFactoryImpl(networkViewFactory,
 				networkFactory, networkManager, networkViewManager, rootNetworkManager, visualMappingManager,
 				vizmapFileTaskFactory, layoutAlgorithmManager, syncTaskManager, networkNaming);
@@ -84,7 +89,7 @@ public class CyActivator extends AbstractCyActivator {
 		taskExecProps.setProperty(TITLE, "Run Community Detection");
 		LauncherDialog clusterAlgoDialog = new LauncherDialog(editorPaneFac,
 		                                                      AppUtils.CD_ALGORITHM_INPUT_TYPE);
-		registerAllServices(bc, new HierarchyTaskFactoryImpl(swingApplication, clusterAlgoDialog, readerTaskFactory), taskExecProps);
+		registerAllServices(bc, new HierarchyTaskFactoryImpl(swingApplication, clusterAlgoDialog, readerTaskFactory, dialogUtil), taskExecProps);
 		
 		// Add Run Functional Enrichment under Apps => Community Detection
 		// menu
@@ -97,7 +102,6 @@ public class CyActivator extends AbstractCyActivator {
 		NetworkTermMappingTaskFactoryImpl termFac = new NetworkTermMappingTaskFactoryImpl(swingApplication, tmAlgoDialog); 
 		registerAllServices(bc, termFac, tmExecProps);
 
-		ShowDialogUtil dialogUtil = new ShowDialogUtil();
 		// add About undern Apps => Community Detection
 		// menu
 		Properties aboutProps = new Properties();
