@@ -73,8 +73,8 @@ public class NetworkTermMappingTaskFactoryImpl implements NetworkTaskFactory {
 		if (cda != null){   
 		    Map<String, String> customParameters = this._dialog.getAlgorithmCustomParameters(cda.getName());
 		    LOGGER.debug("User wants to run: " + cda.getName() +
-			    customParameters == null ? "" : " with " +
-				    customParameters.toString());
+			    (customParameters == null ? "" : " with " +
+				    customParameters.toString()));
 
 		    return new TaskIterator(new TermMappingTask(network, cda, customParameters,
 			    _dialog.runOnSelectedNodes()));
