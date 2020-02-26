@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.swing.JOptionPane;
 import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactory;
 import org.cytoscape.app.communitydetection.util.AppUtils;
+import org.cytoscape.app.communitydetection.util.ShowDialogUtil;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyNetwork;
@@ -26,18 +27,21 @@ public class HierarchyTaskFactoryImpl implements NetworkTaskFactory {
 	private LauncherDialog _dialog;
 	private CySwingApplication _swingApplication;
 	private ReaderTaskFactory _readerFactory;
+	private ShowDialogUtil _dialogUtil;
+
 
 	public HierarchyTaskFactoryImpl(CySwingApplication swingApplication, LauncherDialog dialog,
-			ReaderTaskFactory readerFactory) {
+			ReaderTaskFactory readerFactory, ShowDialogUtil dialogUtil) {
 		this._dialog = dialog;
 		this._swingApplication = swingApplication;
 		this._readerFactory = readerFactory;
+		this._dialogUtil = dialogUtil;
 	}
 	
 	@Override
 	public TaskIterator createTaskIterator(CyNetwork network) {
 	    if (network == null){
-		JOptionPane.showMessageDialog(_swingApplication.getJFrame(),
+		_dialogUtil.showMessageDialog(_swingApplication.getJFrame(),
 			"A network must be selected in Cytoscape to Run "
 				+ "Community Detection. "
 				+ "For more information click About menu item under Apps => Community Detection",
@@ -50,7 +54,7 @@ public class HierarchyTaskFactoryImpl implements NetworkTaskFactory {
 		
 	    _dialog.updateWeightColumnCombo(getNumericColumns(network.getDefaultEdgeTable()));
 	    Object[] options = {AppUtils.RUN, AppUtils.CANCEL};
-	    int res = JOptionPane.showOptionDialog(_swingApplication.getJFrame(),
+	    int res = _dialogUtil.showOptionDialog(_swingApplication.getJFrame(),
 		                                   this._dialog,
 					           "Run Community Detection",
 						   JOptionPane.YES_NO_OPTION,
