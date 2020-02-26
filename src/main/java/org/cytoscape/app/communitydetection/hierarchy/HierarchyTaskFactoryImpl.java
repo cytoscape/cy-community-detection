@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.JOptionPane;
+import org.cytoscape.app.communitydetection.DoNothingTask;
 import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactory;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.app.communitydetection.util.ShowDialogUtil;
@@ -46,11 +47,12 @@ public class HierarchyTaskFactoryImpl implements NetworkTaskFactory {
 				+ "Community Detection. "
 				+ "For more information click About menu item under Apps => Community Detection",
 			AppUtils.APP_NAME, JOptionPane.ERROR_MESSAGE);
-		return new TaskIterator(new HierarchyTask(null, network, null, null, null));
+		return new TaskIterator(new DoNothingTask());
 	    }
 		if (_dialog.createGUI(_swingApplication.getJFrame())== false){
-			return new TaskIterator(new HierarchyTask(null, network, null, null, null));
-		} 
+			LOGGER.error("LauncherDialog.createGUI() returned false");
+			return new TaskIterator(new DoNothingTask());
+		}
 		
 	    _dialog.updateWeightColumnCombo(getNumericColumns(network.getDefaultEdgeTable()));
 	    Object[] options = {AppUtils.RUN, AppUtils.CANCEL};
@@ -63,21 +65,22 @@ public class HierarchyTaskFactoryImpl implements NetworkTaskFactory {
 						   options,
 						   options[0]);
 	    if (res == 0){
-		// user wants to run job
-		CommunityDetectionAlgorithm cda = this._dialog.getSelectedCommunityDetectionAlgorithm();
-		if (cda != null){   
-		    Map<String, String> customParameters = this._dialog.getAlgorithmCustomParameters(cda.getName());
-		    LOGGER.info("User wants to run: " + cda.getName() +
-			    customParameters == null ? "" : " with " +
-				    customParameters.toString());
-		    return new TaskIterator(new HierarchyTask(this._readerFactory, network, cda, customParameters,
-			    _dialog.getWeightColumn()));
-		} else {
-		   LOGGER.error("Unable to get algorithm from dialog...");
-		}
+			// user wants to run job
+			CommunityDetectionAlgorithm cda = this._dialog.getSelectedCommunityDetectionAlgorithm();
+			if (cda != null){   
+				Map<String, String> customParameters = this._dialog.getAlgorithmCustomParameters(cda.getName());
+				LOGGER.info("User wants to run: " + cda.getName() +
+					(customParameters == null ? "" : " with " +
+						customParameters.toString()));
+
+				return new TaskIterator(new HierarchyTask(this._readerFactory, network, cda, customParameters,
+					_dialog.getWeightColumn()));
+			} else {
+			   LOGGER.error("Unable to get algorithm from dialog...");
+			}
 	    }
 	    
-	    return new TaskIterator(new HierarchyTask(null, network, null, null, null));
+	    return new TaskIterator(new DoNothingTask());
 	}
 
 	/**
