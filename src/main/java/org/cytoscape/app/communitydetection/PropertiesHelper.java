@@ -3,8 +3,12 @@ package org.cytoscape.app.communitydetection;
 import java.io.IOException;
 import java.util.Properties;
 import org.cytoscape.app.communitydetection.util.AppUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PropertiesHelper {
+
+	private final static Logger LOGGER = LoggerFactory.getLogger(PropertiesHelper.class);
 
 	private String baseurl;
 	private String iQueryurl;
@@ -23,10 +27,11 @@ public class PropertiesHelper {
 		Properties properties = new Properties();
 		try {
 			properties.load(getClass().getClassLoader().getResourceAsStream(AppUtils.PROP_NAME));
+			
 			appName = properties.getProperty(AppUtils.PROP_PROJECT_NAME, AppUtils.APP_NAME);
 			appVersion = properties.getProperty(AppUtils.PROP_PROJECT_VERSION, "Unknown");
 		} catch(IOException io){
-			
+			LOGGER.warn("Caught exception creating PropertiesHelper", io);
 		}
 	}
 
@@ -44,8 +49,10 @@ public class PropertiesHelper {
 
 	public void updateViaProperties(Properties props){
 		if (props == null){
+			LOGGER.warn("Properties passed in was null");
 			props = new Properties();
 		}
+		LOGGER.debug("Updating properties");
 		setBaseurl(props.getProperty(AppUtils.PROP_APP_BASEURL,
 				"http://cdservice.cytoscape.org/cd/communitydetection/v1"));
 		setiQueryurl(props.getProperty(AppUtils.PROP_IQUERY_URL,
@@ -64,7 +71,7 @@ public class PropertiesHelper {
 		setHttpConnectionRequestTimeoutMillis(getPropertyAsInt(props,
 								AppUtils.PROP_HTTP_CONNECTION_REQUEST_TIMEOUT, 10000));
 		setPollingIntervalTimeMillis(getPropertyAsInt(props,
-								AppUtils.PROP_POLL_INTERVAL_TIME, 1000));
+								AppUtils.PROP_POLL_INTERVAL_TIME, 1000));		
 	}
 	
 	/**
@@ -221,6 +228,8 @@ public class PropertiesHelper {
 			return Integer.parseInt(propVal);
 		}
 		catch(NumberFormatException nfe){
+			LOGGER.warn("Caught format exception attempting to "
+					+ "get integer from property", nfe);
 		}
 		return defaultValue;
     }
