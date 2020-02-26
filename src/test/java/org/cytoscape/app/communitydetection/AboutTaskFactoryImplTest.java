@@ -11,6 +11,7 @@ import org.cytoscape.model.CyNetwork;
 import static org.mockito.Mockito.*;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.mockito.Mockito;
 
 
 /**
@@ -26,14 +27,13 @@ public class AboutTaskFactoryImplTest {
 		JEditorPaneFactory mockPaneFac = mock(JEditorPaneFactory.class);
 		JEditorPane mockEditorPane = mock(JEditorPane.class);
 		ShowDialogUtil mockDialog = mock(ShowDialogUtil.class);
-		when(mockPaneFac.getDescriptionFrame(any(String.class))).thenReturn(mockEditorPane);
+		when(mockPaneFac.getDescriptionFrame(anyString())).thenReturn(mockEditorPane);
 		
 		AboutTaskFactoryImpl tFac = new AboutTaskFactoryImpl(mockApp, mockPaneFac,
 															mockDialog);
 		tFac.createTaskIterator(null);
 		verify(mockDialog).showMessageDialog(eq(null), eq(mockEditorPane),
 				eq(AppUtils.APP_NAME), eq(JOptionPane.INFORMATION_MESSAGE), any(ImageIcon.class));
-		tFac.createTaskIterator(null);
 	}
 	
 	@Test

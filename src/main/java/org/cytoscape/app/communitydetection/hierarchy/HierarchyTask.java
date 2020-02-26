@@ -33,6 +33,7 @@ public class HierarchyTask extends AbstractTask {
 	private final Map<String, String> customParameters;
 	private WriterTaskFactory _writerFactory;
 	private ReaderTaskFactory _readerFactory;
+	private CDRestClient _restClient;
 	
 
 	public HierarchyTask(ReaderTaskFactory readerFactory, CyNetwork network, CommunityDetectionAlgorithm algorithm, Map<String, String> customParameters,
@@ -43,10 +44,23 @@ public class HierarchyTask extends AbstractTask {
 	    this.customParameters = customParameters;
 		_writerFactory = new WriterTaskFactoryImpl();
 		_readerFactory = readerFactory;
+		_restClient = CDRestClient.getInstance();
 	}
 	
+	/**
+	 * Sets alternate writer task factory. Used for testing purposes
+	 * @param altFactory 
+	 */
 	protected void setAlternateWriterTaskFactory(WriterTaskFactory altFactory){
 		_writerFactory = altFactory;
+	}
+	
+	/**
+	 * Sets alternate REST client. Used for testing purposes
+	 * @param restClient 
+	 */
+	protected void setAlternateCDRestClient(CDRestClient restClient){
+		_restClient = restClient;
 	}
 
 	@Override
@@ -58,21 +72,21 @@ public class HierarchyTask extends AbstractTask {
 		taskMonitor.setTitle("Community Detection: Creating Hierarchy Network");
 		taskMonitor.setStatusMessage("Exporting the network");
 		ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-		
 		CyWriter writer = _writerFactory.createWriter(outStream, network, weightColumn);
+
 		writer.run(taskMonitor);
-		String resultURI = CDRestClient.getInstance().postCDData(algorithm.getName(),
-			this.customParameters, outStream.toString());
+		String resultURI = _restClient.postCDData(algorithm.getName(),
+			this.customParameters, outStream.toString());		
 		if (cancelled) {
-			CDRestClient.getInstance().setTaskCanceled(false);
+			_restClient.setTaskCanceled(false);
 			return;
 		}
 		taskMonitor.setProgress(0.1);
 		taskMonitor.setStatusMessage("Network exported, retrieving the hierarchy");
-		CommunityDetectionResult cdResult = CDRestClient.getInstance().getCDResult(resultURI, taskMonitor, 0.1f, 0.8f,
+		CommunityDetectionResult cdResult = _restClient.getCDResult(resultURI, taskMonitor, 0.1f, 0.8f,
 				PropertiesHelper.getInstance().getCommunityDetectionTimeoutMillis());
 		if (cancelled) {
-			CDRestClient.getInstance().setTaskCanceled(false);
+			_restClient.setTaskCanceled(false);
 			return;
 		}
 		InputStream inStream = new ByteArrayInputStream(
@@ -84,7 +98,6 @@ public class HierarchyTask extends AbstractTask {
 		TaskIterator iterator = _readerFactory.createTaskIterator(inStream, null, network.getSUID());
 		ReaderTask reader = (ReaderTask) iterator.next();
 		reader.run(taskMonitor);
-		
 		reader.setNetworkAttributes(weightColumn, algorithm, cdResult, this.customParameters);
 		taskMonitor.setProgress(0.95);
 		taskMonitor.setStatusMessage("Network created in " +
@@ -99,7 +112,7 @@ public class HierarchyTask extends AbstractTask {
 
 	@Override
 	public void cancel() {
-		CDRestClient.getInstance().setTaskCanceled(true);
+		_restClient.setTaskCanceled(true);
 		super.cancel();
 	}
 
