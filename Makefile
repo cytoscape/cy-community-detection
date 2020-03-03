@@ -55,3 +55,7 @@ installdependencies: ## For running on travis, checks out and builds dependencie
 	cd target/tmp/communitydetection-rest-model ; mvn clean install -DskipTests=true -B
 	rm -rf target/tmp
 	
+docs: ## generate Sphinx HTML documentation
+	$(MAKE) -C docs clean
+	$(MAKE) -C docs html
+	$(BROWSER) docs/_build/html/index.html
