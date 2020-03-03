@@ -4,3 +4,4 @@ target/
 .classpath
 bin/
 .DS_Store
+docs/_build
