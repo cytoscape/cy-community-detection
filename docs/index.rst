@@ -1,15 +1,44 @@
-.. Community Detection APplication and Service (CDAPS) documentation master file, created by
-   sphinx-quickstart on Tue Mar  3 11:05:57 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. Community Detection APplication and Service (CDAPS) documentation master file
 
-Welcome to Community Detection APplication and Service (CDAPS)'s documentation!
+CDAPS
 ===============================================================================
+
+Community Detection APplication and Service (CDAPS)
+
+**TODO** add overview documentation here
+
+Feature Requests and Reporting Bugs
+-----------------------------------
+
+The CDAPS GitHub issue tracker can be used to report a bug or request a feature.
+
+To Report a bug:
+
+* Go to https://github.com/idekerlab/cy-community-detection/issues
+* Click on *New Issue*
+* Write a short description of the issue. It is very helpful to provide a series of steps
+  that can be taken to reproduce the issue.
+* If possible attach a session file (.cys) or example input files.
+* Enter App version, Cytoscape version and operating system.
+* Click on *Submit new issue*
+
+Cite CDAPS
+-----------
+
+TODO
+
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+   Installation
+   WhatsNew
+   QuickTour
+   CreatingHierarchy
+   MappingTerms
+   ViewingInteractions
+   
 
 
 Indices and tables

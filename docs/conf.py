@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'Community Detection APplication and Service (CDAPS)'
+project = 'Community Detection APplication and Service'
 copyright = '2020, Song Cao, Christopher Churas, Akshat Singhal, Fan Zheng'
 author = 'Song Cao, Christopher Churas, Akshat Singhal, Fan Zheng'
 
