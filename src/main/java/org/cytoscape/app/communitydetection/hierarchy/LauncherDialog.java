@@ -67,6 +67,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	public static final String INPUTDELIM = ":::";
 	private List<CommunityDetectionAlgorithm> _algorithmList;
 	private static final float ALGO_FONTSIZE_BOOST = 4.0f;
+	private static final float EXPERIMENTAL_FONT_BOOST = 4.0f;
 	private static final double TEXT_FIELD_WIDTH = 160.0;
 
 	private JPanel _cards;
@@ -248,7 +249,14 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		labelConstraints.anchor = GridBagConstraints.WEST;
 		labelConstraints.fill = GridBagConstraints.NONE;
 		labelConstraints.insets = new Insets(0, 0, 0, 0);
-		disclaimPanel.add(new JLabel("NOTE: This service is experimental"), labelConstraints);
+		
+		JLabel expLabel = new JLabel("NOTE: This service is experimental");
+		Font expLabelFont = expLabel.getFont();
+		Font newFont = expLabelFont.deriveFont(expLabelFont.getStyle() | Font.BOLD,
+			expLabelFont.getSize2D() + EXPERIMENTAL_FONT_BOOST);
+		expLabel.setFont(newFont);
+		
+		disclaimPanel.add(expLabel, labelConstraints);
 		return disclaimPanel;
 	}
 
