@@ -87,7 +87,7 @@ public class CyActivator extends AbstractCyActivator {
 		taskExecProps.setProperty(MENU_GRAVITY, "1.0");
 		taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
 		taskExecProps.setProperty(TITLE, "Run Community Detection");
-		LauncherDialog clusterAlgoDialog = new LauncherDialog(editorPaneFac,
+		LauncherDialog clusterAlgoDialog = new LauncherDialog(editorPaneFac, dialogUtil,
 		                                                      AppUtils.CD_ALGORITHM_INPUT_TYPE);
 		registerAllServices(bc, new HierarchyTaskFactoryImpl(swingApplication, clusterAlgoDialog, readerTaskFactory, dialogUtil), taskExecProps);
 		
@@ -97,7 +97,7 @@ public class CyActivator extends AbstractCyActivator {
 		tmExecProps.setProperty(MENU_GRAVITY, "2.0");
 		tmExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
 		tmExecProps.setProperty(TITLE, "Run Functional Enrichment");
-		LauncherDialog tmAlgoDialog = new LauncherDialog(new JEditorPaneFactoryImpl(),
+		LauncherDialog tmAlgoDialog = new LauncherDialog(new JEditorPaneFactoryImpl(), dialogUtil,
 		                                                      AppUtils.TM_ALGORITHM_INPUT_TYPE);
 		NetworkTermMappingTaskFactoryImpl termFac = new NetworkTermMappingTaskFactoryImpl(swingApplication, tmAlgoDialog); 
 		registerAllServices(bc, termFac, tmExecProps);

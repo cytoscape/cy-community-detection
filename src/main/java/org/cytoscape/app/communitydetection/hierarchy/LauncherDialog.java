@@ -49,6 +49,7 @@ import javax.swing.JViewport;
 import org.cytoscape.app.communitydetection.rest.CDRestClient;
 import org.cytoscape.app.communitydetection.rest.CDRestClientException;
 import org.cytoscape.app.communitydetection.util.AppUtils;
+import org.cytoscape.app.communitydetection.util.ShowDialogUtil;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTableUtil;
@@ -81,12 +82,17 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	private JRadioButton _allButton;
 	private boolean _guiLoaded = false;
 	private String _algorithmType;
+	private ShowDialogUtil _dialogUtil;
+	private String _currentlySelectedAlgorithm;
 
 	public LauncherDialog(JEditorPaneFactory editorPaneFac,
+			ShowDialogUtil dialogUtil,
 		final String algorithmType) throws Exception {
 		this._editorPaneFac = editorPaneFac;
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		this._algorithmType = algorithmType;
+		this._dialogUtil = dialogUtil;
+		_currentlySelectedAlgorithm = null;
 	}
 	
 	
@@ -94,6 +100,12 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	    return createGUI(parentWindow, false);
 	}
 
+	/**
+	 * Queries REST service for list of Community Detection Algorithms
+	 * @param parentWindow
+	 * @return list of algorithms or null if there was an error. Also displays
+	 *         a dialog to the user describing the issue
+	 */
 	protected List<CommunityDetectionAlgorithm> getCommunityDetectionAlgorithmsFromService(Component parentWindow) {
 		CommunityDetectionAlgorithms result = null;
 		
@@ -110,11 +122,11 @@ public class LauncherDialog extends JPanel implements ItemListener {
 			}
 			return algorithms;
 		} catch(CDRestClientException ce){
-			JOptionPane.showMessageDialog(parentWindow,
+			_dialogUtil.showMessageDialog(parentWindow,
 					"Unable to get list of algorithms from service: " + ce.getMessage() + " : " +
 							(ce.getErrorResponse() == null ? "" : ce.getErrorResponse().asJson()));
 		} catch(IOException io){
-			JOptionPane.showMessageDialog(parentWindow,
+			_dialogUtil.showMessageDialog(parentWindow,
 					"Unable to get list of algorithms from service: " + io.getMessage());
 		}
 		return null;
@@ -182,6 +194,8 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		contentPane.add(aLabel);
 		
 		contentPane.add(_algorithmComboBox);
+		
+		contentPane.add(this.getAboutAlgorithmIcon());
 		
 		JPanel masterPanel = new JPanel();
 		masterPanel.setLayout(new BoxLayout(masterPanel, BoxLayout.Y_AXIS));
@@ -369,6 +383,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	}
 	
 	private void loadAlgorithmCards(){
+		_currentlySelectedAlgorithm = null;
 	    _algoCardMap.clear();
 	    _cards.removeAll();
 	    _algorithmComboBox.removeAllItems();
@@ -430,13 +445,6 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		resetConstraints.insets = new Insets(0, 5, 0, 0);
 		resetConstraints.anchor = GridBagConstraints.LINE_START;
 		algoCard.add(this.getResetButton(cda.getName()), resetConstraints);
-		
-		GridBagConstraints aboutConstraints = new GridBagConstraints();
-		aboutConstraints.gridy = 0;
-		aboutConstraints.gridx = 1;
-		aboutConstraints.insets = new Insets(0, 0, 5, 0);
-		aboutConstraints.anchor = GridBagConstraints.LINE_END;
-		algoCard.add(this.getAboutButton(cda), aboutConstraints);
 
 		_cards.add(algoCard, cda.getDisplayName());
 		this.resetAlgorithmToDefaults(cda.getName());
@@ -506,7 +514,8 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	@Override
 	public void itemStateChanged(ItemEvent evt) {
 		CardLayout cl = (CardLayout)(_cards.getLayout());
-		cl.show(_cards, (String)evt.getItem());
+		_currentlySelectedAlgorithm = (String)evt.getItem();
+		cl.show(_cards, _currentlySelectedAlgorithm);
 	}
 	
 	/**
@@ -561,7 +570,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				JOptionPane.showMessageDialog(getParent(), getCustomParameterHelp(parameter),
+				_dialogUtil.showMessageDialog(getParent(), getCustomParameterHelp(parameter),
 					"Parameter " + parameter.getDisplayName(), JOptionPane.INFORMATION_MESSAGE,
 					_infoIconLarge);
 			}
@@ -601,7 +610,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				JOptionPane.showMessageDialog(getParent(), getCustomParameterHelp(parameter),
+				_dialogUtil.showMessageDialog(getParent(), getCustomParameterHelp(parameter),
 					"Parameter " + parameter.getDisplayName(), JOptionPane.INFORMATION_MESSAGE,
 					_infoIconLarge);
 			}
@@ -799,28 +808,77 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	}
 	
 	/**
-	 * Creates {@link javax.swing.JButton} about button that displays information
-	 * about algorithm passed in
-	 * @param algorithm the algorithm to display information about
-	 * @return About button with listener setup to display dialog when clicked
+	 * Creates a {@link javax.swing.JLabel} with an info icon that when clicked
+	 * displays a small dialog that displays information about the Algorithm
+	 * selected in the drop down menu
+	 * @param parameter The parameter
+	 * @return 
+	 * @throws IOException 
 	 */
-	private JButton getAboutButton(final CommunityDetectionAlgorithm algorithm){
-	    JButton button = new JButton(AppUtils.ABOUT);
-	    button.setName(AppUtils.ABOUT);
-	    button.setToolTipText("Displays information about " + algorithm.getDisplayName());
-	    button.addActionListener(new ActionListener() {
-		    @Override
-		    public void actionPerformed(ActionEvent e) {
-			
-			LOGGER.debug("About button clicked "
-				      + "on algorithm: " + algorithm.getDisplayName());
-			JOptionPane.showMessageDialog(getParent(), getAlgorithmAboutFrame(algorithm),
-					"About " + algorithm.getDisplayName(),
-					JOptionPane.INFORMATION_MESSAGE,
+	private JLabel getAboutAlgorithmIcon() {
+		JLabel infoIcon = new JLabel(_infoIconSmall, JLabel.CENTER);
+		infoIcon.setToolTipText("Click here for more "
+				+ "information about currently selected algorithm");
+
+		infoIcon.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				CommunityDetectionAlgorithm cda = getSelectedCommunityDetectionAlgorithm();
+				_dialogUtil.showMessageDialog(getParent(), getAlgorithmAboutFrame(cda),
+					"Algorithm " + cda.getDisplayName(), JOptionPane.INFORMATION_MESSAGE,
 					_infoIconLarge);
-		    }
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+
+			}
 		});
-	    return button;
+
+		infoIcon.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				CommunityDetectionAlgorithm cda = getSelectedCommunityDetectionAlgorithm();
+				_dialogUtil.showMessageDialog(getParent(), getAlgorithmAboutFrame(cda),
+					"Algorithm " + cda.getDisplayName(), JOptionPane.INFORMATION_MESSAGE,
+					_infoIconLarge);
+			}
+		});
+
+		return infoIcon;
 	}
 	
 	/**
