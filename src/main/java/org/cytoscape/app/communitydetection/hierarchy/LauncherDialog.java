@@ -28,10 +28,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
-
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -202,7 +202,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		}
 		
 		add(masterPanel, BorderLayout.CENTER);
-		add(this.getDisclaimerPanel(), BorderLayout.CENTER);
+		// add(this.getDisclaimerPanel(), BorderLayout.CENTER); Removing note from the dialog box
 		_guiLoaded = true;
 		updateWeightColumnCombo(null);
 		return true;
@@ -831,6 +831,8 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	 * @return {@link javax.swing.JEditorPane} with text and links describing algorithm passed in
 	 */
 	private JEditorPane getAlgorithmAboutFrame(CommunityDetectionAlgorithm algorithm){
-	    return _editorPaneFac.getDescriptionFrame(algorithm.getDescription() == null ? "No additional information available" : algorithm.getDescription());
+		return _editorPaneFac
+				.getDescriptionFrame(algorithm.getDescription() == null ? "No additional information available"
+						: algorithm.getDescription());
 	}
 }
