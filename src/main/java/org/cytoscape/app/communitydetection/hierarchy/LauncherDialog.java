@@ -37,7 +37,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -46,14 +45,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JViewport;
 
-import org.cytoscape.app.communitydetection.rest.CDRestClient;
-import org.cytoscape.app.communitydetection.rest.CDRestClientException;
 import org.cytoscape.app.communitydetection.util.AppUtils;
+import org.cytoscape.app.communitydetection.util.ShowDialogUtil;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTableUtil;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm;
-import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithms;
 import org.ndexbio.communitydetection.rest.model.CustomParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +58,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("serial")
 public class LauncherDialog extends JPanel implements ItemListener {
 
-    	private final static Logger LOGGER = LoggerFactory.getLogger(LauncherDialog.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(LauncherDialog.class);
 
 	private static final String SELECTED_NODES_BUTTON_LABEL = "Selected Nodes";
 	public static final String INPUTDELIM = ":::";
@@ -71,7 +68,8 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	private static final double TEXT_FIELD_WIDTH = 160.0;
 
 	private JPanel _cards;
-	private JEditorPaneFactory _editorPaneFac;
+	private AboutAlgorithmEditorPaneFactoryImpl _aboutAlgoFac;
+	private CustomParameterHelpJEditorPaneFactoryImpl  _customParamHelpFac;
 	private ImageIcon _infoIconSmall;
 	private ImageIcon _infoIconLarge;
 	private Map<String, JPanel> _algoCardMap;
@@ -81,12 +79,22 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	private JRadioButton _allButton;
 	private boolean _guiLoaded = false;
 	private String _algorithmType;
+	private ShowDialogUtil _dialogUtil;
+	private String _currentlySelectedAlgorithm;
+	private LauncherDialogAlgorithmFactory _algoFac;
 
-	public LauncherDialog(JEditorPaneFactory editorPaneFac,
+	public LauncherDialog(AboutAlgorithmEditorPaneFactoryImpl aboutAlgoFac,
+			CustomParameterHelpJEditorPaneFactoryImpl customParamHelpFac,
+			LauncherDialogAlgorithmFactory algoFac,
+			ShowDialogUtil dialogUtil,
 		final String algorithmType) throws Exception {
-		this._editorPaneFac = editorPaneFac;
+		this._customParamHelpFac = customParamHelpFac;
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		this._algorithmType = algorithmType;
+		this._dialogUtil = dialogUtil;
+		_aboutAlgoFac = aboutAlgoFac;
+		_algoFac = algoFac;
+		_currentlySelectedAlgorithm = null;
 	}
 	
 	
@@ -94,63 +102,13 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	    return createGUI(parentWindow, false);
 	}
 
-	protected List<CommunityDetectionAlgorithm> getCommunityDetectionAlgorithmsFromService(Component parentWindow) {
-		CommunityDetectionAlgorithms result = null;
-		
-		try {
-			result = this.getAlgorithmsFromService();
-			if (result == null){
-				return null;
-			}
-			ArrayList<CommunityDetectionAlgorithm> algorithms = new ArrayList<>();
-			for (CommunityDetectionAlgorithm algo : result.getAlgorithms().values()) {
-				if (algo.getInputDataFormat().equalsIgnoreCase(this._algorithmType)){
-					algorithms.add(algo);
-				}
-			}
-			return algorithms;
-		} catch(CDRestClientException ce){
-			JOptionPane.showMessageDialog(parentWindow,
-					"Unable to get list of algorithms from service: " + ce.getMessage() + " : " +
-							(ce.getErrorResponse() == null ? "" : ce.getErrorResponse().asJson()));
-		} catch(IOException io){
-			JOptionPane.showMessageDialog(parentWindow,
-					"Unable to get list of algorithms from service: " + io.getMessage());
-		}
-		return null;
-	}
-	
-	/**
-	 * Gets the algorithms from CD Service by trying twice. The second time
-	 * the value is just returned or any exception is passed on.
-	 * @return Algorithms found in service or null if there are none
-	 * @throws CDRestClientException thrown if there is a problem with service call on 2nd
-	 *                               try
-	 * @throws IOException thrown if there is a problem with service call on 2nd
-	 *                     try
-	 */
-	private CommunityDetectionAlgorithms getAlgorithmsFromService() throws CDRestClientException, IOException{
-		CDRestClient client = CDRestClient.getInstance();
-		try {
-			return client.getAlgorithms(false);
-		} catch(CDRestClientException ce){
-			LOGGER.warn("Got error trying to get algorithm list from "
-					+ "CD service, trying again",
-					ce);
-		} catch(IOException ie){
-			LOGGER.warn("Got error trying to get algorithm list from "
-					+ "CD service, trying again",
-					ie);
-		}
-		return client.getAlgorithms(false);
-	}
 	public boolean createGUI(Component parentWindow, boolean refresh) {
 	    if (_guiLoaded == true && refresh==false){
 		return true;
 	    }
 	    loadImageIcon();
 		_algoCardMap = new LinkedHashMap<>();
-		_algorithmList = getCommunityDetectionAlgorithmsFromService(parentWindow);
+		_algorithmList = _algoFac.getAlgorithms(parentWindow, _algorithmType);
 		if (_algorithmList == null){
 			return false;
 		}
@@ -183,6 +141,8 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		
 		contentPane.add(_algorithmComboBox);
 		
+		contentPane.add(this.getAboutAlgorithmIcon());
+		
 		JPanel masterPanel = new JPanel();
 		masterPanel.setLayout(new BoxLayout(masterPanel, BoxLayout.Y_AXIS));
 		masterPanel.add(_cards);
@@ -202,7 +162,8 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		}
 		
 		add(masterPanel, BorderLayout.CENTER);
-		// add(this.getDisclaimerPanel(), BorderLayout.CENTER); Removing note from the dialog box
+		//Removing note from the dialog box
+		//add(this.getDisclaimerPanel(), BorderLayout.CENTER);
 		_guiLoaded = true;
 		updateWeightColumnCombo(null);
 		return true;
@@ -369,6 +330,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	}
 	
 	private void loadAlgorithmCards(){
+		_currentlySelectedAlgorithm = null;
 	    _algoCardMap.clear();
 	    _cards.removeAll();
 	    _algorithmComboBox.removeAllItems();
@@ -430,13 +392,6 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		resetConstraints.insets = new Insets(0, 5, 0, 0);
 		resetConstraints.anchor = GridBagConstraints.LINE_START;
 		algoCard.add(this.getResetButton(cda.getName()), resetConstraints);
-		
-		GridBagConstraints aboutConstraints = new GridBagConstraints();
-		aboutConstraints.gridy = 0;
-		aboutConstraints.gridx = 1;
-		aboutConstraints.insets = new Insets(0, 0, 5, 0);
-		aboutConstraints.anchor = GridBagConstraints.LINE_END;
-		algoCard.add(this.getAboutButton(cda), aboutConstraints);
 
 		_cards.add(algoCard, cda.getDisplayName());
 		this.resetAlgorithmToDefaults(cda.getName());
@@ -506,36 +461,8 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	@Override
 	public void itemStateChanged(ItemEvent evt) {
 		CardLayout cl = (CardLayout)(_cards.getLayout());
-		cl.show(_cards, (String)evt.getItem());
-	}
-	
-	/**
-	 * Gets a UI Component that describes the parameter passed in.
-	 * @param parameter
-	 * @return 
-	 */
-	private JEditorPane getCustomParameterHelp(final CustomParameter parameter){
-	    if (parameter == null){
-		return _editorPaneFac.getDescriptionFrame("No parameter set, unable to generate help");
-	    }
-	    StringBuilder sb = new StringBuilder();
-	    sb.append("<b>Parameter:</b> ");
-	    sb.append(parameter.getDisplayName());
-	    sb.append(" (");
-	    sb.append(parameter.getName());
-	    sb.append(")");
-	    if (parameter.getDefaultValue() != null){
-		sb.append(" [Default: ");
-		sb.append(parameter.getDefaultValue());
-		sb.append("]");
-	    }
-	    sb.append("<br/><h3>Description</h3> ");
-	    sb.append(parameter.getDescription());
-	    if (parameter.getValidationHelp() != null){
-		sb.append("<br/>");
-		sb.append(parameter.getValidationHelp());
-	    }
-	    return _editorPaneFac.getDescriptionFrame(sb.toString());
+		_currentlySelectedAlgorithm = (String)evt.getItem();
+		cl.show(_cards, _currentlySelectedAlgorithm);
 	}
 	
 	/**
@@ -558,12 +485,10 @@ public class LauncherDialog extends JPanel implements ItemListener {
 				// TODO Auto-generated method stub
 
 			}
-
+			
 			@Override
 			public void keyReleased(KeyEvent e) {
-				JOptionPane.showMessageDialog(getParent(), getCustomParameterHelp(parameter),
-					"Parameter " + parameter.getDisplayName(), JOptionPane.INFORMATION_MESSAGE,
-					_infoIconLarge);
+				showCustomHelpParameterDialog(parameter);
 			}
 
 			@Override
@@ -601,13 +526,17 @@ public class LauncherDialog extends JPanel implements ItemListener {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				JOptionPane.showMessageDialog(getParent(), getCustomParameterHelp(parameter),
-					"Parameter " + parameter.getDisplayName(), JOptionPane.INFORMATION_MESSAGE,
-					_infoIconLarge);
+				showCustomHelpParameterDialog(parameter);
 			}
 		});
 
 		return paramLabel;
+	}
+	
+	private void showCustomHelpParameterDialog(final CustomParameter parameter){
+		_dialogUtil.showMessageDialog(getParent(),  _customParamHelpFac.getCustomParameterHelp(parameter),
+					"Parameter " + parameter.getDisplayName(), JOptionPane.INFORMATION_MESSAGE,
+					_infoIconLarge);
 	}
 
 	
@@ -799,40 +728,77 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	}
 	
 	/**
-	 * Creates {@link javax.swing.JButton} about button that displays information
-	 * about algorithm passed in
-	 * @param algorithm the algorithm to display information about
-	 * @return About button with listener setup to display dialog when clicked
+	 * Creates a {@link javax.swing.JLabel} with an info icon that when clicked
+	 * displays a small dialog that displays information about the Algorithm
+	 * selected in the drop down menu
+	 * @param parameter The parameter
+	 * @return 
+	 * @throws IOException 
 	 */
-	private JButton getAboutButton(final CommunityDetectionAlgorithm algorithm){
-	    JButton button = new JButton(AppUtils.ABOUT);
-	    button.setName(AppUtils.ABOUT);
-	    button.setToolTipText("Displays information about " + algorithm.getDisplayName());
-	    button.addActionListener(new ActionListener() {
-		    @Override
-		    public void actionPerformed(ActionEvent e) {
-			
-			LOGGER.debug("About button clicked "
-				      + "on algorithm: " + algorithm.getDisplayName());
-			JOptionPane.showMessageDialog(getParent(), getAlgorithmAboutFrame(algorithm),
-					"About " + algorithm.getDisplayName(),
-					JOptionPane.INFORMATION_MESSAGE,
-					_infoIconLarge);
-		    }
+	private JLabel getAboutAlgorithmIcon() {
+		JLabel infoIcon = new JLabel(_infoIconSmall, JLabel.CENTER);
+		infoIcon.setToolTipText("Click here for more "
+				+ "information about currently selected algorithm");
+
+		infoIcon.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				showAboutAlgorithmFrame();
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+
+			}
 		});
-	    return button;
+
+		infoIcon.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				showAboutAlgorithmFrame();
+			}
+		});
+
+		return infoIcon;
 	}
-	
-	/**
-	 * Creates {@link javax.swing.JEditorPane} with text from 
-	 * {@link org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm#getDescription()} 
-	 * method or if that is null a simple string saying no information is available
-	 * @param algorithm Algorithm to get description from
-	 * @return {@link javax.swing.JEditorPane} with text and links describing algorithm passed in
-	 */
-	private JEditorPane getAlgorithmAboutFrame(CommunityDetectionAlgorithm algorithm){
-		return _editorPaneFac
-				.getDescriptionFrame(algorithm.getDescription() == null ? "No additional information available"
-						: algorithm.getDescription());
+
+	private void showAboutAlgorithmFrame(){
+		CommunityDetectionAlgorithm cda = getSelectedCommunityDetectionAlgorithm();
+				_dialogUtil.showMessageDialog(getParent(), _aboutAlgoFac.getAlgorithmAboutFrame(cda),
+					"Algorithm " + cda.getDisplayName(), JOptionPane.INFORMATION_MESSAGE,
+					_infoIconLarge);
 	}
 }

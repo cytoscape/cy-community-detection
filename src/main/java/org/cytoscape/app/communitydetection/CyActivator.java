@@ -10,11 +10,15 @@ import static org.cytoscape.work.ServiceProperties.TITLE;
 
 import java.util.Properties;
 import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactoryImpl;
+import org.cytoscape.app.communitydetection.hierarchy.AboutAlgorithmEditorPaneFactoryImpl;
+import org.cytoscape.app.communitydetection.hierarchy.CustomParameterHelpJEditorPaneFactoryImpl;
 
 import org.cytoscape.app.communitydetection.hierarchy.HierarchyTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.hierarchy.JEditorPaneFactoryImpl;
 import org.cytoscape.app.communitydetection.hierarchy.LauncherDialog;
+import org.cytoscape.app.communitydetection.hierarchy.LauncherDialogAlgorithmFactoryImpl;
 import org.cytoscape.app.communitydetection.iquery.IQueryTaskFactoryImpl;
+import org.cytoscape.app.communitydetection.rest.CDRestClient;
 import org.cytoscape.app.communitydetection.subnetwork.SubNetworkTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.termmap.NetworkTermMappingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.termmap.NodeTermMapppingTaskFactoryImpl;
@@ -75,19 +79,22 @@ public class CyActivator extends AbstractCyActivator {
 		loadPropertyReaderService(bc);
 		
 		ShowDialogUtil dialogUtil = new ShowDialogUtil();
+		JEditorPaneFactoryImpl editorPaneFac = new JEditorPaneFactoryImpl();
+		AboutAlgorithmEditorPaneFactoryImpl aboutAlgoFac = new AboutAlgorithmEditorPaneFactoryImpl(editorPaneFac);
+		CustomParameterHelpJEditorPaneFactoryImpl customHelpParameterFac = new CustomParameterHelpJEditorPaneFactoryImpl(editorPaneFac);
+		LauncherDialogAlgorithmFactoryImpl algoFac = new LauncherDialogAlgorithmFactoryImpl(CDRestClient.getInstance(), dialogUtil);
 		
 		final ReaderTaskFactoryImpl readerTaskFactory = new ReaderTaskFactoryImpl(networkViewFactory,
 				networkFactory, networkManager, networkViewManager, rootNetworkManager, visualMappingManager,
 				vizmapFileTaskFactory, layoutAlgorithmManager, syncTaskManager, networkNaming);
 		
-		JEditorPaneFactoryImpl editorPaneFac = new JEditorPaneFactoryImpl();
 		// Add Run Community Detection under Apps => Community Detection
 		// menu
 		Properties taskExecProps = new Properties();
 		taskExecProps.setProperty(MENU_GRAVITY, "1.0");
 		taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
 		taskExecProps.setProperty(TITLE, "Run Community Detection");
-		LauncherDialog clusterAlgoDialog = new LauncherDialog(editorPaneFac,
+		LauncherDialog clusterAlgoDialog = new LauncherDialog(aboutAlgoFac, customHelpParameterFac, algoFac, dialogUtil,
 		                                                      AppUtils.CD_ALGORITHM_INPUT_TYPE);
 		registerAllServices(bc, new HierarchyTaskFactoryImpl(swingApplication, clusterAlgoDialog, readerTaskFactory, dialogUtil), taskExecProps);
 		
@@ -97,7 +104,7 @@ public class CyActivator extends AbstractCyActivator {
 		tmExecProps.setProperty(MENU_GRAVITY, "2.0");
 		tmExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
 		tmExecProps.setProperty(TITLE, "Run Functional Enrichment");
-		LauncherDialog tmAlgoDialog = new LauncherDialog(new JEditorPaneFactoryImpl(),
+		LauncherDialog tmAlgoDialog = new LauncherDialog(aboutAlgoFac, customHelpParameterFac, algoFac, dialogUtil,
 		                                                      AppUtils.TM_ALGORITHM_INPUT_TYPE);
 		NetworkTermMappingTaskFactoryImpl termFac = new NetworkTermMappingTaskFactoryImpl(swingApplication, tmAlgoDialog); 
 		registerAllServices(bc, termFac, tmExecProps);
