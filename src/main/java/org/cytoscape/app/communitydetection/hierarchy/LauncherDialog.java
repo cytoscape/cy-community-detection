@@ -162,7 +162,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		}
 		
 		add(masterPanel, BorderLayout.CENTER);
-		add(this.getDisclaimerPanel(), BorderLayout.CENTER);
+		//add(this.getDisclaimerPanel(), BorderLayout.CENTER);
 		_guiLoaded = true;
 		updateWeightColumnCombo(null);
 		return true;
