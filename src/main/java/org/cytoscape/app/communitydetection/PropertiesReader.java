@@ -12,7 +12,7 @@ public class PropertiesReader extends AbstractConfigDirPropsReader implements Pr
 	private final String propName;
 
 	public PropertiesReader(String name, String propFileName) {
-		super(name, propFileName, CyProperty.SavePolicy.SESSION_FILE_AND_CONFIG_DIR);
+		super(name, propFileName, CyProperty.SavePolicy.CONFIG_DIR);
 		this.propName = name;
 	}
 

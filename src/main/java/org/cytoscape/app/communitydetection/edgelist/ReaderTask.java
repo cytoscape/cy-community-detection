@@ -246,7 +246,7 @@ public class ReaderTask extends AbstractCyNetworkReader {
 			derivedFrom += " UUID: " + UUID;
 		}
 		Properties properties = new Properties();
-		properties.load(getClass().getClassLoader().getResourceAsStream(AppUtils.PROP_NAME));
+		properties.load(getClass().getClassLoader().getResourceAsStream(AppUtils.PROP_NAME + ".props"));
 		String generatedBy = "App: " + properties.getProperty(AppUtils.PROP_PROJECT_NAME);
 		generatedBy += " (" + properties.getProperty(AppUtils.PROP_PROJECT_VERSION) + ")";
 		generatedBy += " Docker Image: " + algorithm.getDockerImage();
