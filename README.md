@@ -11,6 +11,7 @@ Community Detection App for Cytoscape
 ======================================
 
 [![Build Status](https://travis-ci.org/idekerlab/cy-community-detection.svg?branch=master)](https://travis-ci.org/idekerlab/cy-community-detection) [![Coverage Status](https://coveralls.io/repos/github/idekerlab/cy-community-detection/badge.svg?branch=master)](https://coveralls.io/github/idekerlab/cy-community-detection?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/cdaps/badge/?version=latest&token=d51549910b0a9d03167cce98f0f550cbacc48ec26e849a72a75a36c1cb474847)](https://cdaps.readthedocs.io/en/latest/?badge=latest)
 
 
 Community Detection App is a Cytoscape App that leverages third party algorithms (via [REST service][cdservice])
