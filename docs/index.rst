@@ -30,14 +30,8 @@ TODO
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    Installation
-   WhatsNew
-   QuickTour
-   CreatingHierarchy
-   MappingTerms
-   ViewingInteractions
    
 
 
