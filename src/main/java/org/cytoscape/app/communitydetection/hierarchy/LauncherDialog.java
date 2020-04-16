@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +58,9 @@ import org.slf4j.LoggerFactory;
 public class LauncherDialog extends JPanel implements ItemListener {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(LauncherDialog.class);
-
+	private static final String WEIGHT_ALERT_MSG = "Alert: The weight column is an advanced\n"
+			+ "option requiring direct knowledge\n"
+			+ "of algorithm being used.";
 	private static final String SELECTED_NODES_BUTTON_LABEL = "Selected Nodes";
 	public static final String INPUTDELIM = ":::";
 	private List<CommunityDetectionAlgorithm> _algorithmList;
@@ -72,6 +73,9 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	private CustomParameterHelpJEditorPaneFactoryImpl  _customParamHelpFac;
 	private ImageIcon _infoIconSmall;
 	private ImageIcon _infoIconLarge;
+	private ImageIcon _alertIconSmall;
+	private ImageIcon _alertIconLarge;
+	private JLabel _alertIconLabel;
 	private Map<String, JPanel> _algoCardMap;
 	private JComboBox _algorithmComboBox;
 	private JComboBox _weightComboBox;
@@ -107,6 +111,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		return true;
 	    }
 	    loadImageIcon();
+		loadAlertIcon();
 		_algoCardMap = new LinkedHashMap<>();
 		_algorithmList = _algoFac.getAlgorithms(parentWindow, _algorithmType);
 		if (_algorithmList == null){
@@ -244,20 +249,49 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		labelConstraints.insets = new Insets(0, 5, 5, 0);
 		weightPanel.add(new JLabel("Weight Column: "), labelConstraints);
 
-		_weightComboBox = new JComboBox();
-		_weightComboBox.setEditable(false);
-		_weightComboBox.setToolTipText("Numeric edge column to use for "
-			+ "edge weights in Community Detection. Select '" +
-			AppUtils.TYPE_NONE_VALUE + "' to"
-			+ " not use a column");
+		_weightComboBox = getWeightColumnComboBox();
 		
 		GridBagConstraints weightComboConstraints = new GridBagConstraints();
 		weightComboConstraints.gridy = 0;
-		labelConstraints.gridx = 1;
-		labelConstraints.anchor = GridBagConstraints.LINE_END;
-		labelConstraints.insets = new Insets(0, 0, 5, 0);
+		weightComboConstraints.gridx = 1;
+		weightComboConstraints.insets = new Insets(0, 0, 5, 0);
 		weightPanel.add(_weightComboBox, weightComboConstraints);
+
+		GridBagConstraints weightAlertConstraints = new GridBagConstraints();
+		weightAlertConstraints.gridy = 0;
+		weightAlertConstraints.gridx = 2;
+		weightAlertConstraints.anchor = GridBagConstraints.LINE_END;
+		weightAlertConstraints.insets = new Insets(0, 0, 5, 0);
+		_alertIconLabel = getWeightColumnAlertIcon();
+		weightPanel.add(_alertIconLabel, weightAlertConstraints);
 		return weightPanel;
+	}
+	
+	/**
+	 * Gets weight column selection combo box that has an
+	 * attached listener which makes an alert icon visible
+	 * when a user selects a column for weight
+	 * @return 
+	 */
+	private JComboBox getWeightColumnComboBox(){
+		JComboBox comboBox = new JComboBox();
+		comboBox.setEditable(false);
+		comboBox.setToolTipText("Advanced: Numeric edge column to use for "
+			+ "edge weights in Community Detection. Select '" +
+			AppUtils.TYPE_NONE_VALUE + "' to"
+			+ " not use a column");
+		comboBox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                String selected = getWeightColumn();
+                if (selected == null || selected.equals(AppUtils.TYPE_NONE_VALUE)){
+					_alertIconLabel.setVisible(false);
+				}
+				else {
+					_alertIconLabel.setVisible(true);
+				}
+            }
+        });
+		return comboBox;
 	}
 
 	/**
@@ -322,6 +356,10 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	    }
 	}
 	
+	/**
+	 * Gets the value of the weight column dropdown box
+	 * @return 
+	 */
 	public String getWeightColumn(){
 	    if (_weightComboBox == null){
 		return null;
@@ -396,7 +434,6 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		_cards.add(algoCard, cda.getDisplayName());
 		this.resetAlgorithmToDefaults(cda.getName());
 	    }
-	    
 	}
 	
 	/**
@@ -442,14 +479,31 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	    try {
 		    File imgFile = File.createTempFile("info_icon", "png");
 	        InputStream imgStream = getClass().getClassLoader().getResourceAsStream("info_icon.png");
-		Files.copy(imgStream, imgFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-		_infoIconSmall = new ImageIcon(new ImageIcon(imgFile.getPath()).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
-		_infoIconLarge = new ImageIcon(new ImageIcon(imgFile.getPath()).getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH));
+			Files.copy(imgStream, imgFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			_infoIconSmall = new ImageIcon(new ImageIcon(imgFile.getPath()).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+			_infoIconLarge = new ImageIcon(new ImageIcon(imgFile.getPath()).getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH));
 	    }
 	    catch (IOException ex){
 		    
 	    }
 	}
+	
+	/**
+	 * Loads a small alert image icon
+	 */
+	private void loadAlertIcon(){
+	    try {
+		    File imgFile = File.createTempFile("alert_icon", "png");
+	        InputStream imgStream = getClass().getClassLoader().getResourceAsStream("alert_icon.png");
+			Files.copy(imgStream, imgFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			_alertIconSmall = new ImageIcon(new ImageIcon(imgFile.getPath()).getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+			_alertIconLarge = new ImageIcon(new ImageIcon(imgFile.getPath()).getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH));
+		}
+	    catch (IOException ex){
+		    
+	    }
+	}
+	
 
 	/**
 	 * Event invoked when user interacts with algorithm combo box
@@ -537,6 +591,79 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		_dialogUtil.showMessageDialog(getParent(),  _customParamHelpFac.getCustomParameterHelp(parameter),
 					"Parameter " + parameter.getDisplayName(), JOptionPane.INFORMATION_MESSAGE,
 					_infoIconLarge);
+	}
+	
+	/**
+	 * Creates a {@link javax.swing.JLabel} with an info icon that when clicked
+	 * displays a small dialog that displays information about the parameter
+	 * passed in
+	 * @param parameter The parameter
+	 * @return 
+	 * @throws IOException 
+	 */
+	private JLabel getWeightColumnAlertIcon() {
+		JLabel alertLabel = new JLabel(_alertIconSmall, JLabel.CENTER);
+		alertLabel.setToolTipText(WEIGHT_ALERT_MSG); 
+
+		alertLabel.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+			
+			@Override
+			public void keyReleased(KeyEvent e) {
+				showWeightColumnAlertDialog(WEIGHT_ALERT_MSG);
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+
+		alertLabel.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				showWeightColumnAlertDialog(WEIGHT_ALERT_MSG);
+			}
+		});
+
+		return alertLabel;
+	}
+	
+	private void showWeightColumnAlertDialog(final String message){
+		_dialogUtil.showMessageDialog(getParent(), message,
+					"Weight Column Alert", JOptionPane.INFORMATION_MESSAGE,
+					_alertIconLarge);
 	}
 
 	
