@@ -1,6 +1,7 @@
 package org.cytoscape.app.communitydetection;
 
 import java.util.Properties;
+import org.cytoscape.app.communitydetection.hierarchy.LauncherDialog;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,10 +76,16 @@ public class PropertiesHelper {
 	}
 
 	/**
-	 * Sets REST endpoint for CD Service
+	 * Sets REST endpoint for CD Service and sets
+	 * LauncherDialog.ALGORITHM_ENDPOINT_UPDATED to true if previous
+	 * or new baseurl is null or if the previous value is different then
+	 * the current
 	 * @param baseurl 
 	 */
 	public void setBaseurl(String baseurl) {
+		if (this.baseurl == null || baseurl == null || !this.baseurl.equals(baseurl)){
+			LauncherDialog.ALGORITHM_ENDPOINT_UPDATED = true;
+		} 
 		this.baseurl = baseurl;
 	}
 

@@ -43,7 +43,6 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JViewport;
-
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.app.communitydetection.util.ShowDialogUtil;
 import org.cytoscape.model.CyNetwork;
@@ -86,6 +85,8 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	private ShowDialogUtil _dialogUtil;
 	private String _currentlySelectedAlgorithm;
 	private LauncherDialogAlgorithmFactory _algoFac;
+	private String _baseRestURL;
+	public static boolean ALGORITHM_ENDPOINT_UPDATED;
 
 	public LauncherDialog(AboutAlgorithmEditorPaneFactoryImpl aboutAlgoFac,
 			CustomParameterHelpJEditorPaneFactoryImpl customParamHelpFac,
@@ -100,23 +101,19 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		_algoFac = algoFac;
 		_currentlySelectedAlgorithm = null;
 	}
-	
-	
-	public boolean createGUI(Component parentWindow) {
-	    return createGUI(parentWindow, false);
-	}
 
-	public boolean createGUI(Component parentWindow, boolean refresh) {
-	    if (_guiLoaded == true && refresh==false){
-		return true;
+	public boolean createGUI(Component parentWindow) {
+	    if (_guiLoaded == true){
+			return refreshAlgorithmsIfEndPointChanged(parentWindow);
 	    }
 	    loadImageIcon();
 		loadAlertIcon();
 		_algoCardMap = new LinkedHashMap<>();
-		_algorithmList = _algoFac.getAlgorithms(parentWindow, _algorithmType);
+		_algorithmList = _algoFac.getAlgorithms(parentWindow, _algorithmType, false);
 		if (_algorithmList == null){
 			return false;
 		}
+		LauncherDialog.ALGORITHM_ENDPOINT_UPDATED = false;
 		_cards = new JPanel(new CardLayout());
 		_algorithmComboBox = new JComboBox();
 		
@@ -171,6 +168,19 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		//add(this.getDisclaimerPanel(), BorderLayout.CENTER);
 		_guiLoaded = true;
 		updateWeightColumnCombo(null);
+		return true;
+	}
+	
+	private boolean refreshAlgorithmsIfEndPointChanged(Component parentWindow){
+		if (ALGORITHM_ENDPOINT_UPDATED == true){
+			LOGGER.debug("CD Service rest endpoint changed. Updating algorithms");
+			_algorithmList = _algoFac.getAlgorithms(parentWindow, _algorithmType, true);
+			if (_algorithmList == null){
+				return false;
+			}
+			this.loadAlgorithmCards();
+			LauncherDialog.ALGORITHM_ENDPOINT_UPDATED = false;
+		}
 		return true;
 	}
 	

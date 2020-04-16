@@ -1,6 +1,7 @@
 package org.cytoscape.app.communitydetection;
 
 import java.util.Properties;
+import org.cytoscape.app.communitydetection.hierarchy.LauncherDialog;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -48,6 +49,7 @@ public class PropertiesHelperTest {
 		assertEquals(5, ph.getSubmitRetryCount());
 		assertEquals(6, ph.getCommunityDetectionTimeoutMillis());
 		assertEquals(7, ph.getFunctionalEnrichmentTimeoutMillis());
+		assertEquals(true, LauncherDialog.ALGORITHM_ENDPOINT_UPDATED);
     }
 	
 	@Test

@@ -18,6 +18,6 @@ public interface LauncherDialogAlgorithmFactory {
 	 * @return list of algorithms or null if there was a problem
 	 */
 	public List<CommunityDetectionAlgorithm> getAlgorithms(Component parentWindow,
-			final String algorithmType);
+			final String algorithmType, boolean refresh);
 	
 }

@@ -35,12 +35,12 @@ public class LauncherDialogAlgorithmFactoryImpl implements LauncherDialogAlgorit
 	 */
 	@Override
 	public List<CommunityDetectionAlgorithm> getAlgorithms(Component parentWindow,
-			String algorithmType) {
+			String algorithmType, boolean refresh) {
 		
 		CommunityDetectionAlgorithms result = null;
 		
 		try {
-			result = this.getAlgorithmsFromService();
+			result = this.getAlgorithmsFromService(refresh);
 			if (result == null){
 				return null;
 			}
@@ -71,10 +71,10 @@ public class LauncherDialogAlgorithmFactoryImpl implements LauncherDialogAlgorit
 	 * @throws IOException thrown if there is a problem with service call on 2nd
 	 *                     try
 	 */
-	private CommunityDetectionAlgorithms getAlgorithmsFromService() throws CDRestClientException, IOException{
+	private CommunityDetectionAlgorithms getAlgorithmsFromService(boolean refresh) throws CDRestClientException, IOException{
 		CDRestClient client = CDRestClient.getInstance();
 		try {
-			return client.getAlgorithms(false);
+			return client.getAlgorithms(refresh);
 		} catch(CDRestClientException ce){
 			LOGGER.warn("Got error trying to get algorithm list from "
 					+ "CD service, trying again",
