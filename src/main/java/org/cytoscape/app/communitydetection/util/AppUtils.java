@@ -3,7 +3,7 @@ package org.cytoscape.app.communitydetection.util;
 public class AppUtils {
 
 	public static final String APP_NAME = "CyCommunityDetection";
-	public static final String PROP_NAME = "communitydetection";
+	public static final String PROP_NAME = "cycommunitydetection";
 	public static final String PROP_APP_BASEURL = "app.baseurl";
 	public static final String PROP_IQUERY_URL = "iquery.url";
 	public static final String PROP_APP_THREADCOUNT = "app.threadcount";

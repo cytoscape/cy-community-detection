@@ -49,7 +49,7 @@ public class AboutTaskFactoryImpl implements NetworkTaskFactory {
 	String version = "Unknown";
 	Properties properties = new Properties();
 	try {
-	    properties.load(getClass().getClassLoader().getResourceAsStream(AppUtils.PROP_NAME));
+	    properties.load(getClass().getClassLoader().getResourceAsStream(AppUtils.PROP_NAME + ".props"));
 	    version = properties.getProperty(AppUtils.PROP_PROJECT_VERSION, version);
 	} catch(IOException ioex){
 	    

@@ -1,6 +1,5 @@
 package org.cytoscape.app.communitydetection;
 
-import java.io.IOException;
 import java.util.Properties;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.slf4j.Logger;
@@ -24,15 +23,6 @@ public class PropertiesHelper {
 	private int submitRetryCount;
 
 	private PropertiesHelper() {
-		Properties properties = new Properties();
-		try {
-			properties.load(getClass().getClassLoader().getResourceAsStream(AppUtils.PROP_NAME));
-			
-			appName = properties.getProperty(AppUtils.PROP_PROJECT_NAME, AppUtils.APP_NAME);
-			appVersion = properties.getProperty(AppUtils.PROP_PROJECT_VERSION, "Unknown");
-		} catch(IOException io){
-			LOGGER.warn("Caught exception creating PropertiesHelper", io);
-		}
 	}
 
 	private static class SingletonHelper {
@@ -53,6 +43,8 @@ public class PropertiesHelper {
 			props = new Properties();
 		}
 		LOGGER.debug("Updating properties");
+		appName = props.getProperty(AppUtils.PROP_PROJECT_NAME, AppUtils.APP_NAME);
+		appVersion = props.getProperty(AppUtils.PROP_PROJECT_VERSION, "Unknown");
 		setBaseurl(props.getProperty(AppUtils.PROP_APP_BASEURL,
 				"http://cdservice.cytoscape.org/cd/communitydetection/v1"));
 		setiQueryurl(props.getProperty(AppUtils.PROP_IQUERY_URL,
