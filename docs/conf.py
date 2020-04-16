@@ -14,6 +14,9 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+from xml.etree import ElementTree
+import sphinx_rtd_theme
+
 
 # -- Project information -----------------------------------------------------
 
@@ -25,10 +28,16 @@ author = 'Song Cao, Christopher Churas, Akshat Singhal, Fan Zheng'
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-# The short X.Y version.
-version = '1.10'
+with open('../pom.xml', 'rt') as f:
+    tree = ElementTree.parse(f)
+
+pom_ns = {'xmlns': 'http://maven.apache.org/POM/4.0.0'}
+
 # The full version, including alpha/beta/rc tags.
-release = '1.10.0-SNAPSHOT'
+release = tree.getroot().findall('.//xmlns:version', namespaces=pom_ns)[0].text
+
+# The short X.Y version.
+version = release[0:release.rindex('.')]
 
 # -- General configuration ---------------------------------------------------
 
@@ -36,6 +45,7 @@ release = '1.10.0-SNAPSHOT'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinx_rtd_theme'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -53,7 +63,9 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'classic'
+html_theme = "sphinx_rtd_theme"
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

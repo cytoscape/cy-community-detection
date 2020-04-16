@@ -25,19 +25,12 @@ To Report a bug:
 Cite CDAPS
 -----------
 
-TODO
+Manuscript in preparation
 
 
 .. toctree::
    :maxdepth: 2
+   :caption: Contents
 
    Installation
-   
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
