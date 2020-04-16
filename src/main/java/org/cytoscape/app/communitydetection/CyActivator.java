@@ -49,13 +49,13 @@ public class CyActivator extends AbstractCyActivator {
 	}
 
 	private void loadPropertyReaderService(BundleContext bc) throws Exception {
-		PropertiesReader propReader = new PropertiesReader(AppUtils.APP_NAME, AppUtils.PROP_NAME);
+		PropertiesReader propReader = new PropertiesReader(AppUtils.APP_NAME, AppUtils.PROP_NAME + ".props");
 		Properties propReaderProperties = new Properties();
-		propReaderProperties.setProperty("cyPropertyName", AppUtils.PROP_NAME);
+		propReaderProperties.setProperty("cyPropertyName", AppUtils.PROP_NAME + ".props");
 		registerAllServices(bc, propReader, propReaderProperties);
 
 		final CyProperty<Properties> cyProperties = getService(bc, CyProperty.class,
-				"(cyPropertyName=" + AppUtils.PROP_NAME + ")");
+				"(cyPropertyName=" + AppUtils.PROP_NAME + ".props)");
 		PropertiesHelper.getInstance().updateViaProperties(cyProperties.getProperties());
 	}
 	
