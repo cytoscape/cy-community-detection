@@ -34,13 +34,16 @@ click **Run** button.
 .. image:: images/quicktutorial/communitydetectiondialog.png
    :class: with-border with-shadow
 
-A new network should be generated as seen here:
+A new network/hierarchy should be generated as seen here:
 
 .. image:: images/quicktutorial/resultinghierarchy.png
    :class: with-border with-shadow
 
 Perform Term Mapping
 --------------------
+
+Using network/hierarchy generated above left click to select a node
+in the network view and then right click to display
 
 View Interactions
 -----------------
