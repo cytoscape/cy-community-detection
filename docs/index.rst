@@ -33,4 +33,6 @@ Manuscript in preparation
    :caption: Contents
 
    Installation
+   WhatsNew
+   QuickTutorial
 
