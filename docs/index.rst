@@ -14,7 +14,7 @@ The CDAPS GitHub issue tracker can be used to report a bug or request a feature.
 
 To Report a bug:
 
-* Go to https://github.com/idekerlab/cy-community-detection/issues
+* Go to https://github.com/cytoscape/cy-community-detection/issues
 * Click on *New Issue*
 * Write a short description of the issue. It is very helpful to provide a series of steps
   that can be taken to reproduce the issue.
