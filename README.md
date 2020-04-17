@@ -66,7 +66,7 @@ The above command will create a jar file under **target/** named
 into [Cytoscape][cytoscape]
 
 COPYRIGHT AND LICENSE
-=======================
+========================
 
 [Click here](LICENSE)
 
