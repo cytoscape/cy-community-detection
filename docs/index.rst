@@ -5,7 +5,25 @@ CDAPS
 
 Community Detection APplication and Service (CDAPS)
 
-**TODO** add overview documentation here
+CDAPS performs multiscale community detection and
+functional enrichment for network analysis
+through a service-oriented architecture.
+These features are provided by integrating
+popular community detection algorithms and
+enrichment tools. All the algorithms and
+tools run remotely on a dedicated server.
+
+Currently supported features:
+
+* Community detection algorithms: Louvain, Infomap, OSLOM, CliXO
+* Functional enrichment tools: g:Profiler, Enrichr, iQuery
+
+.. image:: images/f1_app_store.png
+   :class: with-border with-shadow
+   :width: 200px
+.. image:: images/f3.png
+   :class: with-border with-shadow
+   :width: 400px
 
 Feature Requests and Reporting Bugs
 -----------------------------------
