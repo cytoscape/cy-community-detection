@@ -53,6 +53,7 @@ Manuscript in preparation
    Installation
    WhatsNew
    QuickTutorial
+   Columns
 
 .. toctree::
    :maxdepth: 2
