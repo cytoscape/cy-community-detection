@@ -46,7 +46,7 @@ public class SettingsTaskFactoryImpl implements NetworkTaskFactory {
      */
     @Override
     public TaskIterator createTaskIterator(CyNetwork network) {
-		if (_settingsDialog.createGUI(_swingApplication.getJFrame()) == false){
+		if (_settingsDialog.createGUI() == false){
 			LOGGER.error("SettingsDialog.createGUI() returned false");
 			return new TaskIterator(new DoNothingTask());
 		}
