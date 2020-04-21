@@ -74,17 +74,14 @@ public class SettingsTaskFactoryImpl implements NetworkTaskFactory {
 	 * @param newBaseUrl new url
 	 */
 	private void updateBaseURL(final String newBaseUrl){
-		String newURL = null;
-		if (newBaseUrl == null || newBaseUrl.trim().isEmpty() == true){
-			newURL = PropertiesHelper.DEFAULT_BASEURL;
-		} else {
+		String newURL = PropertiesHelper.DEFAULT_BASEURL;
+		if (newBaseUrl != null && newBaseUrl.trim().isEmpty() == false){
 			String trimmedBaseUrl = newBaseUrl.trim();
 			if (!trimmedBaseUrl.startsWith("http://") && ! trimmedBaseUrl.startsWith("https://")){
 				newURL = PropertiesHelper.BASEURL_PREFIX + trimmedBaseUrl;
 			} else {
 				newURL = trimmedBaseUrl;
 			}
-			
 			newURL = newURL + PropertiesHelper.BASEURL_SUFFIX;
 		}
 		LOGGER.info("Setting app.baseurl to " + newURL);
