@@ -5,7 +5,9 @@
 [cytoscape]: https://cytoscape.org/
 [directappinstall]: http://manual.cytoscape.org/en/stable/App_Manager.html#installing-apps
 [cd]: https://en.wikipedia.org/wiki/Hierarchical_clustering_of_networks
-[cdservice]: https://github.com/idekerlab/communitydetection-rest-server
+[appstore]: http://apps.cytoscape.org/apps/cycommunitydetection
+[directcytoscapeinstall]: https://cdaps.readthedocs.io/en/latest/Installation.html
+[cdservice]: https://github.com/cytoscape/communitydetection-rest-server
 
 Community Detection App for Cytoscape
 =======================================
@@ -34,11 +36,11 @@ Requirements to use
 
 
 
-Installation
-==============
+Installation via from Cytoscape
+======================================
 
-1. Download jar from releases on this page
-1. Open Cytoscape and follow instructions [here][directappinstall]
+CDAPS is in the [Cytoscape App Store][appstore]
+and can be installed by following these [instructions][directcytoscapeinstall]
 
 
 Requirements to build (for developers)
@@ -55,7 +57,7 @@ Commands below assume [Git][git] command line tools have been installed
 
 ```Bash
 # Can also just download repo and unzip it
-git clone https://github.com/idekerlab/cy-community-detection
+git clone https://github.com/cytoscape/cy-community-detection
 
 cd cy-community-detection
 mvn clean test install
@@ -64,6 +66,10 @@ mvn clean test install
 The above command will create a jar file under **target/** named
 **cy-community-detection-\<VERSION\>.jar** that can be installed
 into [Cytoscape][cytoscape]
+
+
+Open Cytoscape and follow instructions [here][directappinstall] to install
+the jar just built.
 
 COPYRIGHT AND LICENSE
 ========================
