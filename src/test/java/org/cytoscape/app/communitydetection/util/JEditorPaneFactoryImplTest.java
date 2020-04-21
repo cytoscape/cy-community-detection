@@ -3,7 +3,6 @@ package org.cytoscape.app.communitydetection.util;
 import javax.swing.JEditorPane;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import static org.mockito.Mockito.*;
 
 /**
  *
