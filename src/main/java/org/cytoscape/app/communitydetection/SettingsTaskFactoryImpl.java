@@ -73,6 +73,8 @@ public class SettingsTaskFactoryImpl implements NetworkTaskFactory {
 		} else {
 			if (!newBaseUrl.startsWith("http://") && ! newBaseUrl.startsWith("https://")){
 				newURL = PropertiesHelper.BASEURL_PREFIX + newBaseUrl;
+			} else {
+				newURL = newBaseUrl;
 			}
 			
 			newURL = newURL + PropertiesHelper.BASEURL_SUFFIX;
@@ -89,7 +91,7 @@ public class SettingsTaskFactoryImpl implements NetworkTaskFactory {
      */
     @Override
     public boolean isReady(CyNetwork network) {
-	return true;
+		return true;
     }
     
 }
