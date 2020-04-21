@@ -136,7 +136,7 @@ public class SettingsTaskFactoryImplTest {
 	}
 	
 	@Test
-	public void testCreateTaskIteratorShowDialogReturnsZeroAndWhiteSpaceBaseurl(){
+	public void testCreateTaskIteratorShowDialogReturnsZeroAndWhiteSpaceAtStartEnd(){
 		CySwingApplication mockApp = mock(CySwingApplication.class);
 		when(mockApp.getJFrame()).thenReturn(null);
 		ShowDialogUtil mockDialog = mock(ShowDialogUtil.class);
@@ -144,7 +144,7 @@ public class SettingsTaskFactoryImplTest {
 		CyProperty<Properties> mockCyProperties = mock(CyProperty.class);
 		when(mockSettingsDialog.createGUI()).thenReturn(true);
 		Object[] options = {AppUtils.UPDATE, AppUtils.CANCEL};
-		when(mockSettingsDialog.getBaseurl()).thenReturn("  ");
+		when(mockSettingsDialog.getBaseurl()).thenReturn(" foo.com ");
 		Properties props = new Properties();
 		when(mockCyProperties.getProperties()).thenReturn(props);
 		when(mockDialog.showOptionDialog(null, mockSettingsDialog, "Community Detection Settings",
@@ -153,12 +153,9 @@ public class SettingsTaskFactoryImplTest {
 															      mockDialog,
 		                                                          mockCyProperties);
 		assertNotNull(tFac.createTaskIterator(null));
-		verify(mockSettingsDialog).createGUI();
-		verify(mockDialog).showOptionDialog(null, mockSettingsDialog, "Community Detection Settings",
-				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
-		verify(mockSettingsDialog).getBaseurl();
-		assertEquals(PropertiesHelper.DEFAULT_BASEURL, props.getProperty(AppUtils.PROP_APP_BASEURL));
-		assertEquals(PropertiesHelper.DEFAULT_BASEURL, PropertiesHelper.getInstance().getBaseurl());
+		String newurl = "http://foo.com/cd/communitydetection/v1";
+		assertEquals(newurl, props.getProperty(AppUtils.PROP_APP_BASEURL));
+		assertEquals(newurl, PropertiesHelper.getInstance().getBaseurl());
 	}
 	
 	@Test

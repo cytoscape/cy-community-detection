@@ -66,15 +66,23 @@ public class SettingsTaskFactoryImpl implements NetworkTaskFactory {
 		return new TaskIterator(new DoNothingTask());
     }
 	
+	/**
+	 * Updates Properties with {@code newBaseUrl} after doing a trim and
+	 * code prepends PropertiesHelper.BASEURL_PREFIX and appends PropertiesHelper.BASEURL_SUFFIX
+	 * if {@code newBaseUrl} is null, empty or just full of whitespace then
+	 * the default URL set in PropertiesHelper.DEFAULT_BASEURL is used
+	 * @param newBaseUrl new url
+	 */
 	private void updateBaseURL(final String newBaseUrl){
 		String newURL = null;
 		if (newBaseUrl == null || newBaseUrl.trim().isEmpty() == true){
 			newURL = PropertiesHelper.DEFAULT_BASEURL;
 		} else {
-			if (!newBaseUrl.startsWith("http://") && ! newBaseUrl.startsWith("https://")){
-				newURL = PropertiesHelper.BASEURL_PREFIX + newBaseUrl;
+			String trimmedBaseUrl = newBaseUrl.trim();
+			if (!trimmedBaseUrl.startsWith("http://") && ! trimmedBaseUrl.startsWith("https://")){
+				newURL = PropertiesHelper.BASEURL_PREFIX + trimmedBaseUrl;
 			} else {
-				newURL = newBaseUrl;
+				newURL = trimmedBaseUrl;
 			}
 			
 			newURL = newURL + PropertiesHelper.BASEURL_SUFFIX;
