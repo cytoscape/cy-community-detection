@@ -11,7 +11,6 @@ import org.cytoscape.model.CyNetwork;
 import static org.mockito.Mockito.*;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.mockito.Mockito;
 
 
 /**
