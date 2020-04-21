@@ -1,6 +1,5 @@
 package org.cytoscape.app.communitydetection;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -80,10 +79,9 @@ public class SettingsDialog extends JPanel {
 
 	/**
 	 * Creates the GUI
-	 * @param parentWindow Parent window used to center children dialogs
 	 * @return true upon success otherwise false
 	 */
-	public boolean createGUI(Component parentWindow) {
+	public boolean createGUI() {
 	    if (_guiLoaded == false){
 			this.add(getSettingsPanel());
 			_guiLoaded = true;
@@ -160,6 +158,7 @@ public class SettingsDialog extends JPanel {
 	private JLabel getRestUrlIcon() {
 		_iconHolder = this._iconFactory.getImageIconHolder("info_icon","png", 20, 40);
 		JLabel restUrlLabel = new JLabel(_iconHolder.getSmallIcon(), JLabel.CENTER);
+		restUrlLabel.setName("restURLIcon");
 		restUrlLabel.setToolTipText(REST_URL_MESSAGE_TOOLTIP); 
 
 		restUrlLabel.addKeyListener(new KeyListener() {
