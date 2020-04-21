@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.cytoscape.app.communitydetection.hierarchy;
+package org.cytoscape.app.communitydetection.util;
 
+import org.cytoscape.app.communitydetection.util.JEditorPaneFactory;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;

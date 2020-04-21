@@ -3,7 +3,7 @@ package org.cytoscape.app.communitydetection;
 import javax.swing.ImageIcon;
 import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
-import org.cytoscape.app.communitydetection.hierarchy.JEditorPaneFactory;
+import org.cytoscape.app.communitydetection.util.JEditorPaneFactory;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.app.communitydetection.util.ShowDialogUtil;
 import org.cytoscape.application.swing.CySwingApplication;

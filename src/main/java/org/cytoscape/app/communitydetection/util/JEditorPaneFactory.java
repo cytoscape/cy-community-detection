@@ -1,4 +1,4 @@
-package org.cytoscape.app.communitydetection.hierarchy;
+package org.cytoscape.app.communitydetection.util;
 
 import javax.swing.JEditorPane;
 

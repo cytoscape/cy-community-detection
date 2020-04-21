@@ -18,7 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import org.cytoscape.app.communitydetection.hierarchy.JEditorPaneFactory;
+import org.cytoscape.app.communitydetection.util.JEditorPaneFactory;
 import org.cytoscape.app.communitydetection.util.ImageIconHolder;
 import org.cytoscape.app.communitydetection.util.ImageIconHolderFactory;
 import org.cytoscape.app.communitydetection.util.ShowDialogUtil;

@@ -1,5 +1,6 @@
 package org.cytoscape.app.communitydetection.hierarchy;
 
+import org.cytoscape.app.communitydetection.util.JEditorPaneFactory;
 import javax.swing.JEditorPane;
 import org.ndexbio.communitydetection.rest.model.CustomParameter;
 

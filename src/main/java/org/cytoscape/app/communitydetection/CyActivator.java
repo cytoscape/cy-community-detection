@@ -14,7 +14,7 @@ import org.cytoscape.app.communitydetection.hierarchy.AboutAlgorithmEditorPaneFa
 import org.cytoscape.app.communitydetection.hierarchy.CustomParameterHelpJEditorPaneFactoryImpl;
 
 import org.cytoscape.app.communitydetection.hierarchy.HierarchyTaskFactoryImpl;
-import org.cytoscape.app.communitydetection.hierarchy.JEditorPaneFactoryImpl;
+import org.cytoscape.app.communitydetection.util.JEditorPaneFactoryImpl;
 import org.cytoscape.app.communitydetection.hierarchy.LauncherDialog;
 import org.cytoscape.app.communitydetection.hierarchy.LauncherDialogAlgorithmFactoryImpl;
 import org.cytoscape.app.communitydetection.iquery.IQueryTaskFactoryImpl;
