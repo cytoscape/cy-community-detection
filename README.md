@@ -68,8 +68,8 @@ The above command will create a jar file under **target/** named
 into [Cytoscape][cytoscape]
 
 
-Open Cytoscape and follow instructions [here][directappinstall] to install
-the jar just built.
+Open Cytoscape and follow instructions [here][directappinstall] and click on
+**Install from File...** button to load the jar created above.
 
 COPYRIGHT AND LICENSE
 ========================
