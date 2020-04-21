@@ -74,6 +74,7 @@ public class AppUtils {
 	public final static String APPLY = "Apply";
 	public final static String CLOSE = "Close";
 	public final static String ABOUT = "About";
+	public final static String UPDATE = "Update";
 	public final static String RUN = "Run";
 	public final static String RESET = "Reset to defaults";
 }

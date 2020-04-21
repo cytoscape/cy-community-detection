@@ -42,6 +42,8 @@ public class PropertiesHelperTest {
 		assertEquals("appy", ph.getAppName());
 		assertEquals("version", ph.getAppVersion());
 		assertEquals("url", ph.getBaseurl());
+		assertEquals("url", ph.getBaseurlHostNameOnly());
+		
 		assertEquals("thread", ph.getThreadcount());
 		assertEquals(1, ph.getHttpSocketTimeoutMillis());
 		assertEquals(2, ph.getHttpConnectTimeoutMillis());
@@ -50,13 +52,23 @@ public class PropertiesHelperTest {
 		assertEquals(6, ph.getCommunityDetectionTimeoutMillis());
 		assertEquals(7, ph.getFunctionalEnrichmentTimeoutMillis());
 		assertEquals(true, LauncherDialog.ALGORITHM_ENDPOINT_UPDATED);
-    }
+		
+		ph.setBaseurl(null);
+		assertEquals("", ph.getBaseurlHostNameOnly());
+		ph.setBaseurl("https://hi.com");
+		assertEquals("hi.com", ph.getBaseurlHostNameOnly());
+		ph.setBaseurl("hi.com/foo");
+		assertEquals("hi.com", ph.getBaseurlHostNameOnly());
+
+	}
 	
 	@Test
 	public void testUpdateViaPropertiesWithNullProperties(){
 		PropertiesHelper ph = PropertiesHelper.getInstance();
 		ph.getInstance().updateViaProperties(null);
-		assertEquals("http://cdservice.cytoscape.org/cd/communitydetection/v1", ph.getBaseurl());
+		assertEquals("http://cdservice.cytoscape.org/cd/communitydetection/v1",
+				ph.getBaseurl());
+		assertEquals("cdservice.cytoscape.org", ph.getBaseurlHostNameOnly());
 		assertEquals("4", ph.getThreadcount());
 		assertEquals(10000, ph.getHttpSocketTimeoutMillis());
 		assertEquals(10000, ph.getHttpConnectTimeoutMillis());

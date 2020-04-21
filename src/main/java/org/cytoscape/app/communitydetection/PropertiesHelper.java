@@ -8,6 +8,10 @@ import org.slf4j.LoggerFactory;
 
 public class PropertiesHelper {
 
+	public final static String BASEURL_PREFIX = "http://";
+	public final static String BASEURL_SUFFIX = "/cd/communitydetection/v1";
+	public final static String DEFAULT_BASEURL = BASEURL_PREFIX
+			+ "cdservice.cytoscape.org" + BASEURL_SUFFIX;
 	private final static Logger LOGGER = LoggerFactory.getLogger(PropertiesHelper.class);
 
 	private String baseurl;
@@ -47,7 +51,7 @@ public class PropertiesHelper {
 		appName = props.getProperty(AppUtils.PROP_PROJECT_NAME, AppUtils.APP_NAME);
 		appVersion = props.getProperty(AppUtils.PROP_PROJECT_VERSION, "Unknown");
 		setBaseurl(props.getProperty(AppUtils.PROP_APP_BASEURL,
-				"http://cdservice.cytoscape.org/cd/communitydetection/v1"));
+				PropertiesHelper.DEFAULT_BASEURL));
 		setiQueryurl(props.getProperty(AppUtils.PROP_IQUERY_URL,
 				"http://iquery.ndexbio.org"));
 		setThreadcount(props.getProperty(AppUtils.PROP_APP_THREADCOUNT, "4"));
@@ -75,6 +79,18 @@ public class PropertiesHelper {
 		return baseurl;
 	}
 
+	/**
+	 * Gets REST endpoint for CD Service with http?:// prefix and
+	 * /.* suffix removed
+	 * @return 
+	 */
+	public String getBaseurlHostNameOnly(){
+		if (baseurl == null){
+			return "";
+		}
+		return baseurl.replaceAll("^https?://", "").replaceAll("/.*$", "");
+	}
+	
 	/**
 	 * Sets REST endpoint for CD Service and sets
 	 * LauncherDialog.ALGORITHM_ENDPOINT_UPDATED to true if previous

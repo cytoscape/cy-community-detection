@@ -23,6 +23,7 @@ import org.cytoscape.app.communitydetection.subnetwork.SubNetworkTaskFactoryImpl
 import org.cytoscape.app.communitydetection.termmap.NetworkTermMappingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.termmap.NodeTermMapppingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.util.AppUtils;
+import org.cytoscape.app.communitydetection.util.ImageIconHolderFactory;
 import org.cytoscape.app.communitydetection.util.ShowDialogUtil;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.model.CyNetworkFactory;
@@ -48,7 +49,7 @@ public class CyActivator extends AbstractCyActivator {
 		super();
 	}
 
-	private void loadPropertyReaderService(BundleContext bc) throws Exception {
+	private CyProperty<Properties> loadPropertyReaderService(BundleContext bc) throws Exception {
 		PropertiesReader propReader = new PropertiesReader(AppUtils.APP_NAME, AppUtils.PROP_NAME + ".props");
 		Properties propReaderProperties = new Properties();
 		propReaderProperties.setProperty("cyPropertyName", AppUtils.PROP_NAME + ".props");
@@ -57,6 +58,7 @@ public class CyActivator extends AbstractCyActivator {
 		final CyProperty<Properties> cyProperties = getService(bc, CyProperty.class,
 				"(cyPropertyName=" + AppUtils.PROP_NAME + ".props)");
 		PropertiesHelper.getInstance().updateViaProperties(cyProperties.getProperties());
+		return cyProperties;
 	}
 	
 	@Override
@@ -76,9 +78,10 @@ public class CyActivator extends AbstractCyActivator {
 		
 		// sets up the PropertiesHelper and links it to properties that a user can
 		// view and edit in Edit => Preferences menu
-		loadPropertyReaderService(bc);
+		CyProperty<Properties> cyProperties = loadPropertyReaderService(bc);
 		
 		ShowDialogUtil dialogUtil = new ShowDialogUtil();
+		ImageIconHolderFactory iconFactory = new ImageIconHolderFactory();
 		JEditorPaneFactoryImpl editorPaneFac = new JEditorPaneFactoryImpl();
 		AboutAlgorithmEditorPaneFactoryImpl aboutAlgoFac = new AboutAlgorithmEditorPaneFactoryImpl(editorPaneFac);
 		CustomParameterHelpJEditorPaneFactoryImpl customHelpParameterFac = new CustomParameterHelpJEditorPaneFactoryImpl(editorPaneFac);
@@ -109,10 +112,20 @@ public class CyActivator extends AbstractCyActivator {
 		NetworkTermMappingTaskFactoryImpl termFac = new NetworkTermMappingTaskFactoryImpl(swingApplication, tmAlgoDialog); 
 		registerAllServices(bc, termFac, tmExecProps);
 
+		// add Settings under Apps => Community Detection
+		// menu
+		Properties settingsProps = new Properties();
+		settingsProps.setProperty(MENU_GRAVITY, "3.0");
+		settingsProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
+		settingsProps.setProperty(TITLE, "Settings");
+		SettingsDialog settingsDialog = new SettingsDialog(dialogUtil, editorPaneFac, iconFactory,
+		                                                   PropertiesHelper.getInstance());
+		registerAllServices(bc, new SettingsTaskFactoryImpl(swingApplication, settingsDialog, dialogUtil, cyProperties), settingsProps);
+		
 		// add About undern Apps => Community Detection
 		// menu
 		Properties aboutProps = new Properties();
-		aboutProps.setProperty(MENU_GRAVITY, "3.0");
+		aboutProps.setProperty(MENU_GRAVITY, "4.0");
 		aboutProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
 		aboutProps.setProperty(TITLE, "About");
 		registerAllServices(bc, new AboutTaskFactoryImpl(swingApplication, editorPaneFac, dialogUtil), aboutProps);
