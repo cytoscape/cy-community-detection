@@ -18,11 +18,13 @@ import static org.mockito.Mockito.*;
 import org.junit.Test;
 import org.cytoscape.model.NetworkTestSupport;
 import org.cytoscape.view.model.CyNetworkView;
+import org.junit.Ignore;
 
 /**
  *
  * @author churas
  */
+@Ignore
 public class IQueryTaskFactoryImplTest {
 	
 	@Test
