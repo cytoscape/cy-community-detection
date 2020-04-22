@@ -74,9 +74,8 @@ public class LauncherDialogAlgorithmFactoryImpl implements LauncherDialogAlgorit
 	 *                     try
 	 */
 	private CommunityDetectionAlgorithms getAlgorithmsFromService(boolean refresh) throws CDRestClientException, IOException{
-		CDRestClient client = CDRestClient.getInstance();
 		try {
-			return client.getAlgorithms(refresh);
+			return _client.getAlgorithms(refresh);
 		} catch(CDRestClientException ce){
 			LOGGER.warn("Got error trying to get algorithm list from "
 					+ "CD service, trying again",
@@ -86,6 +85,6 @@ public class LauncherDialogAlgorithmFactoryImpl implements LauncherDialogAlgorit
 					+ "CD service, trying again",
 					ie);
 		}
-		return client.getAlgorithms(refresh);
+		return _client.getAlgorithms(refresh);
 	}
 }
