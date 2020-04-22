@@ -27,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -86,7 +87,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	private String _currentlySelectedAlgorithm;
 	private LauncherDialogAlgorithmFactory _algoFac;
 	private String _baseRestURL;
-	public static boolean ALGORITHM_ENDPOINT_UPDATED;
+	public static AtomicBoolean ALGORITHM_ENDPOINT_UPDATED = new AtomicBoolean();
 
 	public LauncherDialog(AboutAlgorithmEditorPaneFactoryImpl aboutAlgoFac,
 			CustomParameterHelpJEditorPaneFactoryImpl customParamHelpFac,
@@ -113,7 +114,6 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		if (_algorithmList == null){
 			return false;
 		}
-		LauncherDialog.ALGORITHM_ENDPOINT_UPDATED = false;
 		_cards = new JPanel(new CardLayout());
 		_algorithmComboBox = new JComboBox();
 		
@@ -172,15 +172,16 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	}
 	
 	private boolean refreshAlgorithmsIfEndPointChanged(Component parentWindow){
-		if (ALGORITHM_ENDPOINT_UPDATED == true){
+		if (ALGORITHM_ENDPOINT_UPDATED.get() == true){
 			LOGGER.debug("CD Service rest endpoint changed. Updating algorithms");
 			_algorithmList = _algoFac.getAlgorithms(parentWindow, _algorithmType, true);
 			if (_algorithmList == null){
 				return false;
 			}
-			this.loadAlgorithmCards();
-			LauncherDialog.ALGORITHM_ENDPOINT_UPDATED = false;
+			LauncherDialog.ALGORITHM_ENDPOINT_UPDATED.set(false);
 		}
+		_algorithmList = _algoFac.getAlgorithms(parentWindow, _algorithmType, false);
+		this.loadAlgorithmCards();
 		return true;
 	}
 	

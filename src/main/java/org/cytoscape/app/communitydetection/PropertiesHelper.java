@@ -100,7 +100,7 @@ public class PropertiesHelper {
 	 */
 	public void setBaseurl(String baseurl) {
 		if (this.baseurl == null || baseurl == null || !this.baseurl.equals(baseurl)){
-			LauncherDialog.ALGORITHM_ENDPOINT_UPDATED = true;
+			LauncherDialog.ALGORITHM_ENDPOINT_UPDATED.set(true);
 		} 
 		this.baseurl = baseurl;
 	}

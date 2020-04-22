@@ -52,10 +52,12 @@ public class LauncherDialogAlgorithmFactoryImpl implements LauncherDialogAlgorit
 			}
 			return algorithms;
 		} catch(CDRestClientException ce){
+			LOGGER.info("Caught Exception, displaying GUI with error to user", ce);
 			_dialogUtil.showMessageDialog(parentWindow,
 					"Unable to get list of algorithms from service: " + ce.getMessage() + " : " +
 							(ce.getErrorResponse() == null ? "" : ce.getErrorResponse().asJson()));
 		} catch(IOException io){
+			LOGGER.info("Caught Exception, displaying GUI with error to user", io);
 			_dialogUtil.showMessageDialog(parentWindow,
 					"Unable to get list of algorithms from service: " + io.getMessage());
 		}
@@ -84,7 +86,6 @@ public class LauncherDialogAlgorithmFactoryImpl implements LauncherDialogAlgorit
 					+ "CD service, trying again",
 					ie);
 		}
-		return client.getAlgorithms(false);
+		return client.getAlgorithms(refresh);
 	}
-	
 }

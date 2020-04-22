@@ -51,7 +51,7 @@ public class PropertiesHelperTest {
 		assertEquals(5, ph.getSubmitRetryCount());
 		assertEquals(6, ph.getCommunityDetectionTimeoutMillis());
 		assertEquals(7, ph.getFunctionalEnrichmentTimeoutMillis());
-		assertEquals(true, LauncherDialog.ALGORITHM_ENDPOINT_UPDATED);
+		assertEquals(true, LauncherDialog.ALGORITHM_ENDPOINT_UPDATED.get());
 		
 		ph.setBaseurl(null);
 		assertEquals("", ph.getBaseurlHostNameOnly());
