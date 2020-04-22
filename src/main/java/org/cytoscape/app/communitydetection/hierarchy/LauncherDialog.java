@@ -164,8 +164,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		}
 		
 		add(masterPanel, BorderLayout.CENTER);
-		//Removing note from the dialog box
-		//add(this.getDisclaimerPanel(), BorderLayout.CENTER);
+		
 		_guiLoaded = true;
 		updateWeightColumnCombo(null);
 		return true;
@@ -211,30 +210,6 @@ public class LauncherDialog extends JPanel implements ItemListener {
             nodePanel.add(_allButton);
             nodePanel.add(_selectedButton);
 	    return nodePanel;
-	}
-
-	/**
-	 * Gets a panel to show the disclaimer text
-	 * @return JPanel with a label containing a disclaimer
-	 */
-	private JPanel getDisclaimerPanel(){
-		JPanel disclaimPanel = new JPanel();
-		disclaimPanel.setLayout(new GridBagLayout());
-		GridBagConstraints labelConstraints = new GridBagConstraints();
-		labelConstraints.gridy = 0;
-		labelConstraints.gridx = 0;
-		labelConstraints.anchor = GridBagConstraints.WEST;
-		labelConstraints.fill = GridBagConstraints.NONE;
-		labelConstraints.insets = new Insets(0, 0, 0, 0);
-		
-		JLabel expLabel = new JLabel("NOTE: This service is experimental");
-		Font expLabelFont = expLabel.getFont();
-		Font newFont = expLabelFont.deriveFont(expLabelFont.getStyle() | Font.BOLD,
-			expLabelFont.getSize2D() + EXPERIMENTAL_FONT_BOOST);
-		expLabel.setFont(newFont);
-		
-		disclaimPanel.add(expLabel, labelConstraints);
-		return disclaimPanel;
 	}
 
 	/**
@@ -386,9 +361,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	    int rowIndex = 1;
 	    for (CommunityDetectionAlgorithm cda : _algorithmList){
 		Map<String, CustomParameter> pMap = cda.getCustomParameterMap();
-		if (pMap == null){
-		    continue;
-		}
+		
 		JPanel algoCard = new JPanel();
 		algoCard.setName(cda.getName());
 		_algoCardMap.put(cda.getName(), algoCard);
@@ -397,51 +370,52 @@ public class LauncherDialog extends JPanel implements ItemListener {
 			    BorderFactory.createTitledBorder("Parameters"),
 			    BorderFactory.createEmptyBorder(5,5,5,5)));
 		_algorithmComboBox.addItem(cda.getDisplayName());
-		for (String key : pMap.keySet()){
-		    CustomParameter cp = pMap.get(key);
-		    JLabel paramLabel = new JLabel(cp.getDisplayName() + ":");
+		if (pMap != null){
+			for (String key : pMap.keySet()){
+				CustomParameter cp = pMap.get(key);
+				JLabel paramLabel = new JLabel(cp.getDisplayName() + ":");
 
-		    GridBagConstraints labelConstraints = new GridBagConstraints();
-		    labelConstraints.gridy = rowIndex;
-		    labelConstraints.gridx = 0;
-		    labelConstraints.weightx = 1.0;
-		    labelConstraints.anchor = GridBagConstraints.NORTHEAST;
-		    labelConstraints.insets = new Insets(5, 5, 0, 5);
-		    algoCard.add(paramLabel, labelConstraints);
+				GridBagConstraints labelConstraints = new GridBagConstraints();
+				labelConstraints.gridy = rowIndex;
+				labelConstraints.gridx = 0;
+				labelConstraints.weightx = 1.0;
+				labelConstraints.anchor = GridBagConstraints.NORTHEAST;
+				labelConstraints.insets = new Insets(5, 5, 0, 5);
+				algoCard.add(paramLabel, labelConstraints);
 
-		    JComponent inputComponent = getCustomParameterInput(cda.getName(), cp);
-		    if (cp.getDescription() != null){
-			inputComponent.setToolTipText(cp.getDescription());
-			paramLabel.setToolTipText(cp.getDescription());
-		    }
+				JComponent inputComponent = getCustomParameterInput(cda.getName(), cp);
+				if (cp.getDescription() != null){
+				inputComponent.setToolTipText(cp.getDescription());
+				paramLabel.setToolTipText(cp.getDescription());
+				}
 
-		    GridBagConstraints inputConstraints = new GridBagConstraints();
-		    inputConstraints.gridy = rowIndex;
-		    inputConstraints.gridx = 1;
-		    inputConstraints.gridwidth = 1;
-		    inputConstraints.weightx = 0.;
-		    inputConstraints.anchor = GridBagConstraints.LINE_START;
-		    inputConstraints.insets = new Insets(0, 0, 5, 0);
-		    inputConstraints.fill = GridBagConstraints.HORIZONTAL;
+				GridBagConstraints inputConstraints = new GridBagConstraints();
+				inputConstraints.gridy = rowIndex;
+				inputConstraints.gridx = 1;
+				inputConstraints.gridwidth = 1;
+				inputConstraints.weightx = 0.;
+				inputConstraints.anchor = GridBagConstraints.LINE_START;
+				inputConstraints.insets = new Insets(0, 0, 5, 0);
+				inputConstraints.fill = GridBagConstraints.HORIZONTAL;
 
-		    algoCard.add(inputComponent, inputConstraints);
+				algoCard.add(inputComponent, inputConstraints);
 
-		    GridBagConstraints infoConstraints = new GridBagConstraints();
-		    infoConstraints.gridy = rowIndex;
-		    infoConstraints.gridx = 2;
-		    infoConstraints.anchor = GridBagConstraints.NORTH;
-		    infoConstraints.insets = new Insets(5, 5, 5, 0);
-		    algoCard.add(getParameterInfoIcon(cp), infoConstraints);
+				GridBagConstraints infoConstraints = new GridBagConstraints();
+				infoConstraints.gridy = rowIndex;
+				infoConstraints.gridx = 2;
+				infoConstraints.anchor = GridBagConstraints.NORTH;
+				infoConstraints.insets = new Insets(5, 5, 5, 0);
+				algoCard.add(getParameterInfoIcon(cp), infoConstraints);
 
-		    rowIndex++;
+				rowIndex++;
+			}
+			GridBagConstraints resetConstraints = new GridBagConstraints();
+			resetConstraints.gridy = 0;
+			resetConstraints.gridx = 0;
+			resetConstraints.insets = new Insets(0, 5, 0, 0);
+			resetConstraints.anchor = GridBagConstraints.LINE_START;
+			algoCard.add(this.getResetButton(cda.getName()), resetConstraints);
 		}
-		GridBagConstraints resetConstraints = new GridBagConstraints();
-		resetConstraints.gridy = 0;
-		resetConstraints.gridx = 0;
-		resetConstraints.insets = new Insets(0, 5, 0, 0);
-		resetConstraints.anchor = GridBagConstraints.LINE_START;
-		algoCard.add(this.getResetButton(cda.getName()), resetConstraints);
-
 		_cards.add(algoCard, cda.getDisplayName());
 		this.resetAlgorithmToDefaults(cda.getName());
 	    }
@@ -690,9 +664,12 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	    }
 	    CommunityDetectionAlgorithm cda = getCommunityDetectionAlgorithm(algorithm);
 	    if (cda == null){
-		return;
+			return;
 	    }
 	    Map<String, CustomParameter> pMap = cda.getCustomParameterMap();
+		if (pMap == null){
+			return;
+		}
 	    JPanel algoCard = _algoCardMap.get(algorithm);
 	    for (Component c : algoCard.getComponents()){
 		if (c.getName() == null || !c.getName().startsWith(algorithm + INPUTDELIM)){
