@@ -3,6 +3,7 @@ package org.cytoscape.app.communitydetection.iquery;
 
 import java.awt.Component;
 import java.awt.Desktop;
+import java.awt.GraphicsEnvironment;
 import java.net.URI;
 import javax.swing.JFrame;
 import org.cytoscape.app.communitydetection.PropertiesHelper;
@@ -14,18 +15,19 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTable;
 import static org.junit.Assert.*;
+import static org.junit.Assume.*;
 import static org.mockito.Mockito.*;
 import org.junit.Test;
 import org.cytoscape.model.NetworkTestSupport;
 import org.cytoscape.view.model.CyNetworkView;
-import org.junit.Ignore;
 
 /**
  *
  * @author churas
  */
-@Ignore
 public class IQueryTaskFactoryImplTest {
+	
+	public static GraphicsEnvironment GE = GraphicsEnvironment.getLocalGraphicsEnvironment(); 
 	
 	@Test
 	public void testIsReadyNullNetwork(){
@@ -81,6 +83,8 @@ public class IQueryTaskFactoryImplTest {
 	
 	@Test
 	public void testIsReadyWithColumn(){
+		assumeFalse("Skipping test in headless mode", GE.isHeadlessInstance());
+
 		CySwingApplication mockApp = mock(CySwingApplication.class);
 		ShowDialogUtil mockDialog = mock(ShowDialogUtil.class);
 		CyNetworkView mockView = mock(CyNetworkView.class);
@@ -141,6 +145,8 @@ public class IQueryTaskFactoryImplTest {
 	
 	@Test
 	public void testCreateTaskIteratorDesktopBrowseRaisesException() throws Exception {
+		assumeFalse("Skipping test in headless mode", GE.isHeadlessInstance());
+		
 		PropertiesHelper.getInstance().setiQueryurl("http://foo.com");
 		CySwingApplication mockApp = mock(CySwingApplication.class);
 		when(mockApp.getJFrame()).thenReturn(new JFrame());
@@ -168,6 +174,8 @@ public class IQueryTaskFactoryImplTest {
 	
 	@Test
 	public void testCreateTaskIteratorURISyntaxException() throws Exception {
+		assumeFalse("Skipping test in headless mode", GE.isHeadlessInstance());
+
 		PropertiesHelper.getInstance().setiQueryurl("http://foo^");
 		CySwingApplication mockApp = mock(CySwingApplication.class);
 		when(mockApp.getJFrame()).thenReturn(new JFrame());
