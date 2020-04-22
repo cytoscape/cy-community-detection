@@ -109,4 +109,60 @@ public class LauncherDialogTest {
 		assertNotNull(cda);
 	}
 	
+	@Test
+	public void testCreateGUIFirstCallSuccessMultipleCreateGUICalls() throws Exception {
+		Component mockComponent = mock(Component.class);
+		ShowDialogUtil mockDialog = mock(ShowDialogUtil.class);
+		AboutAlgorithmEditorPaneFactoryImpl mockAbout = mock(AboutAlgorithmEditorPaneFactoryImpl.class);
+		CustomParameterHelpJEditorPaneFactoryImpl mockCustom = mock(CustomParameterHelpJEditorPaneFactoryImpl.class);
+		LauncherDialogAlgorithmFactory mockAlgoFac = mock(LauncherDialogAlgorithmFactory.class);
+		List<CommunityDetectionAlgorithm> cdaList = new ArrayList<>();
+		CommunityDetectionAlgorithm cda = new CommunityDetectionAlgorithm();
+		cda.setName("foo");
+		cda.setInputDataFormat(AppUtils.CD_ALGORITHM_INPUT_TYPE);
+		cda.setDescription("description");
+		cda.setDisplayName("displayname");
+		cdaList.add(cda);
+		
+		//This second algorithm list is returned after a refresh call
+		// and is an easy way to verify refresh is calling new endpoint
+		List<CommunityDetectionAlgorithm> cdaListTwo = new ArrayList<>();
+		CommunityDetectionAlgorithm cdaTwo = new CommunityDetectionAlgorithm();
+		cdaTwo.setName("foo");
+		cdaTwo.setInputDataFormat(AppUtils.CD_ALGORITHM_INPUT_TYPE);
+		cdaTwo.setDescription("description");
+		cdaTwo.setDisplayName("displayname");
+		cdaListTwo.add(cdaTwo);
+		HashSet<CustomParameter> custParams = new HashSet<>();
+		CustomParameter custTwo = new CustomParameter();
+		custTwo.setName("--custtwo");
+		custTwo.setDisplayName("custtwodisplay");
+		custTwo.setDescription("custtwodescription");
+		custTwo.setType("value");
+		custTwo.setDefaultValue("custtwodefault");
+		custParams.add(custTwo);
+		cdaTwo.setCustomParameters(custParams);
+		
+		
+		when(mockAlgoFac.getAlgorithms(mockComponent, AppUtils.CD_ALGORITHM_INPUT_TYPE, false)).thenReturn(cdaList, cdaList, cdaListTwo);
+		when(mockAlgoFac.getAlgorithms(mockComponent, AppUtils.CD_ALGORITHM_INPUT_TYPE, true)).thenReturn(cdaListTwo);
+		
+		LauncherDialog ld = new LauncherDialog(mockAbout, mockCustom,
+				mockAlgoFac, mockDialog,AppUtils.CD_ALGORITHM_INPUT_TYPE);
+		assertTrue(ld.createGUI(mockComponent));
+		Map<String, String> algoCustParams = ld.getAlgorithmCustomParameters("foo");
+		assertEquals(0, algoCustParams.size());
+		
+		// try refresh no update to REST url
+		assertTrue(ld.createGUI(mockComponent));
+		algoCustParams = ld.getAlgorithmCustomParameters("foo");
+		assertEquals(0, algoCustParams.size());
+		
+		//try refresh with CHANGED REST URL
+		LauncherDialog.ALGORITHM_ENDPOINT_UPDATED.set(true);
+		assertTrue(ld.createGUI(mockComponent));
+		algoCustParams = ld.getAlgorithmCustomParameters("foo");
+		assertEquals(1, algoCustParams.size());
+	}
+	
 }
