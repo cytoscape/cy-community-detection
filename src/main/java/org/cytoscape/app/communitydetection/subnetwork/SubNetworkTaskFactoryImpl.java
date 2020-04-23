@@ -16,6 +16,8 @@ import org.cytoscape.view.model.View;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of {@link NetworkViewTaskFactory} and
@@ -23,6 +25,8 @@ import org.cytoscape.work.TaskIterator;
  *
  */
 public class SubNetworkTaskFactoryImpl extends AbstractNodeViewTaskFactory implements NetworkViewTaskFactory {
+
+	private final static Logger LOGGER = LoggerFactory.getLogger(SubNetworkTaskFactoryImpl.class);
 
 	private final CyRootNetworkManager rootNetworkManager;
 	private final CyNetworkManager networkManager;
@@ -49,6 +53,31 @@ public class SubNetworkTaskFactoryImpl extends AbstractNodeViewTaskFactory imple
 
 	@Override
 	public TaskIterator createTaskIterator(CyNetworkView networkView) {
+		/*
+		CyNetwork hierarchyNetwork = networkView.getModel();
+		List<CyNetwork> parentNetworks =  _parentNetworkFinder.findParents(networkManager.getNetworks(), 
+		                                                                   hierarchyNetwork);
+		if (parentNetworks.size() == 1){
+			return new TaskIterator(
+				new SubNetworkTask(rootNetworkManager, networkManager, networkViewManager, networkViewFactory,
+						visualMappingManager, layoutManager, syncTaskManager, networkNaming, hierarchyNetwork, parentNetworks.get(0))));
+		} 
+		
+		int res = _parentNetworkChooserDialog.show(parentNetworks);
+		if (res == 0){
+			CyNetwork selectedParentNetwork = _parentNetworkChooserDialog.getSelection();
+			if (_parentNetworkChooserDialog.rememberChoice() == true){
+				updateHierarchySUID(hierarchyNetwork, selectedParentNetwork);
+			}
+			return new TaskIterator(
+				new SubNetworkTask(rootNetworkManager, networkManager, networkViewManager, networkViewFactory,
+						visualMappingManager, layoutManager, syncTaskManager, networkNaming, hierarchyNetwork, selectedParentNetwork)));
+
+		
+		// fail throw new exception
+		
+		*/
+		
 		return new TaskIterator(
 				new SubNetworkTask(rootNetworkManager, networkManager, networkViewManager, networkViewFactory,
 						visualMappingManager, layoutManager, syncTaskManager, networkNaming, networkView.getModel()));

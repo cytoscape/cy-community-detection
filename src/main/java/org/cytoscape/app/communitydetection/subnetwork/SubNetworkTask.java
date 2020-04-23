@@ -30,8 +30,12 @@ import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskMonitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SubNetworkTask extends AbstractTask {
+
+	private final static Logger LOGGER = LoggerFactory.getLogger(SubNetworkTask.class);
 
 	private final CyRootNetworkManager rootNetworkManager;
 	private final CyNetworkManager networkManager;
@@ -70,6 +74,9 @@ public class SubNetworkTask extends AbstractTask {
 				Long.class);
 		CyNetwork originalNetwork = networkManager.getNetwork(originalNetworkSUID);
 		if (originalNetwork == null) {
+			for (CyNetwork curNet : networkManager.getNetworkSet()){
+				LOGGER.info("Other network names: " + curNet.getRow(curNet).get(CyNetwork.NAME, String.class));
+			}
 			throw new Exception("No network found with SUID " + originalNetworkSUID);
 		}
 		CyNode communityNode = CyTableUtil.getSelectedNodes(hierarchyNetwork).get(0);

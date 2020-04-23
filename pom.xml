@@ -15,7 +15,7 @@
 		<osgi.api.version>6.0.0</osgi.api.version>
 		<jackson.version>2.10.1</jackson.version>
 		<jackson-databind.version>2.10.1</jackson-databind.version>
-
+                <communitydetection-rest-model.version>0.8.1-SNAPSHOT</communitydetection-rest-model.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -263,7 +263,7 @@
 		<dependency>
 			<groupId>org.ndexbio.communitydetection.rest.model</groupId>
 			<artifactId>communitydetection-rest-model</artifactId>
-			<version>0.8.0</version>
+			<version>${communitydetection-rest-model.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
