@@ -3,6 +3,7 @@
 [git]: https://git-scm.com/
 [make]: https://www.gnu.org/software/make
 [cytoscape]: https://cytoscape.org/
+[cdapsreadthedocs]: https://cdaps.readthedocs.io/en/latest/
 [directappinstall]: http://manual.cytoscape.org/en/stable/App_Manager.html#installing-apps
 [cd]: https://en.wikipedia.org/wiki/Hierarchical_clustering_of_networks
 [appstore]: http://apps.cytoscape.org/apps/cycommunitydetection
@@ -49,6 +50,13 @@ Requirements to build (for developers)
 * [Java][java] 8+ with jdk
 * [Maven][maven] 3.4 or above
 
+To build documentation
+
+* Make
+* Python 3+
+* Sphinx (install via `pip install sphinx`)
+* Sphinx rtd theme (install via `pip install sphinx_rtd_theme`)
+
 
 Building manually
 ====================
@@ -71,6 +79,26 @@ into [Cytoscape][cytoscape]
 Open Cytoscape and follow instructions [here][directappinstall] and click on
 **Install from File...** button to load the jar created above.
 
+
+Building documentation
+=========================
+
+Documentation is stored under `docs/` directory and
+uses Sphinx & Python to generate documentation that
+is auto uploaded from **master** branch to [Read the Docs][cdapsreadthedocs]
+
+```Bash
+# The clone and directory change can be
+# omitted if done above
+git clone https://github.com/cytoscape/cy-community-detection
+
+cd cy-community-detection
+make docs
+```
+Once `make docs` is run the documentation should automatically
+be displayed in default browser, but if not open `docs/_build/html/index.html` in
+a web browser
+ 
 COPYRIGHT AND LICENSE
 ========================
 
