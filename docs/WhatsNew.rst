@@ -1,7 +1,27 @@
 What's New
 ==========
 
-New in CyCommunityDetection
-----------------------------
+Version 1.10.0
+---------------------------
 
-* TODO
+* Added new menu option `App -> Community Detection -> Settings`
+  that lets caller easily change CDAPS REST server. UD-1066
+
+* Added message letting user know using weight
+  column in Community Detection dialog is an advanced
+  parameter. UD-988
+
+* In Community Detection dialog replaced **About** button
+  with info icon next to algorithm selection dropdown. UD-987
+
+Bug fixes
+
+* Fixed bug where changes to properties under
+  `Edit -> Properties -> CyCommunityDetection`
+  were not being loaded. UD-986
+
+
+Version 1.0
+------------------------
+
+* First release
