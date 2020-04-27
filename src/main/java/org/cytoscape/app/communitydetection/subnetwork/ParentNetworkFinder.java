@@ -1,7 +1,9 @@
 package org.cytoscape.app.communitydetection.subnetwork;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.model.CyNetwork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +16,10 @@ import org.slf4j.LoggerFactory;
 public class ParentNetworkFinder {
 	
 	private final static Logger LOGGER = LoggerFactory.getLogger(ParentNetworkFinder.class);
-
+	
+	public ParentNetworkFinder(){
+	}
+	
 	/**
 	 * Examines {@code allNetworks} for matching parent networks. It does this by looking
 	 * at {@link org.cytoscape.app.communitydetection.util.AppUtils#COLUMN_CD_ORIGINAL_NETWORK}
@@ -31,11 +36,86 @@ public class ParentNetworkFinder {
 	 * @param hierarchyNetwork
 	 * @return 
 	 */
-	List<CyNetwork> findParentNetworks(Set<CyNetwork> allNetworks, CyNetwork hierarchyNetwork){
-		/*
-		throw new Exception("Unable to find parent network with SUID: ### as noted in __originalnetwork"
-		                        + " and with name: ###");
-		*/
+	public List<CyNetwork> findParentNetworks(Set<CyNetwork> allNetworks, CyNetwork hierarchyNetwork) throws ParentNetworkFinderException {
+		if (hierarchyNetwork == null){
+			throw new ParentNetworkFinderException("Hierarchy network is null");
+		}
+		if (allNetworks == null){
+			throw new ParentNetworkFinderException("allNetworks is null");
+		}
+	
+		List<CyNetwork> suidParentNetworkInList = getParentNetworkBySUID(allNetworks,
+				                                                         hierarchyNetwork);
+		if (suidParentNetworkInList != null){
+			return suidParentNetworkInList;
+		}
+		return getAllOtherNetworks(allNetworks, hierarchyNetwork);
+	}
+	
+	/**
+	 * Iterate through all networks in {@code allNetworks} looking for the
+	 * network whose SUID matches the SUID in 
+	 * {@link org.cytoscape.app.communitydetection.util.AppUtils#COLUMN_CD_ORIGINAL_NETWORK}
+	 * column under the network table.
+	 * @param allNetworks all networks currently loaded in Cytoscape
+	 * @param hierarchyNetwork hierarchy network which should have the parent network SUID in
+	 *                         column mentioned above
+	 * @return Matching network in a list or {@code null} if unable to get SUID from {@code hierarchyNetwork} or
+	 *         if no networks i {@code allNetworks} have a matching SUID
+	 */
+	private List<CyNetwork> getParentNetworkBySUID(Set<CyNetwork> allNetworks,
+			CyNetwork hierarchyNetwork){
+		Long originalNetworkSUID = getSUIDFromOriginalNetworkField(hierarchyNetwork);
+		if (originalNetworkSUID == null){
+			return null;
+		}
+		for (CyNetwork curNet : allNetworks){
+			if (curNet.getSUID() != null && curNet.getSUID().equals(originalNetworkSUID)){
+				return createListAndAddNetwork(curNet);
+			}
+		}
 		return null;
 	}
+	
+	/**
+	 * Gets all other networks currently loaded in Cytoscape
+	 * @param allNetworks all networks currently loaded in Cytoscape
+	 * @param hierarchyNetwork hierarchy network which should have the parent network name
+	 *                         in prov:wasGeneratedBy column mentioned above
+	 * @return Matching networks if found or null if none found.
+	 */
+	private List<CyNetwork> getAllOtherNetworks(Set<CyNetwork> allNetworks,
+			CyNetwork hierarchyNetwork){
+
+		List<CyNetwork> allNetworksMinusHierarchy = new ArrayList<>();
+		for (CyNetwork curNet: allNetworks){
+			if (curNet.getSUID().equals(hierarchyNetwork.getSUID())){
+				continue;
+			}
+			allNetworksMinusHierarchy.add(curNet);
+		}
+		return allNetworksMinusHierarchy;
+	}
+	
+	/**
+	 * Simple helper method that takes a network and puts it in a list
+	 * @param network
+	 * @return 
+	 */
+	private List<CyNetwork> createListAndAddNetwork(CyNetwork network){
+		List<CyNetwork> parentNetInList = new ArrayList<>();
+		parentNetInList.add(network);
+		return parentNetInList;
+	}
+
+	/**
+	 * Gets SUID of network passed in
+	 * @param network
+	 * @return 
+	 */
+	private Long getSUIDFromOriginalNetworkField(CyNetwork network){
+		return network.getRow(network).get(AppUtils.COLUMN_CD_ORIGINAL_NETWORK,
+				Long.class);
+	}
+	
 }

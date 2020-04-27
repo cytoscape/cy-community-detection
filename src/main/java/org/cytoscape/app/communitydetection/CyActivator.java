@@ -19,10 +19,13 @@ import org.cytoscape.app.communitydetection.hierarchy.LauncherDialog;
 import org.cytoscape.app.communitydetection.hierarchy.LauncherDialogAlgorithmFactoryImpl;
 import org.cytoscape.app.communitydetection.iquery.IQueryTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.rest.CDRestClient;
+import org.cytoscape.app.communitydetection.subnetwork.ParentNetworkChooserDialog;
+import org.cytoscape.app.communitydetection.subnetwork.ParentNetworkFinder;
 import org.cytoscape.app.communitydetection.subnetwork.SubNetworkTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.termmap.NetworkTermMappingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.termmap.NodeTermMapppingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.util.AppUtils;
+import org.cytoscape.app.communitydetection.util.IconJLabelDialogFactory;
 import org.cytoscape.app.communitydetection.util.ImageIconHolderFactory;
 import org.cytoscape.app.communitydetection.util.ShowDialogUtil;
 import org.cytoscape.application.swing.CySwingApplication;
@@ -81,8 +84,11 @@ public class CyActivator extends AbstractCyActivator {
 		CyProperty<Properties> cyProperties = loadPropertyReaderService(bc);
 		
 		ShowDialogUtil dialogUtil = new ShowDialogUtil();
-		ImageIconHolderFactory iconFactory = new ImageIconHolderFactory();
+		ImageIconHolderFactory iconHolderFactory = new ImageIconHolderFactory();
 		JEditorPaneFactoryImpl editorPaneFac = new JEditorPaneFactoryImpl();
+		IconJLabelDialogFactory iconJLabelFactory = new IconJLabelDialogFactory(dialogUtil,
+				iconHolderFactory, editorPaneFac);
+
 		AboutAlgorithmEditorPaneFactoryImpl aboutAlgoFac = new AboutAlgorithmEditorPaneFactoryImpl(editorPaneFac);
 		CustomParameterHelpJEditorPaneFactoryImpl customHelpParameterFac = new CustomParameterHelpJEditorPaneFactoryImpl(editorPaneFac);
 		LauncherDialogAlgorithmFactoryImpl algoFac = new LauncherDialogAlgorithmFactoryImpl(CDRestClient.getInstance(), dialogUtil);
@@ -118,7 +124,7 @@ public class CyActivator extends AbstractCyActivator {
 		settingsProps.setProperty(MENU_GRAVITY, "3.0");
 		settingsProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
 		settingsProps.setProperty(TITLE, "Settings");
-		SettingsDialog settingsDialog = new SettingsDialog(dialogUtil, editorPaneFac, iconFactory,
+		SettingsDialog settingsDialog = new SettingsDialog(iconJLabelFactory,
 		                                                   PropertiesHelper.getInstance());
 		registerAllServices(bc, new SettingsTaskFactoryImpl(swingApplication, settingsDialog, dialogUtil, cyProperties), settingsProps);
 		
@@ -130,7 +136,9 @@ public class CyActivator extends AbstractCyActivator {
 		aboutProps.setProperty(TITLE, "About");
 		registerAllServices(bc, new AboutTaskFactoryImpl(swingApplication, editorPaneFac, dialogUtil), aboutProps);
 		
-                // add View Interactions for this Community in context menu
+		ParentNetworkFinder parentNetworkFinder = new ParentNetworkFinder();
+		ParentNetworkChooserDialog parentNetworkDialog = new ParentNetworkChooserDialog(iconJLabelFactory);
+        // add View Interactions for this Community in context menu
 		// displayed when user right clicks on a node
 		Properties contextMenuProps = new Properties();
 		contextMenuProps.setProperty(PREFERRED_MENU, AppUtils.CONTEXT_MENU_CD);
@@ -138,7 +146,8 @@ public class CyActivator extends AbstractCyActivator {
 		contextMenuProps.setProperty(TITLE, "View Interactions for Selected Node");
 		contextMenuProps.put(IN_MENU_BAR, false);
 		contextMenuProps.put(IN_CONTEXT_MENU, true);
-		SubNetworkTaskFactoryImpl subnetworkfactoryImpl = new SubNetworkTaskFactoryImpl(rootNetworkManager,
+		SubNetworkTaskFactoryImpl subnetworkfactoryImpl = new SubNetworkTaskFactoryImpl(swingApplication, dialogUtil, parentNetworkFinder,
+				parentNetworkDialog, rootNetworkManager,
 				networkManager, networkViewManager, networkViewFactory, visualMappingManager, layoutAlgorithmManager,
 				syncTaskManager, networkNaming);
 		registerAllServices(bc, subnetworkfactoryImpl, contextMenuProps);

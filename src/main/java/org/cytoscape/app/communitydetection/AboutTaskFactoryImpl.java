@@ -64,7 +64,7 @@ public class AboutTaskFactoryImpl implements NetworkTaskFactory {
 	sb.append("for annotation of<br/>community nodes to gain ");
 	sb.append("biological insight.<br/><br/>");
 	sb.append("<b>NOTE:</b> This service is experimental. The interface is subject to change.<br/><br/>");
-	sb.append("<a href=\"https://github.com/idekerlab/cy-community-detection\">Click here for details and to report issues</a>");
+	sb.append("<a href=\"https://cdaps.readthedocs.io\">Click here for details and to report issues</a>");
 	
 	_editorPane = _editorPaneFactory.getDescriptionFrame(sb.toString());
     }

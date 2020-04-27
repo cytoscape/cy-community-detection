@@ -17,6 +17,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import org.cytoscape.app.communitydetection.subnetwork.ParentNetworkChooserDialog;
+import org.cytoscape.app.communitydetection.util.IconJLabelDialogFactory;
 import org.cytoscape.app.communitydetection.util.JEditorPaneFactory;
 import org.cytoscape.app.communitydetection.util.ImageIconHolder;
 import org.cytoscape.app.communitydetection.util.ImageIconHolderFactory;
@@ -36,12 +38,9 @@ public class SettingsDialog extends JPanel {
 
 	private final static Logger LOGGER = LoggerFactory.getLogger(SettingsDialog.class);
 	private boolean _guiLoaded;
-	private ShowDialogUtil _dialogUtil;
-	private ImageIconHolderFactory _iconFactory;
-	private JEditorPaneFactory _editorPaneFactory;
+	private IconJLabelDialogFactory _iconFactory;
 	private JLabel _restUrlIcon;
 	private JTextField _restUrlTextField;
-	private ImageIconHolder _iconHolder;
 	private PropertiesHelper _pHelper;
 	private final static String REST_URL_LABEL_TEXT = "REST Server (app.baseurl)";
 	
@@ -62,18 +61,14 @@ public class SettingsDialog extends JPanel {
 	
 	/**
 	 * Constructor 
-	 * @param dialogUtil Used to display dialogs to user
-	 * @param editorPaneFactory Factory to get JEditorPane to display html text to user
 	 * @param iconFactory Factory to get icons needed by this dialog
 	 * @param pHelper Instance of PropertiesHelper
 	 */
-	public SettingsDialog(ShowDialogUtil dialogUtil, JEditorPaneFactory editorPaneFactory,
-			ImageIconHolderFactory iconFactory, PropertiesHelper pHelper){
+	public SettingsDialog(IconJLabelDialogFactory iconFactory, PropertiesHelper pHelper){
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		this._dialogUtil = dialogUtil;
-		this._editorPaneFactory = editorPaneFactory;
-		this._iconFactory = iconFactory;
+
 		_guiLoaded = false;
+		_iconFactory = iconFactory;
 		_pHelper = pHelper;
 	}
 
@@ -155,63 +150,13 @@ public class SettingsDialog extends JPanel {
 	 * @return 
 	 * @throws IOException 
 	 */
-	private JLabel getRestUrlIcon() {
-		_iconHolder = this._iconFactory.getImageIconHolder("info_icon","png", 20, 40);
-		JLabel restUrlLabel = new JLabel(_iconHolder.getSmallIcon(), JLabel.CENTER);
+	private JLabel getRestUrlIcon(){
+		JLabel restUrlLabel = _iconFactory.getJLabelIcon(this,"info_icon", "png",
+				SettingsDialog.REST_URL_LABEL_TEXT + " setting", 
+				REST_URL_MESSAGE, 20, 40);
 		restUrlLabel.setName("restURLIcon");
 		restUrlLabel.setToolTipText(REST_URL_MESSAGE_TOOLTIP); 
-
-		restUrlLabel.addKeyListener(new KeyListener() {
-
-			@Override
-			public void keyTyped(KeyEvent e) {
-			}
-			
-			@Override
-			public void keyReleased(KeyEvent e) {
-				showInputInfoDialog(REST_URL_MESSAGE);
-			}
-			
-			@Override
-			public void keyPressed(KeyEvent e) {
-			}
-		});
-
-		restUrlLabel.addMouseListener(new MouseListener() {
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-			}
-			
-			@Override
-			public void mousePressed(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				showInputInfoDialog(REST_URL_MESSAGE);
-			}
-		});
-
-		return restUrlLabel;
-	}
 	
-	/**
-	 * Displays info dialog describing REST URL setting
-	 * @param message 
-	 */
-	private void showInputInfoDialog(final String message){
-		_dialogUtil.showMessageDialog(getParent(), _editorPaneFactory.getDescriptionFrame(message),
-					SettingsDialog.REST_URL_LABEL_TEXT + " setting",
-					JOptionPane.INFORMATION_MESSAGE,
-					_iconHolder.getLargeIcon());
+		return restUrlLabel;
 	}
 }

@@ -1,6 +1,12 @@
 package org.cytoscape.app.communitydetection.subnetwork;
 
+import java.util.List;
+import javax.swing.JOptionPane;
+import org.cytoscape.app.communitydetection.DoNothingTask;
 import org.cytoscape.app.communitydetection.util.AppUtils;
+import org.cytoscape.app.communitydetection.util.ShowDialogUtil;
+import org.cytoscape.application.swing.CySwingApplication;
+import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTableUtil;
@@ -28,6 +34,8 @@ public class SubNetworkTaskFactoryImpl extends AbstractNodeViewTaskFactory imple
 
 	private final static Logger LOGGER = LoggerFactory.getLogger(SubNetworkTaskFactoryImpl.class);
 
+	private CySwingApplication _swingApplication;
+	private ShowDialogUtil _dialogUtil;
 	private final CyRootNetworkManager rootNetworkManager;
 	private final CyNetworkManager networkManager;
 	private final CyNetworkViewManager networkViewManager;
@@ -36,8 +44,12 @@ public class SubNetworkTaskFactoryImpl extends AbstractNodeViewTaskFactory imple
 	private final CyLayoutAlgorithmManager layoutManager;
 	private final SynchronousTaskManager<?> syncTaskManager;
 	private final CyNetworkNaming networkNaming;
+	private ParentNetworkFinder _parentNetworkFinder;
+	private ParentNetworkChooserDialog _parentNetworkDialog;
 
-	public SubNetworkTaskFactoryImpl(CyRootNetworkManager rootNetworkManager, CyNetworkManager networkManager,
+	public SubNetworkTaskFactoryImpl(CySwingApplication swingApplication, ShowDialogUtil dialogUtil,
+			ParentNetworkFinder parentNetworkFinder, ParentNetworkChooserDialog parentNetworkDialog,
+			CyRootNetworkManager rootNetworkManager, CyNetworkManager networkManager,
 			CyNetworkViewManager networkViewManager, CyNetworkViewFactory networkViewFactory,
 			VisualMappingManager visualMappingManager, CyLayoutAlgorithmManager layoutManager,
 			SynchronousTaskManager<?> syncTaskManager, CyNetworkNaming networkNaming) {
@@ -49,38 +61,54 @@ public class SubNetworkTaskFactoryImpl extends AbstractNodeViewTaskFactory imple
 		this.layoutManager = layoutManager;
 		this.syncTaskManager = syncTaskManager;
 		this.networkNaming = networkNaming;
+		
+		this._parentNetworkFinder = parentNetworkFinder;
+		this._parentNetworkDialog = parentNetworkDialog;
+		this._dialogUtil = dialogUtil;
+		this._swingApplication = swingApplication;
 	}
 
 	@Override
 	public TaskIterator createTaskIterator(CyNetworkView networkView) {
-		/*
+		
 		CyNetwork hierarchyNetwork = networkView.getModel();
-		List<CyNetwork> parentNetworks =  _parentNetworkFinder.findParents(networkManager.getNetworks(), 
-		                                                                   hierarchyNetwork);
-		if (parentNetworks.size() == 1){
-			return new TaskIterator(
-				new SubNetworkTask(rootNetworkManager, networkManager, networkViewManager, networkViewFactory,
-						visualMappingManager, layoutManager, syncTaskManager, networkNaming, hierarchyNetwork, parentNetworks.get(0))));
-		} 
-		
-		int res = _parentNetworkChooserDialog.show(parentNetworks);
-		if (res == 0){
-			CyNetwork selectedParentNetwork = _parentNetworkChooserDialog.getSelection();
-			if (_parentNetworkChooserDialog.rememberChoice() == true){
-				updateHierarchySUID(hierarchyNetwork, selectedParentNetwork);
-			}
-			return new TaskIterator(
-				new SubNetworkTask(rootNetworkManager, networkManager, networkViewManager, networkViewFactory,
-						visualMappingManager, layoutManager, syncTaskManager, networkNaming, hierarchyNetwork, selectedParentNetwork)));
+		try {
+			List<CyNetwork> parentNetworks =  _parentNetworkFinder.findParentNetworks(networkManager.getNetworkSet(), 
+			                                                                          hierarchyNetwork);
+			if (parentNetworks.size() == 1){
+				return new TaskIterator(
+					new SubNetworkTask(rootNetworkManager, networkManager, networkViewManager, networkViewFactory,
+							visualMappingManager, layoutManager, syncTaskManager, networkNaming, hierarchyNetwork, parentNetworks.get(0)));
+			} 
 
+			if (_parentNetworkDialog.createGUI(parentNetworks) == false){
+				LOGGER.error("ParentNetworkChooserDialog.createGUI() returned false");
+				return new TaskIterator(new DoNothingTask());
+			}
+			Object[] options = {AppUtils.UPDATE, AppUtils.CANCEL};
+			int res = _dialogUtil.showOptionDialog(_swingApplication.getJFrame(),
+				                               this._parentNetworkDialog,
+									"Parent Network Chooser",
+									JOptionPane.YES_NO_OPTION,
+									JOptionPane.PLAIN_MESSAGE, 
+									null, 
+									options,
+									options[0]);
+			if (res == 0){
+				CyNetwork selectedParentNetwork = _parentNetworkDialog.getSelection();
+				if (_parentNetworkDialog.rememberChoice() == true){
+					updateHierarchySUID(hierarchyNetwork, selectedParentNetwork);
+				}
+				return new TaskIterator(
+					new SubNetworkTask(rootNetworkManager, networkManager, networkViewManager, networkViewFactory,
+							visualMappingManager, layoutManager, syncTaskManager, networkNaming, hierarchyNetwork, selectedParentNetwork));
+			}
+		}
+		catch(ParentNetworkFinderException pe){
+			LOGGER.error("Caught exception trying to find parent network", pe);
+		}
 		
-		// fail throw new exception
-		
-		*/
-		
-		return new TaskIterator(
-				new SubNetworkTask(rootNetworkManager, networkManager, networkViewManager, networkViewFactory,
-						visualMappingManager, layoutManager, syncTaskManager, networkNaming, networkView.getModel()));
+		return new TaskIterator(new DoNothingTask());
 	}
 
 	@Override
@@ -106,5 +134,19 @@ public class SubNetworkTaskFactoryImpl extends AbstractNodeViewTaskFactory imple
 	@Override
 	public boolean isReady(View<CyNode> nodeView, CyNetworkView networkView) {
 		return this.isReady(networkView);
+	}
+	
+	/**
+	 * Updates 
+	 * {@link org.cytoscape.app.communitydetection.util.AppUtils#COLUMN_CD_ORIGINAL_NETWORK}
+	 * network attribute in {@code hierarchyNetwork} with SUID of
+	 * {@code selectedParentNetwork}
+	 * 
+	 * @param hierarchyNetwork hierarchy network to update
+	 * @param selectedParentNetwork parent network
+	 */
+	private void updateHierarchySUID(CyNetwork hierarchyNetwork, CyNetwork selectedParentNetwork){
+		hierarchyNetwork.getRow(hierarchyNetwork).set(AppUtils.COLUMN_CD_ORIGINAL_NETWORK,
+				selectedParentNetwork.getSUID());
 	}
 }

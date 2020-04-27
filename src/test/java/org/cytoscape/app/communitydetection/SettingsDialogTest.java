@@ -6,6 +6,7 @@ import java.awt.event.MouseListener;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import org.cytoscape.app.communitydetection.util.IconJLabelDialogFactory;
 import org.cytoscape.app.communitydetection.util.ImageIconHolderFactory;
 import org.cytoscape.app.communitydetection.util.JEditorPaneFactory;
 import org.cytoscape.app.communitydetection.util.ShowDialogUtil;
@@ -21,7 +22,7 @@ public class SettingsDialogTest {
 	
 	@Test
 	public void testGetBaseurlBeforeGUICreated(){
-		SettingsDialog sd = new SettingsDialog(null, null, null, null);
+		SettingsDialog sd = new SettingsDialog(null, null);
 		assertNull(sd.getBaseurl());
 	}
 	
@@ -30,15 +31,15 @@ public class SettingsDialogTest {
 		ImageIconHolderFactory ifac = new ImageIconHolderFactory();
 		ShowDialogUtil mockDialogUtil = mock(ShowDialogUtil.class);
 		JEditorPaneFactory mockJEditorPaneFactory = mock(JEditorPaneFactory.class);
+		IconJLabelDialogFactory iconFac = new IconJLabelDialogFactory(mockDialogUtil,
+				ifac, mockJEditorPaneFactory);
 		PropertiesHelper mockPropertiesHelper = mock(PropertiesHelper.class);
 		when(mockPropertiesHelper.getBaseurlHostNameOnly()).thenReturn("foo.com", "blah.com");
-		SettingsDialog sd = new SettingsDialog(mockDialogUtil,
-				mockJEditorPaneFactory, ifac, mockPropertiesHelper);
+
+		SettingsDialog sd = new SettingsDialog(iconFac, mockPropertiesHelper);
 		assertTrue(sd.createGUI());
 
 		assertEquals("foo.com", sd.getBaseurl());
-
-		
 		
 		// simple check to verify GUI hasnt changed
 		assertEquals(1, sd.getComponentCount());

@@ -47,11 +47,12 @@ public class SubNetworkTask extends AbstractTask {
 	private final CyNetworkNaming networkNaming;
 
 	private final CyNetwork hierarchyNetwork;
+	private final CyNetwork parentNetwork;
 
 	public SubNetworkTask(CyRootNetworkManager rootNetworkManager, CyNetworkManager networkManager,
 			CyNetworkViewManager networkViewManager, CyNetworkViewFactory networkViewFactory,
 			VisualMappingManager visualMappingManager, CyLayoutAlgorithmManager layoutManager,
-			SynchronousTaskManager<?> syncTaskManager, CyNetworkNaming networkNaming, CyNetwork hierarchyNetwork) {
+			SynchronousTaskManager<?> syncTaskManager, CyNetworkNaming networkNaming, CyNetwork hierarchyNetwork, CyNetwork parentNetwork) {
 		this.rootNetworkManager = rootNetworkManager;
 		this.networkManager = networkManager;
 		this.networkViewManager = networkViewManager;
@@ -61,6 +62,7 @@ public class SubNetworkTask extends AbstractTask {
 		this.syncTaskManager = syncTaskManager;
 		this.networkNaming = networkNaming;
 		this.hierarchyNetwork = hierarchyNetwork;
+		this.parentNetwork = parentNetwork;
 	}
 
 	@Override
@@ -70,34 +72,26 @@ public class SubNetworkTask extends AbstractTask {
 		}
 		taskMonitor.setTitle("Community Detection: Creating Subnetwork");
 		taskMonitor.setProgress(0.0);
-		Long originalNetworkSUID = hierarchyNetwork.getRow(hierarchyNetwork).get(AppUtils.COLUMN_CD_ORIGINAL_NETWORK,
-				Long.class);
-		CyNetwork originalNetwork = networkManager.getNetwork(originalNetworkSUID);
-		if (originalNetwork == null) {
-			for (CyNetwork curNet : networkManager.getNetworkSet()){
-				LOGGER.info("Other network names: " + curNet.getRow(curNet).get(CyNetwork.NAME, String.class));
-			}
-			throw new Exception("No network found with SUID " + originalNetworkSUID);
-		}
+		
 		CyNode communityNode = CyTableUtil.getSelectedNodes(hierarchyNetwork).get(0);
-		Set<CyNode> leafNodes = getMemberList(originalNetwork, communityNode);
-		Set<CyEdge> connectingEdges = getEdges(originalNetwork, leafNodes);
+		Set<CyNode> leafNodes = getMemberList(parentNetwork, communityNode);
+		Set<CyEdge> connectingEdges = getEdges(parentNetwork, leafNodes);
 		if (cancelled) {
 			return;
 		}
 		taskMonitor.setProgress(0.2);
 
-		CySubNetwork newNetwork = rootNetworkManager.getRootNetwork(originalNetwork).addSubNetwork();
+		CySubNetwork newNetwork = rootNetworkManager.getRootNetwork(parentNetwork).addSubNetwork();
 
 		String newNetworkName = hierarchyNetwork.getRow(communityNode).get(CyNetwork.NAME, String.class) + "_"
-				+ originalNetwork.getRow(originalNetwork).get(CyNetwork.NAME, String.class);
+				+ parentNetwork.getRow(parentNetwork).get(CyNetwork.NAME, String.class);
 		newNetwork.getRow(newNetwork).set(CyNetwork.NAME, networkNaming.getSuggestedNetworkTitle(newNetworkName));
 
-		addColumns(originalNetwork.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS),
+		addColumns(parentNetwork.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS),
 				newNetwork.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS));
-		addColumns(originalNetwork.getTable(CyEdge.class, CyNetwork.LOCAL_ATTRS),
+		addColumns(parentNetwork.getTable(CyEdge.class, CyNetwork.LOCAL_ATTRS),
 				newNetwork.getTable(CyEdge.class, CyNetwork.LOCAL_ATTRS));
-		addColumns(originalNetwork.getTable(CyNetwork.class, CyNetwork.LOCAL_ATTRS),
+		addColumns(parentNetwork.getTable(CyNetwork.class, CyNetwork.LOCAL_ATTRS),
 				newNetwork.getTable(CyNetwork.class, CyNetwork.LOCAL_ATTRS));
 		taskMonitor.setProgress(0.4);
 		if (cancelled) {
@@ -106,12 +100,12 @@ public class SubNetworkTask extends AbstractTask {
 
 		for (final CyNode node : leafNodes) {
 			newNetwork.addNode(node);
-			cloneRow(originalNetwork.getRow(node), newNetwork.getRow(node));
+			cloneRow(parentNetwork.getRow(node), newNetwork.getRow(node));
 			newNetwork.getRow(node).set(CyNetwork.SELECTED, false);
 		}
 		for (final CyEdge edge : connectingEdges) {
 			newNetwork.addEdge(edge);
-			cloneRow(originalNetwork.getRow(edge), newNetwork.getRow(edge));
+			cloneRow(parentNetwork.getRow(edge), newNetwork.getRow(edge));
 			newNetwork.getRow(edge).set(CyNetwork.SELECTED, false);
 		}
 		networkManager.addNetwork(newNetwork);
@@ -121,7 +115,7 @@ public class SubNetworkTask extends AbstractTask {
 		}
 
 		CyNetworkView originalNetworkView = null;
-		for (CyNetworkView netView : networkViewManager.getNetworkViews(originalNetwork)) {
+		for (CyNetworkView netView : networkViewManager.getNetworkViews(parentNetwork)) {
 			originalNetworkView = netView;
 			break;
 		}

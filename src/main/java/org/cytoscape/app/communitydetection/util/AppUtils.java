@@ -34,6 +34,7 @@ public class AppUtils {
 	public final static String COLUMN_DESCRIPTION = "description";
 	public final static String COLUMN_DERIVED_FROM = "prov:wasDerivedFrom";
 	public final static String COLUMN_GENERATED_BY = "prov:wasGeneratedBy";
+	public final static String COLUMN_NDEX_UUID_HIDDEN = "NDEx UUID";
 	public final static String COLUMN_CD_MEMBER_LIST = "CD_MemberList";
 	public final static String COLUMN_CD_MEMBER_LIST_SIZE = "CD_MemberList_Size";
 	public final static String COLUMN_CD_MEMBER_LIST_LOG_SIZE = "CD_MemberList_LogSize";
