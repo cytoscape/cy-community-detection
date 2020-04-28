@@ -75,7 +75,7 @@ public class SubNetworkTaskFactoryImpl extends AbstractNodeViewTaskFactory imple
 		try {
 			List<CyNetwork> parentNetworks =  _parentNetworkFinder.findParentNetworks(networkManager.getNetworkSet(), 
 			                                                                          hierarchyNetwork);
-			if (parentNetworks.size() == 1){
+			if (parentNetworks != null && parentNetworks.size() == 1){
 				return new TaskIterator(
 					new SubNetworkTask(rootNetworkManager, networkManager, networkViewManager, networkViewFactory,
 							visualMappingManager, layoutManager, syncTaskManager, networkNaming, hierarchyNetwork, parentNetworks.get(0)));
@@ -114,7 +114,9 @@ public class SubNetworkTaskFactoryImpl extends AbstractNodeViewTaskFactory imple
 	@Override
 	public boolean isReady(CyNetworkView networkView) {
 		if (networkView != null && networkView.getModel() != null) {
-			if (CyTableUtil.getSelectedNodes(networkView.getModel()).size() != 1) {
+			CyNetwork network = networkView.getModel();
+			List<CyNode> selectedNodes = CyTableUtil.getSelectedNodes(network);
+			if (selectedNodes == null || selectedNodes.size() != 1) {
 				return false;
 			}
 			if (networkView.getModel().getDefaultNetworkTable()
