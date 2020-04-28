@@ -67,6 +67,7 @@ public class ParentNetworkFinder {
 			CyNetwork hierarchyNetwork){
 		Long originalNetworkSUID = getSUIDFromOriginalNetworkField(hierarchyNetwork);
 		if (originalNetworkSUID == null){
+			LOGGER.error("This is odd, hierarchy network SUID is null");
 			return null;
 		}
 		for (CyNetwork curNet : allNetworks){
@@ -74,6 +75,7 @@ public class ParentNetworkFinder {
 				return createListAndAddNetwork(curNet);
 			}
 		}
+		LOGGER.debug("No suitable parent networks found");
 		return null;
 	}
 	
