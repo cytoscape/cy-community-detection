@@ -63,16 +63,18 @@ public class ParentNetworkChooserDialog extends JPanel{
 	 */
 	public boolean createGUI(List<CyNetwork> networks) {
 	    if (_guiLoaded == false){
-			this.add(getChooserPanel());
 			_networkMap = new HashMap<>();
+			this.add(getChooserPanel());
 			_guiLoaded = true;
 	    }
 		_comboBox.removeAllItems();
 		_networkMap.clear();
-		for (CyNetwork curNet: networks){
-			String netLabel = getNetworkName(curNet);
-			_networkMap.put(netLabel, curNet);
-			_comboBox.addItem(netLabel);
+		if (networks != null){
+			for (CyNetwork curNet: networks){
+				String netLabel = getNetworkName(curNet);
+				_networkMap.put(netLabel, curNet);
+				_comboBox.addItem(netLabel);
+			}
 		}
 		return true;
 	}
@@ -83,9 +85,6 @@ public class ParentNetworkChooserDialog extends JPanel{
 	 */
 	public CyNetwork getSelection(){
 		if (_comboBox == null){
-			return null;
-		}
-		if (_networkMap == null){
 			return null;
 		}
 		return _networkMap.get((String)_comboBox.getSelectedItem());
@@ -121,6 +120,7 @@ public class ParentNetworkChooserDialog extends JPanel{
 	private JPanel getChooserPanel(){
 	    
 	    JPanel chooserPanel = new JPanel();
+		chooserPanel.setName("chooserPanel");
 		chooserPanel.setLayout(new GridBagLayout());
 		chooserPanel.setBorder(BorderFactory.createCompoundBorder(
 			    BorderFactory.createTitledBorder("Parent network Chooser"),
@@ -140,6 +140,7 @@ public class ParentNetworkChooserDialog extends JPanel{
 		comboConstraints.insets = new Insets(0, 0, 5, 0);
 
 		_comboBox = new JComboBox();
+		_comboBox.setName("comboBox");
 
 		chooserPanel.add(_comboBox, comboConstraints);
 
@@ -156,6 +157,7 @@ public class ParentNetworkChooserDialog extends JPanel{
 		rememberConstraints.anchor = GridBagConstraints.LINE_END;
 		rememberConstraints.insets = new Insets(0, 5, 0, 0);
 		_rememberCheckBox = new JCheckBox(REMEMBER_TEXT);
+		_rememberCheckBox.setName("rememberCheckBox");
 		_rememberCheckBox.setSelected(true);
 		_rememberCheckBox.setToolTipText(REMEMBER_TOOLTIP);
 		chooserPanel.add(_rememberCheckBox, rememberConstraints);
