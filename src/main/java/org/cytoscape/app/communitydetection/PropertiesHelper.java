@@ -1,7 +1,10 @@
 package org.cytoscape.app.communitydetection;
 
+import java.util.HashSet;
 import java.util.Properties;
-import org.cytoscape.app.communitydetection.hierarchy.LauncherDialog;
+import java.util.Set;
+import org.cytoscape.app.communitydetection.event.BaseurlUpdatedEvent;
+import org.cytoscape.app.communitydetection.event.BaseurlUpdatedListener;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +29,10 @@ public class PropertiesHelper {
 	private int communityDetectionTimeoutMillis;
 	private int functionalEnrichmentTimeoutMillis;
 	private int submitRetryCount;
+	private Set<BaseurlUpdatedListener> baseurlUpdatedListeners;
 
 	private PropertiesHelper() {
+		baseurlUpdatedListeners = new HashSet<>();
 	}
 
 	private static class SingletonHelper {
@@ -92,15 +97,18 @@ public class PropertiesHelper {
 	}
 	
 	/**
-	 * Sets REST endpoint for CD Service and sets
-	 * LauncherDialog.ALGORITHM_ENDPOINT_UPDATED to true if previous
+	 * Sets REST endpoint for CD Service and notifies
+	 * any BaseurlUpdatedListeners if previous
 	 * or new baseurl is null or if the previous value is different then
 	 * the current
 	 * @param baseurl 
 	 */
 	public void setBaseurl(String baseurl) {
 		if (this.baseurl == null || baseurl == null || !this.baseurl.equals(baseurl)){
-			LauncherDialog.ALGORITHM_ENDPOINT_UPDATED.set(true);
+			BaseurlUpdatedEvent event = new BaseurlUpdatedEvent(this.baseurl, baseurl);
+			baseurlUpdatedListeners.forEach((listener) -> {
+				listener.urlUpdatedEvent(event);
+			});
 		} 
 		this.baseurl = baseurl;
 	}
@@ -222,6 +230,40 @@ public class PropertiesHelper {
 		this.appVersion = appVersion;
 	}
 	
+	/**
+	 * Adds listener to be notified when {@link #setBaseurl(java.lang.String) }
+	 * is invoked
+	 * @param listener 
+	 */
+	public void addBaseurlUpdatedListener(BaseurlUpdatedListener listener){
+		baseurlUpdatedListeners.add(listener);
+	}
+	
+	/**
+	 * Gets all listeners that are notified when {@link #setBaseurl(java.lang.String) }
+	 * is invoked
+	 * @return set of listeners 
+	 */
+	public Set<BaseurlUpdatedListener> getBaseurlUpdatedListeners(){
+		return baseurlUpdatedListeners;
+	}
+	
+	/**
+	 * Removes listener
+	 * @param listener listener to remove
+	 * @return {@code true} if found and removed otherwise {@code false}
+	 */
+	public boolean removeBaseurlUpdatedListener(BaseurlUpdatedListener listener){
+		return baseurlUpdatedListeners.remove(listener);
+	}
+	
+	/**
+	 * Removes all listeners that are notified when {@link #setBaseurl(java.lang.String) }
+	 * is invoked
+	 */
+	public void clearBaseurlUpdatedListeners(){
+		baseurlUpdatedListeners.clear();
+	}
 	
 	/**
 	 * Gets property as {@code int} from {@code props} passed in
