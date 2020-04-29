@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Factory to get algorithms
  * @author churas
  */
 public class LauncherDialogAlgorithmFactoryImpl implements LauncherDialogAlgorithmFactory  {
@@ -22,6 +22,11 @@ public class LauncherDialogAlgorithmFactoryImpl implements LauncherDialogAlgorit
 	private ShowDialogUtil _dialogUtil;
 	private CDRestClient _client;
 	
+	/**
+	 * Constructor
+	 * @param client REST client used to get algorithms
+	 * @param dialogUtil dialog class to display a GUI for errors to user
+	 */
 	public LauncherDialogAlgorithmFactoryImpl(CDRestClient client,
 			ShowDialogUtil dialogUtil){
 		this._client = client;
@@ -29,7 +34,12 @@ public class LauncherDialogAlgorithmFactoryImpl implements LauncherDialogAlgorit
 	}
 	/**
 	 * Queries REST service for list of Community Detection Algorithms
-	 * @param parentWindow
+	 * @param parentWindow parent GUI component used to place any error dialogs
+	 * @param refresh if {@code true} then REST client is told to refresh its query
+	 *                from server
+	 * @param algorithmType restricts algorithms to those that match this string
+	 *                      in their input type. If {@code null} all algorithms
+	 *                      are returned
 	 * @return list of algorithms or null if there was an error. Also displays
 	 *         a dialog to the user describing the issue
 	 */
@@ -42,22 +52,24 @@ public class LauncherDialogAlgorithmFactoryImpl implements LauncherDialogAlgorit
 		try {
 			result = this.getAlgorithmsFromService(refresh);
 			if (result == null){
+				LOGGER.debug("null returned from service");
 				return null;
 			}
 			ArrayList<CommunityDetectionAlgorithm> algorithms = new ArrayList<>();
 			for (CommunityDetectionAlgorithm algo : result.getAlgorithms().values()) {
-				if (algo.getInputDataFormat().equalsIgnoreCase(algorithmType)){
+				if (algorithmType == null || algo.getInputDataFormat().equalsIgnoreCase(algorithmType)){
 					algorithms.add(algo);
 				}
 			}
+			LOGGER.debug(Integer.toString(algorithms.size()) + " algorithms returned");
 			return algorithms;
 		} catch(CDRestClientException ce){
-			LOGGER.info("Caught Exception, displaying GUI with error to user", ce);
+			LOGGER.error("Caught Exception, displaying GUI with error to user", ce);
 			_dialogUtil.showMessageDialog(parentWindow,
 					"Unable to get list of algorithms from service: " + ce.getMessage() + " : " +
 							(ce.getErrorResponse() == null ? "" : ce.getErrorResponse().asJson()));
 		} catch(IOException io){
-			LOGGER.info("Caught Exception, displaying GUI with error to user", io);
+			LOGGER.error("Caught Exception, displaying GUI with error to user", io);
 			_dialogUtil.showMessageDialog(parentWindow,
 					"Unable to get list of algorithms from service: " + io.getMessage());
 		}

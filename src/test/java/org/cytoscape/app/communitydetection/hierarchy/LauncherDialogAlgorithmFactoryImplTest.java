@@ -84,4 +84,29 @@ public class LauncherDialogAlgorithmFactoryImplTest {
 		assertEquals("algo1", algos.get(0).getName());
 		verify(mockClient, times(1)).getAlgorithms(false);
 	}
+	
+	@Test
+	public void testGetAlgorithmsSuccessNullPassedInForAlgoType() throws Exception {
+		ShowDialogUtil mockDialog = mock(ShowDialogUtil.class);
+		CDRestClient mockClient = mock(CDRestClient.class);
+		CommunityDetectionAlgorithms cda = new CommunityDetectionAlgorithms();
+		HashMap<String, CommunityDetectionAlgorithm> cMap = new HashMap<>();
+		CommunityDetectionAlgorithm algoOne = new CommunityDetectionAlgorithm();
+		algoOne.setName("algo1");
+		algoOne.setInputDataFormat("fooey");
+		cMap.put(algoOne.getName(), algoOne);
+		
+		CommunityDetectionAlgorithm algoTwo = new CommunityDetectionAlgorithm();
+		algoTwo.setName("algo2");
+		algoTwo.setInputDataFormat("blah");
+		cMap.put(algoTwo.getName(), algoTwo);
+		cda.setAlgorithms(cMap);
+		
+		when(mockClient.getAlgorithms(false)).thenReturn(cda);
+		LauncherDialogAlgorithmFactoryImpl fac = new LauncherDialogAlgorithmFactoryImpl(mockClient, mockDialog);
+		
+		List<CommunityDetectionAlgorithm> algos = fac.getAlgorithms(null, null, false);
+		assertEquals(2, algos.size());
+		verify(mockClient, times(1)).getAlgorithms(false);
+	}
 }
