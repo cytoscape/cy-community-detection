@@ -1,10 +1,13 @@
 package org.cytoscape.app.communitydetection;
 
 import java.util.Properties;
-import org.cytoscape.app.communitydetection.hierarchy.LauncherDialog;
+import java.util.Set;
+import org.cytoscape.app.communitydetection.event.BaseurlUpdatedEvent;
+import org.cytoscape.app.communitydetection.event.BaseurlUpdatedListener;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import static org.mockito.Mockito.*;
 
 /**
  *
@@ -51,7 +54,6 @@ public class PropertiesHelperTest {
 		assertEquals(5, ph.getSubmitRetryCount());
 		assertEquals(6, ph.getCommunityDetectionTimeoutMillis());
 		assertEquals(7, ph.getFunctionalEnrichmentTimeoutMillis());
-		assertEquals(true, LauncherDialog.ALGORITHM_ENDPOINT_UPDATED.get());
 		
 		ph.setBaseurl(null);
 		assertEquals("", ph.getBaseurlHostNameOnly());
@@ -116,5 +118,30 @@ public class PropertiesHelperTest {
 		assertEquals(8, ph.getSubmitRetryCount());
 		assertEquals(2, ph.getCommunityDetectionTimeoutMillis());
 		assertEquals(3, ph.getFunctionalEnrichmentTimeoutMillis());
+	}
+	
+	@Test
+	public void testSetBaseURLWithListeners(){
+		BaseurlUpdatedListener mockListener = mock(BaseurlUpdatedListener.class);
+		PropertiesHelper ph = PropertiesHelper.getInstance();
+		ph.setBaseurl("old");
+		ph.addBaseurlUpdatedListener(mockListener);
+		
+		ph.setBaseurl("new");
+		
+		// try with 2 listeners
+		BaseurlUpdatedListener mockListenerTwo = mock(BaseurlUpdatedListener.class);
+		ph.addBaseurlUpdatedListener(mockListenerTwo);
+		ph.setBaseurl("newer");
+
+		verify(mockListener, times(2)).urlUpdatedEvent(any(BaseurlUpdatedEvent.class));
+		verify(mockListenerTwo, times(1)).urlUpdatedEvent(any(BaseurlUpdatedEvent.class));
+		
+		Set<BaseurlUpdatedListener> listeners = ph.getBaseurlUpdatedListeners();
+		assertEquals(2, listeners.size());
+		assertTrue(ph.removeBaseurlUpdatedListener(mockListener));
+		assertEquals(1, listeners.size());
+		ph.clearBaseurlUpdatedListeners();
+		assertEquals(0, listeners.size());
 	}
 }
