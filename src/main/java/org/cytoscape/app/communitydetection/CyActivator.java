@@ -105,6 +105,7 @@ public class CyActivator extends AbstractCyActivator {
 		taskExecProps.setProperty(TITLE, "Run Community Detection");
 		LauncherDialog clusterAlgoDialog = new LauncherDialog(aboutAlgoFac, customHelpParameterFac, algoFac, dialogUtil,
 		                                                      AppUtils.CD_ALGORITHM_INPUT_TYPE);
+		PropertiesHelper.getInstance().addBaseurlUpdatedListener(clusterAlgoDialog);
 		registerAllServices(bc, new HierarchyTaskFactoryImpl(swingApplication, clusterAlgoDialog, readerTaskFactory, dialogUtil), taskExecProps);
 		
 		// Add Run Functional Enrichment under Apps => Community Detection
@@ -115,6 +116,7 @@ public class CyActivator extends AbstractCyActivator {
 		tmExecProps.setProperty(TITLE, "Run Functional Enrichment");
 		LauncherDialog tmAlgoDialog = new LauncherDialog(aboutAlgoFac, customHelpParameterFac, algoFac, dialogUtil,
 		                                                      AppUtils.TM_ALGORITHM_INPUT_TYPE);
+		PropertiesHelper.getInstance().addBaseurlUpdatedListener(tmAlgoDialog);
 		NetworkTermMappingTaskFactoryImpl termFac = new NetworkTermMappingTaskFactoryImpl(swingApplication, tmAlgoDialog); 
 		registerAllServices(bc, termFac, tmExecProps);
 
@@ -126,7 +128,7 @@ public class CyActivator extends AbstractCyActivator {
 		settingsProps.setProperty(TITLE, "Settings");
 		SettingsDialog settingsDialog = new SettingsDialog(iconJLabelFactory,
 		                                                   PropertiesHelper.getInstance());
-		registerAllServices(bc, new SettingsTaskFactoryImpl(swingApplication, settingsDialog, dialogUtil, cyProperties), settingsProps);
+		registerAllServices(bc, new SettingsTaskFactoryImpl(swingApplication, settingsDialog, dialogUtil, cyProperties, algoFac), settingsProps);
 		
 		// add About undern Apps => Community Detection
 		// menu
