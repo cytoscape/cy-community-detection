@@ -1,6 +1,18 @@
 What's New
 ==========
 
+Version 1.10.1
+---------------------------
+
+Bug fixes
+
+* Fixed bug where `View Interactions for Selected Node` no longer
+  worked if a session was reloaded. UD-1087
+
+* Fixed bug where any values set in the community detection or
+  functional enrichment dialogs were lost when when reopening
+  those dialogs. `Issue #3 <https://github.com/cytoscape/cy-community-detection/issues/3>`_
+
 Version 1.10.0
 ---------------------------
 
