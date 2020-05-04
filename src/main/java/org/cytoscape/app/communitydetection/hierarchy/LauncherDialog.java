@@ -44,6 +44,8 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JViewport;
+import org.cytoscape.app.communitydetection.event.BaseurlUpdatedEvent;
+import org.cytoscape.app.communitydetection.event.BaseurlUpdatedListener;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.app.communitydetection.util.ShowDialogUtil;
 import org.cytoscape.model.CyNetwork;
@@ -55,7 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
-public class LauncherDialog extends JPanel implements ItemListener {
+public class LauncherDialog extends JPanel implements ItemListener, BaseurlUpdatedListener {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(LauncherDialog.class);
 	private static final String WEIGHT_ALERT_MSG = "Alert: The weight column is an advanced\n"
@@ -86,8 +88,7 @@ public class LauncherDialog extends JPanel implements ItemListener {
 	private ShowDialogUtil _dialogUtil;
 	private String _currentlySelectedAlgorithm;
 	private LauncherDialogAlgorithmFactory _algoFac;
-	private String _baseRestURL;
-	public static AtomicBoolean ALGORITHM_ENDPOINT_UPDATED = new AtomicBoolean();
+	private AtomicBoolean _algorithmEndPointUpdated = new AtomicBoolean();
 
 	public LauncherDialog(AboutAlgorithmEditorPaneFactoryImpl aboutAlgoFac,
 			CustomParameterHelpJEditorPaneFactoryImpl customParamHelpFac,
@@ -150,7 +151,6 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		masterPanel.add(_cards);
 
 		add(contentPane, BorderLayout.PAGE_START);
-		
 		// only add node selection panel if its not null
 		JPanel nodePanel = this.getNodeSelectionPanel();
 		if (nodePanel != null){
@@ -170,17 +170,21 @@ public class LauncherDialog extends JPanel implements ItemListener {
 		return true;
 	}
 	
+	@Override
+	public void urlUpdatedEvent(BaseurlUpdatedEvent event) {
+		_algorithmEndPointUpdated.set(true);
+	}
+	
 	private boolean refreshAlgorithmsIfEndPointChanged(Component parentWindow){
-		if (ALGORITHM_ENDPOINT_UPDATED.get() == true){
+		if (_algorithmEndPointUpdated.get() == true){
 			LOGGER.debug("CD Service rest endpoint changed. Updating algorithms");
-			_algorithmList = _algoFac.getAlgorithms(parentWindow, _algorithmType, true);
+			_algorithmList = _algoFac.getAlgorithms(parentWindow, _algorithmType, false);
 			if (_algorithmList == null){
 				return false;
 			}
-			LauncherDialog.ALGORITHM_ENDPOINT_UPDATED.set(false);
+			this.loadAlgorithmCards();
+			_algorithmEndPointUpdated.set(false);
 		}
-		_algorithmList = _algoFac.getAlgorithms(parentWindow, _algorithmType, false);
-		this.loadAlgorithmCards();
 		return true;
 	}
 	

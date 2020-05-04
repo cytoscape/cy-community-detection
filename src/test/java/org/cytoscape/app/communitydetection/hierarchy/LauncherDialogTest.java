@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import org.cytoscape.app.communitydetection.event.BaseurlUpdatedEvent;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.app.communitydetection.util.ShowDialogUtil;
 import static org.junit.Assert.*;
@@ -144,8 +145,8 @@ public class LauncherDialogTest {
 		cdaTwo.setCustomParameters(custParams);
 		
 		
-		when(mockAlgoFac.getAlgorithms(mockComponent, AppUtils.CD_ALGORITHM_INPUT_TYPE, false)).thenReturn(cdaList, cdaList, cdaListTwo);
-		when(mockAlgoFac.getAlgorithms(mockComponent, AppUtils.CD_ALGORITHM_INPUT_TYPE, true)).thenReturn(cdaListTwo);
+		when(mockAlgoFac.getAlgorithms(mockComponent, null, true)).thenReturn(cdaListTwo);
+		when(mockAlgoFac.getAlgorithms(mockComponent, AppUtils.CD_ALGORITHM_INPUT_TYPE, false)).thenReturn(cdaList, cdaListTwo);
 		
 		LauncherDialog ld = new LauncherDialog(mockAbout, mockCustom,
 				mockAlgoFac, mockDialog,AppUtils.CD_ALGORITHM_INPUT_TYPE);
@@ -159,7 +160,8 @@ public class LauncherDialogTest {
 		assertEquals(0, algoCustParams.size());
 		
 		//try refresh with CHANGED REST URL
-		LauncherDialog.ALGORITHM_ENDPOINT_UPDATED.set(true);
+		BaseurlUpdatedEvent event = new BaseurlUpdatedEvent("http://oldfoo", "http://newfoo");
+		ld.urlUpdatedEvent(event);
 		assertTrue(ld.createGUI(mockComponent));
 		algoCustParams = ld.getAlgorithmCustomParameters("foo");
 		assertEquals(1, algoCustParams.size());
