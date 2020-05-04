@@ -113,7 +113,9 @@ public class SettingsTaskFactoryImpl implements NetworkTaskFactory {
 		if (algos != null){
 			return "Error querying " + newURL + " settings have been reset to default server";
 		}
-		return "Fatal Error querying default server";
+		return "Fatal Error querying default server.\n\nPlease check internet connection\n"
+				+ "and if issue persists visit\n\nhttps://cdaps.readthedocs.io\n\nto "
+				+ "report the issue.";
 	}
 
     /**

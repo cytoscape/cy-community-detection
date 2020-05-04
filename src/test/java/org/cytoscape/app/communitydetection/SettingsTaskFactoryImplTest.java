@@ -118,7 +118,9 @@ public class SettingsTaskFactoryImplTest {
 		verify(mockSettingsDialog).getBaseurl();
 		assertEquals(PropertiesHelper.DEFAULT_BASEURL, props.getProperty(AppUtils.PROP_APP_BASEURL));
 		assertEquals(PropertiesHelper.DEFAULT_BASEURL, PropertiesHelper.getInstance().getBaseurl());
-		verify(mockDialog).showMessageDialog(null, "Fatal Error querying default server", "Error querying service", JOptionPane.ERROR_MESSAGE);
+		verify(mockDialog).showMessageDialog(null, "Fatal Error querying default server.\n\nPlease check internet connection\n"
+				+ "and if issue persists visit\n\nhttps://cdaps.readthedocs.io\n\nto report the issue.",
+				"Error querying service", JOptionPane.ERROR_MESSAGE);
 	}
 	
 	@Test
