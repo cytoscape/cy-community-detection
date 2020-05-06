@@ -28,8 +28,8 @@ public class HierarchyTaskFactoryImplTest {
 	@Test
 	public void testIsReady(){
 		//always returns true
-		HierarchyTaskFactoryImpl fac = new HierarchyTaskFactoryImpl(null, null,
-				null, null);
+		HierarchyTaskFactoryImpl fac = null; //new HierarchyTaskFactoryImpl(null, null,
+				//null, null);
 		assertEquals(true, fac.isReady(null));
 		assertEquals(true, fac.isReady(mock(CyNetwork.class)));
 	}
@@ -40,8 +40,8 @@ public class HierarchyTaskFactoryImplTest {
 		CySwingApplication mockSwing = mock(CySwingApplication.class);
 		JFrame mockJFrame = mock(JFrame.class);
 		when(mockSwing.getJFrame()).thenReturn(mockJFrame);
-		HierarchyTaskFactoryImpl fac = new HierarchyTaskFactoryImpl(mockSwing, null,
-				null, mockDialog);
+		HierarchyTaskFactoryImpl fac = null;//new HierarchyTaskFactoryImpl(mockSwing, null,
+				//null, mockDialog);
 		TaskIterator res = fac.createTaskIterator(null);
 		assertEquals(1, res.getNumTasks());
 		assertTrue(res.next() instanceof DoNothingTask);
@@ -64,8 +64,8 @@ public class HierarchyTaskFactoryImplTest {
 		when(mockSwing.getJFrame()).thenReturn(mockJFrame);
 		when(mockLauncher.createGUI(mockJFrame)).thenReturn(Boolean.FALSE);
 
-		HierarchyTaskFactoryImpl fac = new HierarchyTaskFactoryImpl(mockSwing, mockLauncher,
-				null, mockDialog);
+		HierarchyTaskFactoryImpl fac = null; //new HierarchyTaskFactoryImpl(mockSwing, mockLauncher,
+				//null, mockDialog);
 		TaskIterator res = fac.createTaskIterator(mockNetwork);
 		assertEquals(1, res.getNumTasks());
 		assertTrue(res.next() instanceof DoNothingTask);
@@ -99,8 +99,8 @@ public class HierarchyTaskFactoryImplTest {
 				eq(JOptionPane.PLAIN_MESSAGE),
 				any(), eq(options), eq(options[0]))).thenReturn(1);
 		
-		HierarchyTaskFactoryImpl fac = new HierarchyTaskFactoryImpl(mockSwing, mockLauncher,
-				null, mockDialog);
+		HierarchyTaskFactoryImpl fac = null;//new HierarchyTaskFactoryImpl(mockSwing, mockLauncher,
+				//null, mockDialog);
 		TaskIterator res = fac.createTaskIterator(mockNetwork);
 		assertEquals(1, res.getNumTasks());
 		assertTrue(res.next() instanceof DoNothingTask);
@@ -139,8 +139,8 @@ public class HierarchyTaskFactoryImplTest {
 				eq(JOptionPane.PLAIN_MESSAGE),
 				any(), eq(options), eq(options[0]))).thenReturn(0);
 		
-		HierarchyTaskFactoryImpl fac = new HierarchyTaskFactoryImpl(mockSwing, mockLauncher,
-				null, mockDialog);
+		HierarchyTaskFactoryImpl fac = null;//new HierarchyTaskFactoryImpl(mockSwing, mockLauncher,
+				//null, mockDialog);
 		TaskIterator res = fac.createTaskIterator(mockNetwork);
 		assertEquals(1, res.getNumTasks());
 		Task resTask = res.next();
@@ -179,8 +179,8 @@ public class HierarchyTaskFactoryImplTest {
 				eq(JOptionPane.PLAIN_MESSAGE),
 				any(), eq(options), eq(options[0]))).thenReturn(0);
 		
-		HierarchyTaskFactoryImpl fac = new HierarchyTaskFactoryImpl(mockSwing, mockLauncher,
-				null, mockDialog);
+		HierarchyTaskFactoryImpl fac = null;//new HierarchyTaskFactoryImpl(mockSwing, mockLauncher,
+				//null, mockDialog);
 		TaskIterator res = fac.createTaskIterator(mockNetwork);
 		assertEquals(1, res.getNumTasks());
 		Task resTask = res.next();
@@ -224,8 +224,8 @@ public class HierarchyTaskFactoryImplTest {
 				eq(JOptionPane.PLAIN_MESSAGE),
 				any(), eq(options), eq(options[0]))).thenReturn(0);
 		
-		HierarchyTaskFactoryImpl fac = new HierarchyTaskFactoryImpl(mockSwing, mockLauncher,
-				null, mockDialog);
+		HierarchyTaskFactoryImpl fac = null;//new HierarchyTaskFactoryImpl(mockSwing, mockLauncher,
+				//null, mockDialog);
 		TaskIterator res = fac.createTaskIterator(mockNetwork);
 		assertEquals(1, res.getNumTasks());
 		Task resTask = res.next();

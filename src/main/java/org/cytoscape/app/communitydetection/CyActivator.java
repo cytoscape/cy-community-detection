@@ -1,5 +1,6 @@
 package org.cytoscape.app.communitydetection;
 
+import java.util.HashSet;
 import static org.cytoscape.application.swing.ActionEnableSupport.ENABLE_FOR_SELECTED_NODES;
 import static org.cytoscape.work.ServiceProperties.ENABLE_FOR;
 import static org.cytoscape.work.ServiceProperties.IN_CONTEXT_MENU;
@@ -9,14 +10,17 @@ import static org.cytoscape.work.ServiceProperties.PREFERRED_MENU;
 import static org.cytoscape.work.ServiceProperties.TITLE;
 
 import java.util.Properties;
-import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.hierarchy.AboutAlgorithmEditorPaneFactoryImpl;
 import org.cytoscape.app.communitydetection.hierarchy.CustomParameterHelpJEditorPaneFactoryImpl;
+import org.cytoscape.app.communitydetection.hierarchy.HierarchyNetworkFactory;
+import org.cytoscape.app.communitydetection.hierarchy.HierarchyNetworkViewFactory;
 
 import org.cytoscape.app.communitydetection.hierarchy.HierarchyTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.util.JEditorPaneFactoryImpl;
 import org.cytoscape.app.communitydetection.hierarchy.LauncherDialog;
 import org.cytoscape.app.communitydetection.hierarchy.LauncherDialogAlgorithmFactoryImpl;
+import org.cytoscape.app.communitydetection.hierarchy.LayoutFactory;
+import org.cytoscape.app.communitydetection.hierarchy.VisualStyleFactory;
 import org.cytoscape.app.communitydetection.iquery.IQueryTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.rest.CDRestClient;
 import org.cytoscape.app.communitydetection.subnetwork.ParentNetworkChooserDialog;
@@ -93,10 +97,10 @@ public class CyActivator extends AbstractCyActivator {
 		CustomParameterHelpJEditorPaneFactoryImpl customHelpParameterFac = new CustomParameterHelpJEditorPaneFactoryImpl(editorPaneFac);
 		LauncherDialogAlgorithmFactoryImpl algoFac = new LauncherDialogAlgorithmFactoryImpl(CDRestClient.getInstance(), dialogUtil);
 		
-		final ReaderTaskFactoryImpl readerTaskFactory = new ReaderTaskFactoryImpl(networkViewFactory,
-				networkFactory, networkManager, networkViewManager, rootNetworkManager, visualMappingManager,
-				vizmapFileTaskFactory, layoutAlgorithmManager, syncTaskManager, networkNaming);
-		
+		//final ReaderTaskFactoryImpl readerTaskFactory = new ReaderTaskFactoryImpl(networkViewFactory,
+		//		networkFactory, networkManager, networkViewManager, rootNetworkManager, visualMappingManager,
+		//		vizmapFileTaskFactory, layoutAlgorithmManager, syncTaskManager, networkNaming);
+		final HierarchyNetworkFactory hierarchyNetworkFactory = new HierarchyNetworkFactory(networkFactory, networkNaming, rootNetworkManager, networkManager);
 		// Add Run Community Detection under Apps => Community Detection
 		// menu
 		Properties taskExecProps = new Properties();
@@ -104,9 +108,16 @@ public class CyActivator extends AbstractCyActivator {
 		taskExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
 		taskExecProps.setProperty(TITLE, "Run Community Detection");
 		LauncherDialog clusterAlgoDialog = new LauncherDialog(aboutAlgoFac, customHelpParameterFac, algoFac, dialogUtil,
-		                                                      AppUtils.CD_ALGORITHM_INPUT_TYPE);
+		                                                      AppUtils.CD_ALGORITHM_INPUT_TYPES);
 		PropertiesHelper.getInstance().addBaseurlUpdatedListener(clusterAlgoDialog);
-		registerAllServices(bc, new HierarchyTaskFactoryImpl(swingApplication, clusterAlgoDialog, readerTaskFactory, dialogUtil), taskExecProps);
+		HierarchyNetworkViewFactory hierarchyNetworkViewFactory = new HierarchyNetworkViewFactory(networkViewManager,
+		                          networkViewFactory, visualMappingManager, layoutAlgorithmManager, syncTaskManager);
+		
+		VisualStyleFactory styleFactory = new VisualStyleFactory(visualMappingManager, vizmapFileTaskFactory);
+		LayoutFactory layoutFactory = new LayoutFactory(layoutAlgorithmManager);
+		registerAllServices(bc, new HierarchyTaskFactoryImpl(swingApplication,
+				clusterAlgoDialog, dialogUtil, hierarchyNetworkFactory,
+		        hierarchyNetworkViewFactory, styleFactory, layoutFactory), taskExecProps);
 		
 		// Add Run Functional Enrichment under Apps => Community Detection
 		// menu
@@ -115,7 +126,7 @@ public class CyActivator extends AbstractCyActivator {
 		tmExecProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
 		tmExecProps.setProperty(TITLE, "Run Functional Enrichment");
 		LauncherDialog tmAlgoDialog = new LauncherDialog(aboutAlgoFac, customHelpParameterFac, algoFac, dialogUtil,
-		                                                      AppUtils.TM_ALGORITHM_INPUT_TYPE);
+		                                                      AppUtils.TM_ALGORITHM_INPUT_TYPES);
 		PropertiesHelper.getInstance().addBaseurlUpdatedListener(tmAlgoDialog);
 		NetworkTermMappingTaskFactoryImpl termFac = new NetworkTermMappingTaskFactoryImpl(swingApplication, tmAlgoDialog); 
 		registerAllServices(bc, termFac, tmExecProps);

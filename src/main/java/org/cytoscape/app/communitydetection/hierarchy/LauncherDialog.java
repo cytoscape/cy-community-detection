@@ -84,7 +84,7 @@ public class LauncherDialog extends JPanel implements ItemListener, BaseurlUpdat
 	private JRadioButton _selectedButton;
 	private JRadioButton _allButton;
 	private boolean _guiLoaded = false;
-	private String _algorithmType;
+	private Set<String> _algorithmTypes;
 	private ShowDialogUtil _dialogUtil;
 	private String _currentlySelectedAlgorithm;
 	private LauncherDialogAlgorithmFactory _algoFac;
@@ -94,10 +94,10 @@ public class LauncherDialog extends JPanel implements ItemListener, BaseurlUpdat
 			CustomParameterHelpJEditorPaneFactoryImpl customParamHelpFac,
 			LauncherDialogAlgorithmFactory algoFac,
 			ShowDialogUtil dialogUtil,
-		final String algorithmType) throws Exception {
+		final Set<String> algorithmTypes) throws Exception {
 		this._customParamHelpFac = customParamHelpFac;
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		this._algorithmType = algorithmType;
+		this._algorithmTypes = algorithmTypes;
 		this._dialogUtil = dialogUtil;
 		_aboutAlgoFac = aboutAlgoFac;
 		_algoFac = algoFac;
@@ -111,7 +111,7 @@ public class LauncherDialog extends JPanel implements ItemListener, BaseurlUpdat
 	    loadImageIcon();
 		loadAlertIcon();
 		_algoCardMap = new LinkedHashMap<>();
-		_algorithmList = _algoFac.getAlgorithms(parentWindow, _algorithmType, false);
+		_algorithmList = _algoFac.getAlgorithms(parentWindow, _algorithmTypes, false);
 		if (_algorithmList == null){
 			return false;
 		}
@@ -178,7 +178,7 @@ public class LauncherDialog extends JPanel implements ItemListener, BaseurlUpdat
 	private boolean refreshAlgorithmsIfEndPointChanged(Component parentWindow){
 		if (_algorithmEndPointUpdated.get() == true){
 			LOGGER.debug("CD Service rest endpoint changed. Updating algorithms");
-			_algorithmList = _algoFac.getAlgorithms(parentWindow, _algorithmType, false);
+			_algorithmList = _algoFac.getAlgorithms(parentWindow, _algorithmTypes, false);
 			if (_algorithmList == null){
 				return false;
 			}
@@ -189,8 +189,8 @@ public class LauncherDialog extends JPanel implements ItemListener, BaseurlUpdat
 	}
 	
 	private JPanel getNodeSelectionPanel(){
-	    if (!_algorithmType.equals(AppUtils.TM_ALGORITHM_INPUT_TYPE)){
-		return null;
+	    if (!_algorithmTypes.contains(AppUtils.TM_ALGORITHM_INPUT_TYPE)){
+			return null;
 	    }
 	    JPanel nodePanel = new JPanel();
 		nodePanel.setLayout(new GridLayout(2, 1));
@@ -223,8 +223,8 @@ public class LauncherDialog extends JPanel implements ItemListener, BaseurlUpdat
 	 * @return 
 	 */
 	private JPanel getWeightPanel(){
-	    if (!_algorithmType.equals(AppUtils.CD_ALGORITHM_INPUT_TYPE)){
-		return null;
+	    if (!_algorithmTypes.contains(AppUtils.CD_ALGORITHM_INPUT_TYPE)){
+			return null;
 	    }
 	    JPanel weightPanel = new JPanel();
 		weightPanel.setLayout(new GridBagLayout());

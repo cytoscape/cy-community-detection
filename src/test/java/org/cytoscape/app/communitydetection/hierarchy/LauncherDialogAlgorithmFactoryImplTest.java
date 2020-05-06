@@ -1,7 +1,9 @@
 package org.cytoscape.app.communitydetection.hierarchy;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import org.cytoscape.app.communitydetection.rest.CDRestClient;
 import org.cytoscape.app.communitydetection.rest.CDRestClientException;
@@ -26,7 +28,7 @@ public class LauncherDialogAlgorithmFactoryImplTest {
 		when(mockClient.getAlgorithms(true)).thenReturn(null);
 		LauncherDialogAlgorithmFactoryImpl fac = new LauncherDialogAlgorithmFactoryImpl(mockClient, mockDialog);
 		
-		List<CommunityDetectionAlgorithm> algos = fac.getAlgorithms(null, "hello", true);
+		List<CommunityDetectionAlgorithm> algos = fac.getAlgorithms(null, new HashSet<String>(Arrays.asList("hello")), true);
 		assertNull(algos);
 		verify(mockClient).getAlgorithms(true);
 	}
@@ -39,7 +41,7 @@ public class LauncherDialogAlgorithmFactoryImplTest {
 		when(mockClient.getAlgorithms(false)).thenThrow(new CDRestClientException("yo"));
 		LauncherDialogAlgorithmFactoryImpl fac = new LauncherDialogAlgorithmFactoryImpl(mockClient, mockDialog);
 		
-		List<CommunityDetectionAlgorithm> algos = fac.getAlgorithms(null, "hello", false);
+		List<CommunityDetectionAlgorithm> algos = fac.getAlgorithms(null, new HashSet<String>(Arrays.asList("hello")), false);
 		assertNull(algos);
 		verify(mockClient, times(2)).getAlgorithms(false);
 		verify(mockDialog).showMessageDialog(null, "Unable to get list of algorithms from service: yo : ");
@@ -53,7 +55,7 @@ public class LauncherDialogAlgorithmFactoryImplTest {
 		when(mockClient.getAlgorithms(true)).thenThrow(new IOException("yo"));
 		LauncherDialogAlgorithmFactoryImpl fac = new LauncherDialogAlgorithmFactoryImpl(mockClient, mockDialog);
 		
-		List<CommunityDetectionAlgorithm> algos = fac.getAlgorithms(null, "hello", true);
+		List<CommunityDetectionAlgorithm> algos = fac.getAlgorithms(null, new HashSet<String>(Arrays.asList("hello")), true);
 		assertNull(algos);
 		verify(mockClient, times(2)).getAlgorithms(true);
 		verify(mockDialog).showMessageDialog(null, "Unable to get list of algorithms from service: yo");
@@ -79,7 +81,7 @@ public class LauncherDialogAlgorithmFactoryImplTest {
 		when(mockClient.getAlgorithms(false)).thenReturn(cda);
 		LauncherDialogAlgorithmFactoryImpl fac = new LauncherDialogAlgorithmFactoryImpl(mockClient, mockDialog);
 		
-		List<CommunityDetectionAlgorithm> algos = fac.getAlgorithms(null, "fooey", false);
+		List<CommunityDetectionAlgorithm> algos = fac.getAlgorithms(null, new HashSet<String>(Arrays.asList("fooey")), false);
 		assertEquals(1, algos.size());
 		assertEquals("algo1", algos.get(0).getName());
 		verify(mockClient, times(1)).getAlgorithms(false);

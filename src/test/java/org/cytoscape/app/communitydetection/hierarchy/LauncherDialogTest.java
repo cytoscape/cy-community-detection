@@ -42,7 +42,7 @@ public class LauncherDialogTest {
 		CustomParameterHelpJEditorPaneFactoryImpl mockCustom = mock(CustomParameterHelpJEditorPaneFactoryImpl.class);
 		LauncherDialogAlgorithmFactory mockAlgoFac = mock(LauncherDialogAlgorithmFactory.class);
 		LauncherDialog ld = new LauncherDialog(mockAbout, mockCustom,
-				mockAlgoFac, mockDialog,AppUtils.CD_ALGORITHM_INPUT_TYPE);
+				mockAlgoFac, mockDialog,AppUtils.CD_ALGORITHM_INPUT_TYPES);
 		assertNull(ld.getSelectedCommunityDetectionAlgorithm());
 	}
 	
@@ -60,9 +60,9 @@ public class LauncherDialogTest {
 		cda.setDescription("description");
 		cda.setDisplayName("displayname");
 		cdaList.add(cda);
-		when(mockAlgoFac.getAlgorithms(mockComponent, AppUtils.CD_ALGORITHM_INPUT_TYPE, false)).thenReturn(cdaList);
+		when(mockAlgoFac.getAlgorithms(mockComponent, AppUtils.CD_ALGORITHM_INPUT_TYPES, false)).thenReturn(cdaList);
 		LauncherDialog ld = new LauncherDialog(mockAbout, mockCustom,
-				mockAlgoFac, mockDialog,AppUtils.CD_ALGORITHM_INPUT_TYPE);
+				mockAlgoFac, mockDialog,AppUtils.CD_ALGORITHM_INPUT_TYPES);
 		assertTrue(ld.createGUI(mockComponent));
 		Map<String, String> algoCustParams = ld.getAlgorithmCustomParameters("foo");
 		assertEquals(0, algoCustParams.size());
@@ -98,9 +98,9 @@ public class LauncherDialogTest {
 		cda.setCustomParameters(custParams);
 		cdaList.add(cda);
 		
-		when(mockAlgoFac.getAlgorithms(mockComponent, AppUtils.CD_ALGORITHM_INPUT_TYPE, false)).thenReturn(cdaList);
+		when(mockAlgoFac.getAlgorithms(mockComponent, AppUtils.CD_ALGORITHM_INPUT_TYPES, false)).thenReturn(cdaList);
 		LauncherDialog ld = new LauncherDialog(mockAbout, mockCustom,
-				mockAlgoFac, mockDialog,AppUtils.CD_ALGORITHM_INPUT_TYPE);
+				mockAlgoFac, mockDialog,AppUtils.CD_ALGORITHM_INPUT_TYPES);
 		assertTrue(ld.createGUI(mockComponent));
 		Map<String, String> algoCustParams = ld.getAlgorithmCustomParameters("foo");
 		
@@ -146,10 +146,10 @@ public class LauncherDialogTest {
 		
 		
 		when(mockAlgoFac.getAlgorithms(mockComponent, null, true)).thenReturn(cdaListTwo);
-		when(mockAlgoFac.getAlgorithms(mockComponent, AppUtils.CD_ALGORITHM_INPUT_TYPE, false)).thenReturn(cdaList, cdaListTwo);
+		when(mockAlgoFac.getAlgorithms(mockComponent, AppUtils.CD_ALGORITHM_INPUT_TYPES, false)).thenReturn(cdaList, cdaListTwo);
 		
 		LauncherDialog ld = new LauncherDialog(mockAbout, mockCustom,
-				mockAlgoFac, mockDialog,AppUtils.CD_ALGORITHM_INPUT_TYPE);
+				mockAlgoFac, mockDialog,AppUtils.CD_ALGORITHM_INPUT_TYPES);
 		assertTrue(ld.createGUI(mockComponent));
 		Map<String, String> algoCustParams = ld.getAlgorithmCustomParameters("foo");
 		assertEquals(0, algoCustParams.size());

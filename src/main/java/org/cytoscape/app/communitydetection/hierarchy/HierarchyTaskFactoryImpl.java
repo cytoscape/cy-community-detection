@@ -27,16 +27,26 @@ public class HierarchyTaskFactoryImpl implements NetworkTaskFactory {
 	private final static Logger LOGGER = LoggerFactory.getLogger(HierarchyTaskFactoryImpl.class);
 	private LauncherDialog _dialog;
 	private CySwingApplication _swingApplication;
-	private ReaderTaskFactory _readerFactory;
 	private ShowDialogUtil _dialogUtil;
+	private HierarchyNetworkFactory _networkFactory;
+	private HierarchyNetworkViewFactory _networkViewFactory;
+	private VisualStyleFactory _styleFactory;
+	private	LayoutFactory _layoutFactory;
 
 
 	public HierarchyTaskFactoryImpl(CySwingApplication swingApplication, LauncherDialog dialog,
-			ReaderTaskFactory readerFactory, ShowDialogUtil dialogUtil) {
-		this._dialog = dialog;
-		this._swingApplication = swingApplication;
-		this._readerFactory = readerFactory;
-		this._dialogUtil = dialogUtil;
+			ShowDialogUtil dialogUtil,
+		    HierarchyNetworkFactory networkFactory,HierarchyNetworkViewFactory networkViewFactory,
+			VisualStyleFactory styleFactory,
+			LayoutFactory layoutFactory) {
+		_dialog = dialog;
+		_swingApplication = swingApplication;
+		_dialogUtil = dialogUtil;
+		_networkFactory = networkFactory;
+		_networkViewFactory = networkViewFactory;
+		_styleFactory = styleFactory;
+		_layoutFactory = layoutFactory;
+		
 	}
 	
 	@Override
@@ -73,8 +83,9 @@ public class HierarchyTaskFactoryImpl implements NetworkTaskFactory {
 					(customParameters == null ? "" : " with " +
 						customParameters.toString()));
 
-				return new TaskIterator(new HierarchyTask(this._readerFactory, network, cda, customParameters,
-					_dialog.getWeightColumn()));
+				return new TaskIterator(new HierarchyTask(_networkFactory, _networkViewFactory,
+						_styleFactory, _layoutFactory, network, cda, customParameters,
+					    _dialog.getWeightColumn()));
 			} else {
 			   LOGGER.error("Unable to get algorithm from dialog...");
 			}

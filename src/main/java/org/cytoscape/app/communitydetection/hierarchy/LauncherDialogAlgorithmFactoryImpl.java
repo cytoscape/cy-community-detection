@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import org.cytoscape.app.communitydetection.rest.CDRestClient;
 import org.cytoscape.app.communitydetection.rest.CDRestClientException;
 import org.cytoscape.app.communitydetection.util.ShowDialogUtil;
@@ -45,7 +46,7 @@ public class LauncherDialogAlgorithmFactoryImpl implements LauncherDialogAlgorit
 	 */
 	@Override
 	public List<CommunityDetectionAlgorithm> getAlgorithms(Component parentWindow,
-			String algorithmType, boolean refresh) {
+			Set<String> algorithmTypes, boolean refresh) {
 		
 		CommunityDetectionAlgorithms result = null;
 		
@@ -57,7 +58,8 @@ public class LauncherDialogAlgorithmFactoryImpl implements LauncherDialogAlgorit
 			}
 			ArrayList<CommunityDetectionAlgorithm> algorithms = new ArrayList<>();
 			for (CommunityDetectionAlgorithm algo : result.getAlgorithms().values()) {
-				if (algorithmType == null || algo.getInputDataFormat().equalsIgnoreCase(algorithmType)){
+				if (algorithmTypes == null || algorithmTypes.isEmpty() ||
+						algorithmTypes.contains(algo.getInputDataFormat())){
 					algorithms.add(algo);
 				}
 			}

@@ -1,5 +1,9 @@
 package org.cytoscape.app.communitydetection.util;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 public class AppUtils {
 
 	public static final String APP_NAME = "CyCommunityDetection";
@@ -69,8 +73,14 @@ public class AppUtils {
 	public final static String TYPE_WEIGHTED_VALUE = "Weighted";
 	public final static String TYPE_ABOUT_VALUE = "About";
 
+	public final static String CD_ALGORITHM_OUTPUT_EDGELIST_KEY = "communityDetectionResult";
 	public final static String CD_ALGORITHM_INPUT_TYPE = "EDGELIST";
+	public final static String CD_ALGORITHM_INPUT_TYPE_V2 = "EDGELISTV2";
+	public final static Set<String> CD_ALGORITHM_INPUT_TYPES = new HashSet<>(Arrays.asList(CD_ALGORITHM_INPUT_TYPE,
+		                                                                                   CD_ALGORITHM_INPUT_TYPE_V2));
+	
 	public final static String TM_ALGORITHM_INPUT_TYPE = "GENELIST";
+	public final static Set<String> TM_ALGORITHM_INPUT_TYPES = new HashSet<>(Arrays.asList(TM_ALGORITHM_INPUT_TYPE));
 	public final static String CANCEL = "Cancel";
 	public final static String APPLY = "Apply";
 	public final static String CLOSE = "Close";
