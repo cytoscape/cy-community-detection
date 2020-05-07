@@ -1,20 +1,19 @@
 package org.cytoscape.app.communitydetection.hierarchy;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import javax.swing.JOptionPane;
-import org.cytoscape.app.communitydetection.cx2.NodeAttributeDeclaration;
+import org.cytoscape.app.communitydetection.cx2.CX2NodeAttributes;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
@@ -27,6 +26,9 @@ import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.session.CyNetworkNaming;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionResult;
+import org.ndexbio.cx2.aspect.element.core.CxAttributeDeclaration;
+import org.ndexbio.cx2.aspect.element.core.CxNode;
+import org.ndexbio.cx2.aspect.element.core.DeclarationEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,87 +103,91 @@ public class HierarchyNetworkFactory {
 		if (nodeAttrsAsCX2 == null){
 			return;
 		}
-		if (nodeAttrsAsCX2.isContainerNode() == false){
-			LOGGER.error("Expected a container in nodeAttributesAsCX2");
+		CX2NodeAttributes nodeAttrs = null;
+		ObjectMapper om = new ObjectMapper();
+		try {
+			nodeAttrs = om.readValue(nodeAttrsAsCX2.traverse(), CX2NodeAttributes.class);
+		} catch(IOException io){
+			LOGGER.error("caught io exception " + io.getMessage(), io);
 			return;
 		}
-		JsonNode attrDecls = nodeAttrsAsCX2.get("attributeDeclarations");
-		if (attrDecls == null){
-			LOGGER.error("No attributeDeclarations found");
+		if (nodeAttrs == null){
+			LOGGER.error("Couldnt parse CX2 for extra column data.");
 			return;
 		}
-		if (attrDecls.isContainerNode() == false){	
-			LOGGER.error("Expected attributeDeclarations to be a container");
-			return;
-		}
-		JsonNode nodesDeclAttr = null;
+		Map<String, String> aliasMap = createColumnsSuppliedByAlgorithm(network, nodeAttrs);
+		populateColumns(network, nodeAttrs, aliasMap, nMap);
 
-		for (Iterator<JsonNode> i = attrDecls.iterator(); i.hasNext();){
-			JsonNode curNode = i.next();
-			if (curNode.isContainerNode() == false){
-				continue;
-			}
-			nodesDeclAttr = curNode.get("nodes");
-			if (nodesDeclAttr != null){
-				break;
-			}
-		}
-		if (nodesDeclAttr == null){
-			LOGGER.error("Expected a nodes entry under attributeDeclarations");
-			return;
-		}
-		HashMap<String, NodeAttributeDeclaration> nads = new HashMap<>();
-		for (Iterator<String> fieldNameItr = nodesDeclAttr.fieldNames(); fieldNameItr.hasNext();){
-			String fieldName = fieldNameItr.next();
-			LOGGER.info("node cols: " + fieldName);
-			JsonNode colNode = nodesDeclAttr.get(fieldName);
-			String dType = null;
-			String alias = null;
-			Object defVal = null;
-			if (colNode.has("d")){
-				dType = colNode.get("d").asText();
-			}
-			if (colNode.has("a")){
-				alias = colNode.get("a").asText();
-			}
-			if (colNode.has("v")){
-				LOGGER.info("v type is: " + colNode.get("v").getNodeType().toString());
-			}
-			NodeAttributeDeclaration nad = new NodeAttributeDeclaration(fieldName, dType, alias, null);
-			if (nad.getAlias() == null){
-				nads.put(fieldName, nad);
-			}
-			else {
-				nads.put(nad.getAlias(), nad);
-			}
-		}
+	}
+	
+	private Map<String, String> createColumnsSuppliedByAlgorithm(CyNetwork network, CX2NodeAttributes nodeAttrs){
+		Map<String, String> aliasMap = new HashMap<>();
 		CyTable nodeTable = network.getDefaultNodeTable();
-		for (NodeAttributeDeclaration nad : nads.values()){
-			createTableColumn(nodeTable, nad.getAttributeName(), Integer.class, false, null);
-		}
-		JsonNode nodes = nodeAttrsAsCX2.get("nodes");
-		if (nodes == null){
-			LOGGER.info("No nodes to parse");
-			return;
-		}
-		for (Iterator<JsonNode> nodeJNode = nodes.iterator(); nodeJNode.hasNext();){
-			JsonNode aNode = nodeJNode.next();
-			Long nodeId = aNode.get("id").asLong();
-			LOGGER.info("Node id: " + nodeId.toString());
-			JsonNode vNode = aNode.get("v");
-			if (vNode == null){
-				continue;
-			}
-			for (String colName : nads.keySet()){
-				JsonNode colNode = vNode.get(colName);
-				if (colNode == null){
-					// need to set default value here for that row
-				} else {
-					LOGGER.info(nodeId.toString() + " => " + colNode.asText());
-					network.getRow(nMap.get(nodeId)).set(nads.get(colName).getAttributeName(), colNode.asInt());
+		for (CxAttributeDeclaration nad : nodeAttrs.getAttributeDeclarations()){
+			for (String decEntryKey : nad.getDeclarations().keySet()){
+				if (!decEntryKey.equals(CxNode.ASPECT_NAME)){
+					continue;
 				}
-				
+				Map<String, DeclarationEntry> decEntryMap = nad.getDeclarations().get(decEntryKey);
+				for (String attrName : decEntryMap.keySet()){
+					DeclarationEntry entry = decEntryMap.get(attrName);
+					entry.processValue();
+					LOGGER.debug(attrName + " alias: " + entry.getAlias()
+							+ " datatype: " + entry.getDataTypeStr()
+							+ " default: " + entry.getDefaultValue());
+					if (entry.getAlias() != null){
+						aliasMap.put(entry.getAlias(), attrName);
+					} else {
+						aliasMap.put(attrName, attrName);
+					}
+					createTableColumn(nodeTable, attrName,
+							getColTypeForDeclarationEntry(entry), false, entry.getDefaultValue());
+				}
 			}
+		}
+		return aliasMap;
+	}
+
+	private void populateColumns(CyNetwork network, CX2NodeAttributes nodeAttrs,
+		Map<String, String> aliasMap, Map<Long, CyNode> nMap){
+		for (CxNode node : nodeAttrs.getNodes()){
+			for (String nodeAttrKey: node.getAttributes().keySet()){
+				if (!aliasMap.containsKey(nodeAttrKey)){
+					continue;
+				}
+				network.getRow(nMap.get(node.getId())).set(aliasMap.get(nodeAttrKey),
+						node.getAttributes().get(nodeAttrKey));
+			}
+		}
+	}
+
+	/**
+	 * Examines {@link org.ndexbio.cx2.aspect.element.core.DeclarationEntry#getDataType()} in
+	 * {@code entry} passed in and returns based on these rules:
+	 *
+	 * INTEGER => {@code Integer.class}
+	 * LONG => {@code Long.class}
+	 * BOOLEAN => {@code Boolean.class}
+	 * DOUBLE => {@code Double.class}
+	 * if none of above return {@code String.class}
+	 * @param entry
+	 * @return Appropriate class for datatype in {@code entry} with fallback being {@code String.class}
+	 */
+	private Class getColTypeForDeclarationEntry(DeclarationEntry entry){
+		if (entry.getDataType() == null){
+			return String.class;
+		}
+		switch (entry.getDataType()) {
+			case INTEGER:
+				return Integer.class;
+			case LONG:
+				return Long.class;
+			case BOOLEAN:
+				return Boolean.class;
+			case DOUBLE:
+				return Double.class;
+			default:
+				return String.class;
 		}
 	}
 	
