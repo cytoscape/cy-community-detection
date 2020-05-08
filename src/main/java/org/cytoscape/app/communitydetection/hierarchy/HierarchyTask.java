@@ -3,7 +3,6 @@ package org.cytoscape.app.communitydetection.hierarchy;
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
 import org.cytoscape.app.communitydetection.PropertiesHelper;
-import org.cytoscape.app.communitydetection.edgelist.ReaderTask;
 import org.cytoscape.app.communitydetection.edgelist.WriterTask;
 import org.cytoscape.app.communitydetection.edgelist.WriterTaskFactory;
 import org.cytoscape.app.communitydetection.edgelist.WriterTaskFactoryImpl;
@@ -18,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Wraps {@link WriterTask} and {@link ReaderTask}. Executes a community
+ * Wraps {@link WriterTask}. Executes a community
  detection _algorithm on the selected _network.
  *
  */
@@ -104,16 +103,22 @@ public class HierarchyTask extends AbstractTask {
 
 		CyNetwork hierarchyNetwork = _networkFactory.getHierarchyNetwork(_network, cdResult,
 				_weightColumn, _algorithm, this._customParameters);
-	
+		if (hierarchyNetwork == null){
+			throw new Exception("Error creating hierarchy from result");
+		}
 		taskMonitor.setProgress(0.95);
 		taskMonitor.setStatusMessage("Network created in " +
 				Long.toString((System.currentTimeMillis() - startTime)) + " ms");
 
 		taskMonitor.setStatusMessage("Creating a view for the network");
-		LOGGER.debug("creating view XXXXXXXXXXXXXXXX");
 		if (_networkViewFactory == null){
-			LOGGER.error("networkviewfactory is null");
-			return;
+			throw new Exception("networkViewFactory is null");
+		}
+		if (_styleFactory == null){
+			throw new Exception("styleFactory is null");
+		}
+		if (_layoutFactory == null){
+			throw new Exception("layoutFactory is null");
 		}
 		_networkViewFactory.getHierarchyNetworkView(hierarchyNetwork,
 				_styleFactory.getVisualStyle(),

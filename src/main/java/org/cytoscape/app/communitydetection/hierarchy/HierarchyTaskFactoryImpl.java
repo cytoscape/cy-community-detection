@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.JOptionPane;
 import org.cytoscape.app.communitydetection.DoNothingTask;
-import org.cytoscape.app.communitydetection.edgelist.ReaderTaskFactory;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.app.communitydetection.util.ShowDialogUtil;
 import org.cytoscape.application.swing.CySwingApplication;
