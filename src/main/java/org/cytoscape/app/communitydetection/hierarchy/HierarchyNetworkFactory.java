@@ -1,7 +1,6 @@
 package org.cytoscape.app.communitydetection.hierarchy;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -14,6 +13,7 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 import javax.swing.JOptionPane;
 import org.cytoscape.app.communitydetection.cx2.CX2NodeAttributes;
+import org.cytoscape.app.communitydetection.cx2.CX2NodeAttributesFactory;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
@@ -103,17 +103,10 @@ public class HierarchyNetworkFactory {
 		if (nodeAttrsAsCX2 == null){
 			return;
 		}
-		CX2NodeAttributes nodeAttrs = null;
-		ObjectMapper om = new ObjectMapper();
-		try {
-			nodeAttrs = om.readValue(nodeAttrsAsCX2.traverse(), CX2NodeAttributes.class);
-		} catch(IOException io){
-			LOGGER.error("caught io exception " + io.getMessage(), io);
-			return;
-		}
+		CX2NodeAttributesFactory nodeAttrFac = new CX2NodeAttributesFactory();
+		CX2NodeAttributes nodeAttrs = nodeAttrFac.getCX2NodeAttributes(nodeAttrsAsCX2);
 		if (nodeAttrs == null){
-			LOGGER.error("Couldnt parse CX2 for extra column data.");
-			return;
+			LOGGER.error("Errors parsing nodeAttributes");
 		}
 		Map<String, String> aliasMap = createColumnsSuppliedByAlgorithm(network, nodeAttrs);
 		populateColumns(network, nodeAttrs, aliasMap, nMap);
