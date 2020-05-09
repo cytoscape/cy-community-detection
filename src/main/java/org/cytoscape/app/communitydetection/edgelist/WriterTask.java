@@ -23,6 +23,9 @@ public class WriterTask implements CyWriter {
 	private final OutputStream outStream;
 	private final CyNetwork network;
 	private final String weightColumn;
+	private final StringBuilder sBuilder;
+	public static final String TAB = "\t";
+	public static final String NEW_LINE = "\n";
 
 	/**
 	 * @param outStream
@@ -33,31 +36,45 @@ public class WriterTask implements CyWriter {
 		this.outStream = outStream;
 		this.network = network;
 		this.weightColumn = attribute;
+		sBuilder = new StringBuilder();
 	}
 
 	@Override
 	public void run(TaskMonitor taskMonitor) throws Exception {
+		
 		if (weightColumn == null || weightColumn.equals(AppUtils.TYPE_NONE_VALUE)) {
 			for (CyEdge edge : network.getEdgeList()) {
-				String s = edge.getSource().getSUID().toString() + "\t" + edge.getTarget().getSUID().toString() + "\n";
-				outStream.write(s.getBytes());
+				writeEdgeToStream(edge.getSource().getSUID(),  edge.getTarget().getSUID(), null);
 			}
 		} else {
 			for (CyEdge edge : network.getEdgeList()) {
-				Double cellValue = (Double) network.getRow(edge).get(weightColumn, getColumnType());
+				Number cellValue = (Number) network.getRow(edge).get(weightColumn, getColumnType());
 				if (cellValue == null){
 				    throw new Exception(weightColumn + " does not have a value for row with SUID: " + edge.getSUID().toString() +
 					    " Please select a column with values in all cells");
 				}
-				if (cellValue < 0) {
+				if (cellValue.doubleValue() < 0) {
 					throw new Exception(weightColumn
 							+ " contains negative values. Please select a column with non-negative data values");
 				}
-				String s = edge.getSource().getSUID().toString() + "\t" + edge.getTarget().getSUID().toString() + "\t"
-						+ network.getRow(edge).get(weightColumn, getColumnType()) + "\n";
-				outStream.write(s.getBytes());
+				writeEdgeToStream(edge.getSource().getSUID(),
+						edge.getTarget().getSUID(),
+						cellValue.toString());
 			}
 		}
+	}
+	
+	private void writeEdgeToStream(Long sourceId, Long targetId, String weight) throws Exception {
+		sBuilder.setLength(0);
+		sBuilder.append(sourceId.toString());
+		sBuilder.append(TAB);
+		sBuilder.append(targetId.toString());
+		if (weight != null){
+			sBuilder.append(TAB);
+			sBuilder.append(weight);
+		}
+		sBuilder.append(NEW_LINE);
+		outStream.write(sBuilder.toString().getBytes());
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package org.cytoscape.app.communitydetection.hierarchy;
 
-import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.List;
 import org.cytoscape.app.communitydetection.PropertiesHelper;
 import org.cytoscape.app.communitydetection.edgelist.WriterTaskFactory;
