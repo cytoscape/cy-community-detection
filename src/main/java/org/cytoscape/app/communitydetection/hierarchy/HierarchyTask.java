@@ -13,6 +13,7 @@ import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionResult;
+import org.ndexbio.communitydetection.rest.model.exceptions.CommunityDetectionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,8 +102,14 @@ public class HierarchyTask extends AbstractTask {
 		taskMonitor.setStatusMessage("Received hierarchy in " +
 				Long.toString((System.currentTimeMillis() - startTime)) + " ms, creating a new network");
 
-		CyNetwork hierarchyNetwork = _networkFactory.getHierarchyNetwork(_network, cdResult,
+		CyNetwork hierarchyNetwork = null;
+		try {
+			hierarchyNetwork = _networkFactory.getHierarchyNetwork(_network, cdResult,
 				_weightColumn, _algorithm, this._customParameters);
+		} catch(CommunityDetectionException cde){
+			throw new Exception(cde);
+		}
+		
 		if (hierarchyNetwork == null){
 			throw new Exception("Error creating hierarchy from result");
 		}

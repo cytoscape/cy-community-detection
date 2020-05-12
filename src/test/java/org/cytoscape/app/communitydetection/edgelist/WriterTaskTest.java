@@ -1,6 +1,7 @@
 package org.cytoscape.app.communitydetection.edgelist;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
@@ -28,6 +29,16 @@ public class WriterTaskTest {
 	@Test
 	public void testCancel() throws Exception {
 		OutputStream mockStream = mock(OutputStream.class);
+		WriterTask wt = new WriterTask(mockStream, null, null);
+		wt.cancel();
+		verify(mockStream, times(1)).close();
+	}
+	
+	@Test
+	public void testCancelOutStreamCloseThrowsException() throws Exception {
+		OutputStream mockStream = mock(OutputStream.class);
+		doThrow(new IOException("hi")).when(mockStream).close();
+		
 		WriterTask wt = new WriterTask(mockStream, null, null);
 		wt.cancel();
 		verify(mockStream, times(1)).close();

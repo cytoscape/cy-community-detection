@@ -2,20 +2,12 @@ package org.cytoscape.app.communitydetection.hierarchy;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.stream.Collectors;
-import javax.swing.JOptionPane;
 import org.cytoscape.app.communitydetection.cx2.CX2NodeAttributes;
 import org.cytoscape.app.communitydetection.cx2.CX2NodeAttributesFactory;
 import org.cytoscape.app.communitydetection.util.AppUtils;
-import org.cytoscape.model.CyEdge;
+import org.cytoscape.app.communitydetection.util.CyNetworkUtil;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
@@ -26,14 +18,12 @@ import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.session.CyNetworkNaming;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionAlgorithm;
 import org.ndexbio.communitydetection.rest.model.CommunityDetectionResult;
-import org.ndexbio.cx2.aspect.element.core.CxAttributeDeclaration;
-import org.ndexbio.cx2.aspect.element.core.CxNode;
-import org.ndexbio.cx2.aspect.element.core.DeclarationEntry;
+import org.ndexbio.communitydetection.rest.model.exceptions.CommunityDetectionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Creates Hierarchy Network from Community Detection algorithm result
  * @author churas
  */
 public class HierarchyNetworkFactory {
@@ -42,6 +32,11 @@ public class HierarchyNetworkFactory {
 	private CyNetworkNaming _networkNaming;
 	private CyRootNetworkManager _rootNetworkManager;
 	private CyNetworkManager _networkManager;
+	private EdgeStringNetworkUpdator _networkUpdator;
+	private CyNetworkUtil _cyNetworkUtil;
+	private CustomDataNetworkUpdator _customDataNetworkUpdator;
+	private MemberListNetworkUpdator _memberListNetworkUpdator;
+	
 	public HierarchyNetworkFactory(CyNetworkFactory cyNetworkFactory,
 			CyNetworkNaming networkNaming,
 			CyRootNetworkManager rootNetworkManager,
@@ -50,27 +45,57 @@ public class HierarchyNetworkFactory {
 		_networkNaming = networkNaming;
 		_rootNetworkManager = rootNetworkManager;
 		_networkManager = networkManager;
+		_networkUpdator = new EdgeStringNetworkUpdator();
+		_cyNetworkUtil = new CyNetworkUtil();
+		_customDataNetworkUpdator = new CustomDataNetworkUpdator();
+		_memberListNetworkUpdator = new MemberListNetworkUpdator();
+		
 	}
 	
+	
+	/**
+	 * Sets alternate updator
+	 * @param updator 
+	 */
+	protected void setAlternateEdgeStringNetworkUpdator(EdgeStringNetworkUpdator updator){
+		_networkUpdator = updator;
+	}
+	
+	protected void setAlternateCyNetworkUtil(CyNetworkUtil networkUtil){
+		_cyNetworkUtil = networkUtil;
+	}
+	
+	protected void setAlternateCustomDataNetworkUpdator(CustomDataNetworkUpdator updator){
+		_customDataNetworkUpdator = updator;
+	}
+	
+	/**
+	 * Creates Hierarchy Network from {@code cdResult}
+	 * @param parentNetwork parent network for hierarchy
+	 * @param cdResult Community Detection algorithm result to parse
+	 * @param weightColumn Name of weight column used or {@code null} if none
+	 * @param algorithm The Community Detection Algorithm run
+	 * @param customParameters Any custom parameters or null/empty map if none
+	 * @return Hierarchy network with proper columns and annotations added
+	 */
 	public CyNetwork getHierarchyNetwork(CyNetwork parentNetwork, CommunityDetectionResult cdResult,
 				final String weightColumn, CommunityDetectionAlgorithm algorithm,
-				Map<String, String> customParameters){	
+				Map<String, String> customParameters) throws CommunityDetectionException {	
 
 		CyNetwork newNetwork = _cyNetworkFactory.createNetwork();
 
-		createTableColumn(newNetwork.getDefaultNetworkTable(), AppUtils.COLUMN_CD_ORIGINAL_NETWORK, Long.class, false,
+		_cyNetworkUtil.createTableColumn(newNetwork.getDefaultNetworkTable(), AppUtils.COLUMN_CD_ORIGINAL_NETWORK, Long.class, false,
 				parentNetwork.getSUID());
 		CyTable nodeTable = newNetwork.getDefaultNodeTable();
-		createTableColumn(nodeTable, AppUtils.COLUMN_CD_MEMBER_LIST, String.class, false, null);
-		createTableColumn(nodeTable, AppUtils.COLUMN_CD_MEMBER_LIST_SIZE, Integer.class, false, 0);
-		createTableColumn(nodeTable, AppUtils.COLUMN_CD_MEMBER_LIST_LOG_SIZE, Double.class, false, 0.0);
-		createTableColumn(nodeTable, AppUtils.COLUMN_CD_COMMUNITY_NAME, String.class, false, null);
-		createTableColumn(nodeTable, AppUtils.COLUMN_CD_ANNOTATED_MEMBERS, String.class, false, null);
-		createTableColumn(nodeTable, AppUtils.COLUMN_CD_ANNOTATED_MEMBERS_SIZE, Integer.class, false, 0);
-		createTableColumn(nodeTable, AppUtils.COLUMN_CD_ANNOTATED_OVERLAP, Double.class, false, 0.0);
-		createTableColumn(nodeTable, AppUtils.COLUMN_CD_ANNOTATED_PVALUE, Double.class, false, 0.0);
-
-		createTableColumn(nodeTable, AppUtils.COLUMN_CD_LABELED, Boolean.class, true, false);
+		_cyNetworkUtil.createTableColumn(nodeTable, AppUtils.COLUMN_CD_MEMBER_LIST, String.class, false, null);
+		_cyNetworkUtil.createTableColumn(nodeTable, AppUtils.COLUMN_CD_MEMBER_LIST_SIZE, Integer.class, false, 0);
+		_cyNetworkUtil.createTableColumn(nodeTable, AppUtils.COLUMN_CD_MEMBER_LIST_LOG_SIZE, Double.class, false, 0.0);
+		_cyNetworkUtil.createTableColumn(nodeTable, AppUtils.COLUMN_CD_COMMUNITY_NAME, String.class, false, null);
+		_cyNetworkUtil.createTableColumn(nodeTable, AppUtils.COLUMN_CD_ANNOTATED_MEMBERS, String.class, false, null);
+		_cyNetworkUtil.createTableColumn(nodeTable, AppUtils.COLUMN_CD_ANNOTATED_MEMBERS_SIZE, Integer.class, false, 0);
+		_cyNetworkUtil.createTableColumn(nodeTable, AppUtils.COLUMN_CD_ANNOTATED_OVERLAP, Double.class, false, 0.0);
+		_cyNetworkUtil.createTableColumn(nodeTable, AppUtils.COLUMN_CD_ANNOTATED_PVALUE, Double.class, false, 0.0);
+		_cyNetworkUtil.createTableColumn(nodeTable, AppUtils.COLUMN_CD_LABELED, Boolean.class, true, false);
 		
 		String edgeStr;
 		JsonNode nodeAttrs = null;
@@ -90,16 +115,18 @@ public class HierarchyNetworkFactory {
 			edgeStr = cdResult.getResult().asText().trim();
 		}
 		
-		Map<Long, CyNode> nMap = createNetworkFromEdgeList(parentNetwork, newNetwork, edgeStr);
+		Map<Long, CyNode> nMap = _networkUpdator.updateNetworkWithEdgeString(parentNetwork, newNetwork, edgeStr);
+		
 		annotateNetwork(newNetwork, nMap, nodeAttrs);
 
 		_networkManager.addNetwork(newNetwork);
-		createMemberList(newNetwork, parentNetwork);
+		_memberListNetworkUpdator.createMemberListsInNetwork(newNetwork, parentNetwork, HierarchyHelper.getInstance());
+		HierarchyHelper.getInstance().clearAll();
 		setNetworkAttributes(parentNetwork, newNetwork, weightColumn, algorithm, cdResult, customParameters);
 		return newNetwork;
 	}
 
-	private void annotateNetwork(CyNetwork network, Map<Long, CyNode> nMap, JsonNode nodeAttrsAsCX2){
+	private void annotateNetwork(CyNetwork network, Map<Long, CyNode> nMap, JsonNode nodeAttrsAsCX2) throws CommunityDetectionException {
 		if (nodeAttrsAsCX2 == null){
 			return;
 		}
@@ -108,131 +135,13 @@ public class HierarchyNetworkFactory {
 		if (nodeAttrs == null){
 			LOGGER.error("Errors parsing nodeAttributes");
 		}
-		Map<String, String> aliasMap = createColumnsSuppliedByAlgorithm(network, nodeAttrs);
-		populateColumns(network, nodeAttrs, aliasMap, nMap);
-
+		_customDataNetworkUpdator.updateNetworkWithCustomData(network, nodeAttrs, nMap);
 	}
 	
-	private Map<String, String> createColumnsSuppliedByAlgorithm(CyNetwork network, CX2NodeAttributes nodeAttrs){
-		Map<String, String> aliasMap = new HashMap<>();
-		CyTable nodeTable = network.getDefaultNodeTable();
-		for (CxAttributeDeclaration nad : nodeAttrs.getAttributeDeclarations()){
-			for (String decEntryKey : nad.getDeclarations().keySet()){
-				if (!decEntryKey.equals(CxNode.ASPECT_NAME)){
-					continue;
-				}
-				Map<String, DeclarationEntry> decEntryMap = nad.getDeclarations().get(decEntryKey);
-				for (String attrName : decEntryMap.keySet()){
-					DeclarationEntry entry = decEntryMap.get(attrName);
-					entry.processValue();
-					LOGGER.debug(attrName + " alias: " + entry.getAlias()
-							+ " datatype: " + entry.getDataTypeStr()
-							+ " default: " + entry.getDefaultValue());
-					if (entry.getAlias() != null){
-						aliasMap.put(entry.getAlias(), attrName);
-					} else {
-						aliasMap.put(attrName, attrName);
-					}
-					createTableColumn(nodeTable, attrName,
-							getColTypeForDeclarationEntry(entry), false, entry.getDefaultValue());
-				}
-			}
-		}
-		return aliasMap;
-	}
-
-	private void populateColumns(CyNetwork network, CX2NodeAttributes nodeAttrs,
-		Map<String, String> aliasMap, Map<Long, CyNode> nMap){
-		for (CxNode node : nodeAttrs.getNodes()){
-			for (String nodeAttrKey: node.getAttributes().keySet()){
-				if (!aliasMap.containsKey(nodeAttrKey)){
-					continue;
-				}
-				network.getRow(nMap.get(node.getId())).set(aliasMap.get(nodeAttrKey),
-						node.getAttributes().get(nodeAttrKey));
-			}
-		}
-	}
-
-	/**
-	 * Examines {@link org.ndexbio.cx2.aspect.element.core.DeclarationEntry#getDataType()} in
-	 * {@code entry} passed in and returns based on these rules:
-	 *
-	 * INTEGER => {@code Integer.class}
-	 * LONG => {@code Long.class}
-	 * BOOLEAN => {@code Boolean.class}
-	 * DOUBLE => {@code Double.class}
-	 * if none of above return {@code String.class}
-	 * @param entry
-	 * @return Appropriate class for datatype in {@code entry} with fallback being {@code String.class}
-	 */
-	private Class getColTypeForDeclarationEntry(DeclarationEntry entry){
-		if (entry.getDataType() == null){
-			return String.class;
-		}
-		switch (entry.getDataType()) {
-			case INTEGER:
-				return Integer.class;
-			case LONG:
-				return Long.class;
-			case BOOLEAN:
-				return Boolean.class;
-			case DOUBLE:
-				return Double.class;
-			default:
-				return String.class;
-		}
-	}
 	
-	private Map<Long, CyNode> createNetworkFromEdgeList(CyNetwork parentNetwork, CyNetwork newNetwork, final String  edgeStr){
-		Map<Long, CyNode> nMap = new HashMap<>();
-		String edges[] = edgeStr.split(";");
-		
-		for (String line : edges) {
-			if (line.trim().length() <= 0)
-				continue;
-			final String[] parts = line.split(AppUtils.EDGE_LIST_SPLIT_PATTERN);
-			if (parts.length >= 3) {
-				long sourceSUID = Long.parseLong(parts[0]);
-				long targetSUID = Long.parseLong(parts[1]);
-				String[] interaction = parts[parts.length - 1].split("-");
-
-				if (interaction[0].equalsIgnoreCase("c")) {
-					CyNode sourceNode = nMap.get(sourceSUID);
-					if (sourceNode == null) {
-						sourceNode = newNetwork.addNode();
-						String sourceName = "C" + sourceSUID;
-						newNetwork.getRow(sourceNode).set(CyNetwork.NAME, sourceName);
-						nMap.put(sourceSUID, sourceNode);
-					}
-				}
-				if (interaction[1].equalsIgnoreCase("c")) {
-					CyNode targetNode = nMap.get(targetSUID);
-					if (targetNode == null) {
-						targetNode = newNetwork.addNode();
-						String targetName = "C" + targetSUID;
-						newNetwork.getRow(targetNode).set(CyNetwork.NAME, targetName);
-						nMap.put(targetSUID, targetNode);
-					}
-					CyEdge edge = newNetwork.addEdge(nMap.get(sourceSUID), targetNode, true);
-					newNetwork.getRow(edge).set(CyEdge.INTERACTION, parts[parts.length - 1]);
-					HierarchyHelper.getInstance().addChildNode(nMap.get(sourceSUID), targetNode);
-				} else {
-					HierarchyHelper.getInstance().addMemberNode(parentNetwork.getNode(targetSUID));
-					HierarchyHelper.getInstance().addChildNode(nMap.get(sourceSUID),
-							parentNetwork.getNode(targetSUID));
-				}
-			} else {
-				JOptionPane.showMessageDialog(null, "Incorrect number of columns!");
-			}
-
-		}
-		return nMap;
-	}
-	
-	public void setNetworkAttributes(CyNetwork parentNetwork, CyNetwork hierarchyNetwork,
+	protected void setNetworkAttributes(CyNetwork parentNetwork, CyNetwork hierarchyNetwork,
 			final String weightColumn, CommunityDetectionAlgorithm algorithm,
-		CommunityDetectionResult cdResult, Map<String, String> customParameters) {
+		CommunityDetectionResult cdResult, Map<String, String> customParameters) throws CommunityDetectionException {
 
 		String name;
 		if (weightColumn == null || weightColumn.equals(AppUtils.TYPE_NONE)) {
@@ -278,58 +187,12 @@ public class HierarchyNetworkFactory {
 		generatedBy += " Docker Image: " + algorithm.getDockerImage();
 
 		CyTable netTable = hierarchyNetwork.getDefaultNetworkTable();
-		createTableColumn(netTable, AppUtils.COLUMN_DESCRIPTION, String.class, false, null);
-		createTableColumn(netTable, AppUtils.COLUMN_DERIVED_FROM, String.class, false, null);
-		createTableColumn(netTable, AppUtils.COLUMN_GENERATED_BY, String.class, false, null);
+		_cyNetworkUtil.createTableColumn(netTable, AppUtils.COLUMN_DESCRIPTION, String.class, false, null);
+		_cyNetworkUtil.createTableColumn(netTable, AppUtils.COLUMN_DERIVED_FROM, String.class, false, null);
+		_cyNetworkUtil.createTableColumn(netTable, AppUtils.COLUMN_GENERATED_BY, String.class, false, null);
 		hierarchyNetwork.getRow(hierarchyNetwork).set(AppUtils.COLUMN_DESCRIPTION, description.toString());
 		hierarchyNetwork.getRow(hierarchyNetwork).set(AppUtils.COLUMN_DERIVED_FROM, derivedFrom);
 		hierarchyNetwork.getRow(hierarchyNetwork).set(AppUtils.COLUMN_GENERATED_BY, generatedBy);
-	}
-
-	/**
-	 * Creates member list for each node in the hierarchy network.
-	 * 
-	 * @param hierarchyNetwork
-	 */
-	private void createMemberList(CyNetwork hierarchyNetwork, CyNetwork parentNetwork) {
-		for (CyNode node : hierarchyNetwork.getNodeList()) {
-			List<CyNode> memberNodes = HierarchyHelper.getInstance().getMemberList(hierarchyNetwork, node).stream()
-					.collect(Collectors.toList());
-			Collections.sort(memberNodes, new Comparator<CyNode>() {
-				@Override
-				public int compare(CyNode node1, CyNode node2) {
-					return parentNetwork.getRow(node1).get(CyNetwork.NAME, String.class)
-							.compareTo(parentNetwork.getRow(node2).get(CyNetwork.NAME, String.class));
-				}
-			});
-			StringBuffer memberList = new StringBuffer();
-			for (CyNode memberNode : memberNodes) {
-				if (memberList.length() > 0) {
-					memberList.append(" ");
-				}
-				String name = parentNetwork.getRow(memberNode).get(CyNetwork.NAME, String.class);
-				memberList.append(name);
-			}
-			if (memberList != null) {
-				hierarchyNetwork.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST, memberList.toString());
-				hierarchyNetwork.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST_SIZE, memberNodes.size());
-				BigDecimal bd = new BigDecimal(Double.toString(log2(memberNodes.size())));
-				BigDecimal roundbd = bd.setScale(3, RoundingMode.HALF_UP);
-				hierarchyNetwork.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST_LOG_SIZE, roundbd.doubleValue());
-			}
-		}
-		HierarchyHelper.getInstance().clearAll();
-	}
-
-	<T> void createTableColumn(CyTable table, String colName, Class<? extends T> type, boolean isImmutable,
-			T defaultValue) {
-		if (table.getColumn(colName) == null) {
-			table.createColumn(colName, type, isImmutable, defaultValue);
-		}
-	}
-
-	private double log2(double x) {
-		return (Math.log(x) / Math.log(2));
 	}
 }
 
