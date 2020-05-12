@@ -2,7 +2,6 @@ package org.cytoscape.app.communitydetection.hierarchy;
 
 import java.util.HashMap;
 import java.util.Map;
-import javax.swing.JOptionPane;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
@@ -17,7 +16,7 @@ import org.slf4j.LoggerFactory;
  */
 public class EdgeStringNetworkUpdator {
 	
-		private final static Logger LOGGER = LoggerFactory.getLogger(EdgeStringNetworkUpdator.class);
+	private final static Logger LOGGER = LoggerFactory.getLogger(EdgeStringNetworkUpdator.class);
 
 	public static final String HYPHEN = "-";
 	public static final String SEMI_COLON = ";";
@@ -34,25 +33,29 @@ public class EdgeStringNetworkUpdator {
 	 *                for full description of format
 	 * @return a map of CyNode objects added by this method with the SUIDs of those nodes as keys
 	 */
-	public Map<Long, CyNode> updateNetworkWithEdgeString(CyNetwork parentNetwork,
+	protected Map<Long, CyNode> updateNetworkWithEdgeString(CyNetwork parentNetwork,
 			CyNetwork newNetwork, final String  edgeStr) throws CommunityDetectionException {
 		if (parentNetwork == null){
 			throw new CommunityDetectionException("Parent network is null");
 		}
 		if (newNetwork == null){
-			throw new CommunityDetectionException("Parent network is null");
+			throw new CommunityDetectionException("New network is null");
 		}
 		if (edgeStr == null){
 			throw new CommunityDetectionException("Edge list is null");
 		}
 		Map<Long, CyNode> nMap = new HashMap<>();
 		String edges[] = edgeStr.split(SEMI_COLON);
-		
-		for (String line : edges) {
-			if (line.trim().length() <= 0)
-				continue;
-			final String[] parts = line.split(AppUtils.EDGE_LIST_SPLIT_PATTERN);
-			if (parts.length >= 3) {
+		LOGGER.debug("Found " + edges.length + " edges to load");
+		long startTime = System.currentTimeMillis();
+		try {
+			for (String line : edges) {
+				if (line.trim().length() <= 0)
+					continue;
+				final String[] parts = line.split(AppUtils.EDGE_LIST_SPLIT_PATTERN);
+				if (parts.length != 3) {
+					throw new CommunityDetectionException("Invalid edge entry: " + line);
+				}
 				long sourceSUID = Long.parseLong(parts[0]);
 				long targetSUID = Long.parseLong(parts[1]);
 				String[] interaction = parts[parts.length - 1].split(HYPHEN);
@@ -82,10 +85,9 @@ public class EdgeStringNetworkUpdator {
 					HierarchyHelper.getInstance().addChildNode(nMap.get(sourceSUID),
 							parentNetwork.getNode(targetSUID));
 				}
-			} else {
-				JOptionPane.showMessageDialog(null, "Incorrect number of columns!");
 			}
-
+		} finally {
+			LOGGER.debug("Adding nodes and edges to network took: " + (System.currentTimeMillis() - startTime) + " ms");
 		}
 		return nMap;
 	}
