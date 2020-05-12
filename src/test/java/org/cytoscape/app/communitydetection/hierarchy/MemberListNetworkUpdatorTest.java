@@ -2,7 +2,6 @@ package org.cytoscape.app.communitydetection.hierarchy;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
-import junit.framework.Assert;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.app.communitydetection.util.CyNetworkUtil;
 import org.cytoscape.model.CyNetwork;
