@@ -49,10 +49,8 @@ public class HierarchyNetworkFactory {
 		_cyNetworkUtil = new CyNetworkUtil();
 		_customDataNetworkUpdator = new CustomDataNetworkUpdator();
 		_memberListNetworkUpdator = new MemberListNetworkUpdator();
-		
 	}
-	
-	
+
 	/**
 	 * Sets alternate updator
 	 * @param updator 
@@ -97,6 +95,10 @@ public class HierarchyNetworkFactory {
 		_cyNetworkUtil.createTableColumn(nodeTable, AppUtils.COLUMN_CD_ANNOTATED_PVALUE, Double.class, false, 0.0);
 		_cyNetworkUtil.createTableColumn(nodeTable, AppUtils.COLUMN_CD_LABELED, Boolean.class, true, false);
 		
+		CyTable netTable = newNetwork.getDefaultNetworkTable();
+		_cyNetworkUtil.createTableColumn(netTable, AppUtils.COLUMN_DESCRIPTION, String.class, false, null);
+		_cyNetworkUtil.createTableColumn(netTable, AppUtils.COLUMN_DERIVED_FROM, String.class, false, null);
+		_cyNetworkUtil.createTableColumn(netTable, AppUtils.COLUMN_GENERATED_BY, String.class, false, null);
 		String edgeStr;
 		JsonNode nodeAttrs = null;
 		if (cdResult.getResult().isContainerNode()){
@@ -137,8 +139,7 @@ public class HierarchyNetworkFactory {
 		}
 		_customDataNetworkUpdator.updateNetworkWithCustomData(network, nodeAttrs, nMap);
 	}
-	
-	
+
 	protected void setNetworkAttributes(CyNetwork parentNetwork, CyNetwork hierarchyNetwork,
 			final String weightColumn, CommunityDetectionAlgorithm algorithm,
 		CommunityDetectionResult cdResult, Map<String, String> customParameters) throws CommunityDetectionException {
@@ -187,12 +188,9 @@ public class HierarchyNetworkFactory {
 		generatedBy += " Docker Image: " + algorithm.getDockerImage();
 
 		CyTable netTable = hierarchyNetwork.getDefaultNetworkTable();
-		_cyNetworkUtil.createTableColumn(netTable, AppUtils.COLUMN_DESCRIPTION, String.class, false, null);
-		_cyNetworkUtil.createTableColumn(netTable, AppUtils.COLUMN_DERIVED_FROM, String.class, false, null);
-		_cyNetworkUtil.createTableColumn(netTable, AppUtils.COLUMN_GENERATED_BY, String.class, false, null);
-		hierarchyNetwork.getRow(hierarchyNetwork).set(AppUtils.COLUMN_DESCRIPTION, description.toString());
-		hierarchyNetwork.getRow(hierarchyNetwork).set(AppUtils.COLUMN_DERIVED_FROM, derivedFrom);
-		hierarchyNetwork.getRow(hierarchyNetwork).set(AppUtils.COLUMN_GENERATED_BY, generatedBy);
+		hierarchyNetwork.getRow(netTable).set(AppUtils.COLUMN_DESCRIPTION, description.toString());
+		hierarchyNetwork.getRow(netTable).set(AppUtils.COLUMN_DERIVED_FROM, derivedFrom);
+		hierarchyNetwork.getRow(netTable).set(AppUtils.COLUMN_GENERATED_BY, generatedBy);
 	}
 }
 

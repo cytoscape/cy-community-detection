@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
+import org.ndexbio.communitydetection.rest.model.exceptions.CommunityDetectionException;
 
 /**
  *
@@ -21,8 +22,21 @@ public class MemberListNetworkUpdator {
 	 * Creates member list for each node in the hierarchy network.
 	 * 
 	 * @param hierarchyNetwork
+	 * @param parentNetwork
+	 * @param helper 
 	 */
-	protected void createMemberListsInNetwork(CyNetwork hierarchyNetwork, CyNetwork parentNetwork, HierarchyHelper helper) {
+	protected void createMemberListsInNetwork(CyNetwork hierarchyNetwork,
+			CyNetwork parentNetwork, HierarchyHelper helper) throws CommunityDetectionException {
+		if (hierarchyNetwork == null){
+			throw new CommunityDetectionException("hierarchy network is null");
+		}
+		if (parentNetwork == null){
+			throw new CommunityDetectionException("parent network is null");
+		}
+		if (helper == null){
+			throw new CommunityDetectionException("hierarchy helper is null");
+		}
+		StringBuilder memberList = new StringBuilder();
 		for (CyNode node : hierarchyNetwork.getNodeList()) {
 			List<CyNode> memberNodes = helper.getMemberList(hierarchyNetwork, node).stream()
 					.collect(Collectors.toList());
@@ -33,7 +47,6 @@ public class MemberListNetworkUpdator {
 							.compareTo(parentNetwork.getRow(node2).get(CyNetwork.NAME, String.class));
 				}
 			});
-			StringBuffer memberList = new StringBuffer();
 			for (CyNode memberNode : memberNodes) {
 				if (memberList.length() > 0) {
 					memberList.append(" ");
@@ -41,13 +54,12 @@ public class MemberListNetworkUpdator {
 				String name = parentNetwork.getRow(memberNode).get(CyNetwork.NAME, String.class);
 				memberList.append(name);
 			}
-			if (memberList != null) {
-				hierarchyNetwork.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST, memberList.toString());
-				hierarchyNetwork.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST_SIZE, memberNodes.size());
-				BigDecimal bd = new BigDecimal(Double.toString(log2(memberNodes.size())));
-				BigDecimal roundbd = bd.setScale(3, RoundingMode.HALF_UP);
-				hierarchyNetwork.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST_LOG_SIZE, roundbd.doubleValue());
-			}
+			hierarchyNetwork.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST, memberList.toString());
+			hierarchyNetwork.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST_SIZE, memberNodes.size());
+			BigDecimal bd = new BigDecimal(Double.toString(log2(memberNodes.size())));
+			BigDecimal roundbd = bd.setScale(3, RoundingMode.HALF_UP);
+			hierarchyNetwork.getRow(node).set(AppUtils.COLUMN_CD_MEMBER_LIST_LOG_SIZE, roundbd.doubleValue());
+			memberList.setLength(0); // clear member list for next node
 		}
 	}
 	

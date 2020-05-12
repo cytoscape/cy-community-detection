@@ -1,6 +1,5 @@
 package org.cytoscape.app.communitydetection;
 
-import java.util.HashSet;
 import static org.cytoscape.application.swing.ActionEnableSupport.ENABLE_FOR_SELECTED_NODES;
 import static org.cytoscape.work.ServiceProperties.ENABLE_FOR;
 import static org.cytoscape.work.ServiceProperties.IN_CONTEXT_MENU;
@@ -96,10 +95,7 @@ public class CyActivator extends AbstractCyActivator {
 		AboutAlgorithmEditorPaneFactoryImpl aboutAlgoFac = new AboutAlgorithmEditorPaneFactoryImpl(editorPaneFac);
 		CustomParameterHelpJEditorPaneFactoryImpl customHelpParameterFac = new CustomParameterHelpJEditorPaneFactoryImpl(editorPaneFac);
 		LauncherDialogAlgorithmFactoryImpl algoFac = new LauncherDialogAlgorithmFactoryImpl(CDRestClient.getInstance(), dialogUtil);
-		
-		//final ReaderTaskFactoryImpl readerTaskFactory = new ReaderTaskFactoryImpl(networkViewFactory,
-		//		networkFactory, networkManager, networkViewManager, rootNetworkManager, visualMappingManager,
-		//		vizmapFileTaskFactory, layoutAlgorithmManager, syncTaskManager, networkNaming);
+
 		final HierarchyNetworkFactory hierarchyNetworkFactory = new HierarchyNetworkFactory(networkFactory, networkNaming, rootNetworkManager, networkManager);
 		// Add Run Community Detection under Apps => Community Detection
 		// menu
@@ -182,8 +178,6 @@ public class CyActivator extends AbstractCyActivator {
 		iQueryCMenuProps.put(IN_CONTEXT_MENU, true);
 		IQueryTaskFactoryImpl iQueryFac = new IQueryTaskFactoryImpl(swingApplication, dialogUtil);
 		registerAllServices(bc, iQueryFac, iQueryCMenuProps);
-		
-		
 	}
 
 }

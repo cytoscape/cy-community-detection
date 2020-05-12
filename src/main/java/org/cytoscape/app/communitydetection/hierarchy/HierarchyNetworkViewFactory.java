@@ -14,12 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Creates view for network as well as applies layout and style
  * @author churas
  */
 public class HierarchyNetworkViewFactory {
 	
-		private final static Logger LOGGER = LoggerFactory.getLogger(HierarchyNetworkViewFactory.class);
+	private final static Logger LOGGER = LoggerFactory.getLogger(HierarchyNetworkViewFactory.class);
 
 	private CyNetworkViewFactory _cyNetworkViewFactory;
 	private VisualMappingManager _visualMappingManager;
@@ -27,6 +27,15 @@ public class HierarchyNetworkViewFactory {
 	private SynchronousTaskManager<?> _syncTaskManager;
 	private CyNetworkViewManager _networkViewManager;
 	
+	/**
+	 * Constructor
+	 * 
+	 * @param networkViewManager Used to add view
+	 * @param cyNetworkViewFactory Used to create view
+	 * @param visualMappingManager Used to set style on network
+	 * @param layoutManager Used to get default layout
+	 * @param syncTaskManager Runs layout task
+	 */
 	public HierarchyNetworkViewFactory(CyNetworkViewManager networkViewManager,
 			CyNetworkViewFactory cyNetworkViewFactory,
 			VisualMappingManager visualMappingManager,
@@ -54,6 +63,13 @@ public class HierarchyNetworkViewFactory {
 		}
 	}
 	
+	/**
+	 * Creates network view for {@code network} passed in
+	 * @param network network to create view
+	 * @param desiredStyle style to apply
+	 * @param desiredLayout layout to apply
+	 * @return 
+	 */
 	public CyNetworkView getHierarchyNetworkView(CyNetwork network, VisualStyle desiredStyle,
 			CyLayoutAlgorithm desiredLayout){
 		if (network == null){
