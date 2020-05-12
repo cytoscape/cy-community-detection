@@ -15,7 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Adds any custom data provided by Community Detection algorithm as new column(s)
+ * in the node table
  * @author churas
  */
 public class CustomDataNetworkUpdator {
@@ -27,7 +28,7 @@ public class CustomDataNetworkUpdator {
 		_cyNetworkUtil = new CyNetworkUtil();
 	}
 	
-	public void updateNetworkWithCustomData(CyNetwork network, CX2NodeAttributes nodeAttrs, Map<Long, CyNode> nMap) throws CommunityDetectionException {
+	protected void updateNetworkWithCustomData(CyNetwork network, CX2NodeAttributes nodeAttrs, Map<Long, CyNode> nMap) throws CommunityDetectionException {
 		Map<String, String> aliasMap = createColumnsSuppliedByAlgorithm(network, nodeAttrs);
 		populateColumns(network, nodeAttrs, aliasMap, nMap);
 	}

@@ -37,7 +37,9 @@ public class MemberListNetworkUpdator {
 			throw new CommunityDetectionException("hierarchy helper is null");
 		}
 		StringBuilder memberList = new StringBuilder();
+		
 		for (CyNode node : hierarchyNetwork.getNodeList()) {
+			// TODO check if helper.getMemberList can ever return null
 			List<CyNode> memberNodes = helper.getMemberList(hierarchyNetwork, node).stream()
 					.collect(Collectors.toList());
 			Collections.sort(memberNodes, new Comparator<CyNode>() {

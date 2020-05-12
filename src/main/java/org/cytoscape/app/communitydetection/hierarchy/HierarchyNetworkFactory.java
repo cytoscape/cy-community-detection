@@ -187,10 +187,9 @@ public class HierarchyNetworkFactory {
 		}
 		generatedBy += " Docker Image: " + algorithm.getDockerImage();
 
-		CyTable netTable = hierarchyNetwork.getDefaultNetworkTable();
-		hierarchyNetwork.getRow(netTable).set(AppUtils.COLUMN_DESCRIPTION, description.toString());
-		hierarchyNetwork.getRow(netTable).set(AppUtils.COLUMN_DERIVED_FROM, derivedFrom);
-		hierarchyNetwork.getRow(netTable).set(AppUtils.COLUMN_GENERATED_BY, generatedBy);
+		hierarchyNetwork.getRow(hierarchyNetwork).set(AppUtils.COLUMN_DESCRIPTION, description.toString());
+		hierarchyNetwork.getRow(hierarchyNetwork).set(AppUtils.COLUMN_DERIVED_FROM, derivedFrom);
+		hierarchyNetwork.getRow(hierarchyNetwork).set(AppUtils.COLUMN_GENERATED_BY, generatedBy);
 	}
 }
 
