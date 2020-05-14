@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyTable;
 import org.cytoscape.model.NetworkTestSupport;
 import org.cytoscape.model.subnetwork.CyRootNetworkManager;
 import org.cytoscape.session.CyNetworkNaming;
@@ -71,6 +72,11 @@ public class AttributeNetworkUpdatorTest {
 		when(networkNaming.getSuggestedNetworkTitle("foo_weightcol_parent")).thenReturn("foo_weightcol_parent");
 		CommunityDetectionAlgorithm cda = new CommunityDetectionAlgorithm();
 		cda.setName("foo");
+		
+		CyTable hidden_table = parentNetwork.getTable(CyNetwork.class, CyNetwork.HIDDEN_ATTRS);
+    	hidden_table.createColumn("NDEx UUID", String.class, false);
+    	parentNetwork.getRow(parentNetwork, CyNetwork.HIDDEN_ATTRS).set("NDEx UUID",
+				"137940DC-4D3B-420C-B5EA-5336DB9A4B82");
 		AttributeNetworkUpdator updator = new AttributeNetworkUpdator(rootNetworkManager, networkNaming);
 		
 		CommunityDetectionResult cdResult = new CommunityDetectionResult();
@@ -87,12 +93,13 @@ public class AttributeNetworkUpdatorTest {
 		assertEquals("Original network: parent\n"
 				   + "Algorithm used for community detection: foo\n"
 				   + "Edge table column used as weight: weightcol\n"
-				   + "CustomParameters: {-a=val, -b=val2}", desc);
+				   + "CustomParameters: {-a=val, -b=val2}\n"
+				   + "Original network's NDEx UUID: 137940DC-4D3B-420C-B5EA-5336DB9A4B82", desc);
 		
 		String derivedFrom = hierarchyNetwork.getRow(hierarchyNetwork).get(AppUtils.COLUMN_DERIVED_FROM,
 				String.class);
 		
-		assertEquals("parent", derivedFrom);
+		assertEquals("parent UUID: 137940DC-4D3B-420C-B5EA-5336DB9A4B82", derivedFrom);
 		String generatedBy = hierarchyNetwork.getRow(hierarchyNetwork).get(AppUtils.COLUMN_GENERATED_BY,
 				String.class);
 		assertTrue(generatedBy.startsWith("App: CyCommunityDetection ("));

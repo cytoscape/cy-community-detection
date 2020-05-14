@@ -70,6 +70,10 @@ public class HierarchyNetworkFactory {
 		_memberListNetworkUpdator = updator;
 	}
 	
+	protected void setAlternateAttributeNetworkUpdator(AttributeNetworkUpdator updator){
+		_attributeNetworkUpdator = updator;
+	}
+	
 	/**
 	 * Creates Hierarchy Network from {@code cdResult}
 	 * @param parentNetwork parent network for hierarchy
@@ -83,6 +87,16 @@ public class HierarchyNetworkFactory {
 				final String weightColumn, CommunityDetectionAlgorithm algorithm,
 				Map<String, String> customParameters) throws CommunityDetectionException {	
 
+		if (parentNetwork == null){
+			throw new CommunityDetectionException("parent network is null");
+		}
+		if (cdResult == null){
+			throw new CommunityDetectionException("community detection object is null");
+		}
+		if (algorithm == null){
+			throw new CommunityDetectionException("algorithm is null");
+		}
+		
 		CyNetwork newNetwork = _cyNetworkFactory.createNetwork();
 
 		_cyNetworkUtil.createTableColumn(newNetwork.getDefaultNetworkTable(), AppUtils.COLUMN_CD_ORIGINAL_NETWORK, Long.class, false,
@@ -100,14 +114,17 @@ public class HierarchyNetworkFactory {
 
 		String edgeStr;
 		JsonNode nodeAttrs = null;
+		
+		if (cdResult.getResult() == null){
+			throw new CommunityDetectionException("community detection result is null");
+		}
 		if (cdResult.getResult().isContainerNode()){
 			LOGGER.debug("This node is a container node");
 			
 			JsonNode cdR = cdResult.getResult().get(AppUtils.CD_ALGORITHM_OUTPUT_EDGELIST_KEY);
 			if (cdR == null){
-				LOGGER.error("No " + AppUtils.CD_ALGORITHM_OUTPUT_EDGELIST_KEY
-						+ " found in container " + cdResult.getResult().asText());
-				return null;
+				throw new CommunityDetectionException("No " + AppUtils.CD_ALGORITHM_OUTPUT_EDGELIST_KEY
+						+ " found in JSON output");
 			}
 			nodeAttrs = cdResult.getResult().get("nodeAttributesAsCX2");
 			edgeStr = cdR.asText().trim();

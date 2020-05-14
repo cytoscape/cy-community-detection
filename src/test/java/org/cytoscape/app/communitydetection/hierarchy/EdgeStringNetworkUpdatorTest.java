@@ -10,7 +10,6 @@ import org.cytoscape.model.NetworkTestSupport;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.mock;
 import org.ndexbio.communitydetection.rest.model.exceptions.CommunityDetectionException;
 
 /**
