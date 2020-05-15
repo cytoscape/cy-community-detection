@@ -1,8 +1,11 @@
 What's New
 ==========
 
-Version 1.10.1
+Version 1.11.0
 ---------------------------
+
+* Added support for new edge list format COMMUNITYDETECTRESULTV2 allowing
+  Community Detection algorithms to add additional custom node columns. UD-1091
 
 Bug fixes
 
