@@ -35,7 +35,7 @@ The second method
 
 .. warning:: This is for advanced users only and may cause
              CDAPS to fail and/or to use excessive CPU and
-             network fail
+             network bandwidth
 
 ``Edit -> Preferences -> Properties``
 

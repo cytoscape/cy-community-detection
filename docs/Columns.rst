@@ -16,7 +16,7 @@ Network Columns
 
    .. code-block::
 
-     <ALGORITHM NAME>_(<WEIGHT COLUMN USED OR (none)>)_<NAME OF PARENT NETWORK>
+     <ALGORITHM NAME>_(<WEIGHT COLUMN USED OR no column used>)_<NAME OF PARENT NETWORK>
 
    Example:
 
@@ -24,8 +24,10 @@ Network Columns
 
      infomap_(none)_HIV_human PPI
 
- * ``__CD_OriginalNetwork`` - SUID of parent network. (``Bug`` Saving/reloading a
-   Cytoscape session changes SUID and will cause **View Interactions for Selected Node** to fail)
+ * ``__CD_OriginalNetwork`` - SUID of parent network. This value can
+   change upon session save/reload. If CDAPS is unable to find the
+   parent network a dialog will be displayed to the user letting
+   them select the correct parent network.
 
  * ``description`` - Contains string in this format:
 
