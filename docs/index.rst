@@ -15,8 +15,8 @@ tools run remotely on a dedicated server.
 
 Currently supported features:
 
-* Community detection algorithms: Louvain, Infomap, OSLOM, CliXO
-* Functional enrichment tools: g:Profiler, Enrichr, iQuery
+* Community detection algorithms: `Louvain <https://github.com/idekerlab/cdlouvain>`_, `Infomap <https://github.com/idekerlab/cdinfomap>`_, `OSLOM <https://github.com/idekerlab/cdoslom>`_, `CliXO <https://github.com/idekerlab/cdclixo>`_, `HiDeF <https://github.com/idekerlab/cdhidef>`_
+* Functional enrichment tools: `g:Profiler <https://github.com/idekerlab/cdgprofilergenestoterm>`_, `Enrichr <https://github.com/idekerlab/cdenrichrgenestoterm>`_, `iQuery <https://github.com/idekerlab/cdiquerygenestoterm>`_
 
 .. image:: images/f1_app_store.png
    :class: with-border with-shadow
@@ -61,8 +61,8 @@ Manuscript in preparation
    :caption: Links:
    :hidden:
 
-   Cytoscape.org <http://cytoscape.org>
-   Cytoscape App Store <http://apps.cytoscape.org/apps/cycommunitydetection>
-   Idekerlab.ucsd.edu <http://idekerlab.ucsd.edu/>
+   Cytoscape.org <https://cytoscape.org>
+   Cytoscape App Store <https://apps.cytoscape.org/apps/cycommunitydetection>
+   Idekerlab.ucsd.edu <https://idekerlab.ucsd.edu/>
    GitHub <https://github.com/cytoscape/cy-community-detection>
 
