@@ -126,7 +126,8 @@ public class TallyAttributesTaskFactoryImpl implements NetworkTaskFactory {
 				continue;
 			}
 			if (col.getType() == Integer.class || 
-				col.getType() == Boolean.class){
+				col.getType() == Boolean.class ||
+					col.getType() == Double.class){
 				LOGGER.debug("Found attribute/column that can be tallied: "
 						+ col.getName());
 				cyColumns.put(col.getName(), col);
