@@ -57,7 +57,8 @@ public class CyNetworkUtil {
 		if (type == null){
 			throw new CommunityDetectionException("type is null");
 		}
-		if (table.getColumn(colName) == null) {
+		
+		if (table.getColumn(nameSpace, colName) == null) {
 			table.createColumn(nameSpace, colName, type, isImmutable, defaultValue);
 		}
 	}
