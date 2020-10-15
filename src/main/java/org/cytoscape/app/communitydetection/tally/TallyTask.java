@@ -1,6 +1,6 @@
 package org.cytoscape.app.communitydetection.tally;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import org.cytoscape.app.communitydetection.util.AppUtils;
 import org.cytoscape.app.communitydetection.util.CyNetworkUtil;
@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TallyTask extends AbstractTask {
 
+	public static final int ONE = 1;
 	private final static Logger LOGGER = LoggerFactory.getLogger(TallyTask.class);
 	
 	private CyNetwork _parentNetwork;
@@ -39,6 +40,7 @@ public class TallyTask extends AbstractTask {
 		taskMonitor.setTitle("Community Detection: Tally Attributes on hierarchy network");
 		taskMonitor.setProgress(0.0);
 		if (cancelled){
+			taskMonitor.setStatusMessage("User cancelled Task");
 			return;
 		}
 		
@@ -47,10 +49,28 @@ public class TallyTask extends AbstractTask {
 		boolean unMatched = true;
 		int curVal = 0;
 		Object res = null;
+		taskMonitor.setStatusMessage("Remove existing and add new tally columns");
+		removeExistingTallyColumns();
 		createTallyColumnsInHierarchyNetwork();
+		if (cancelled){
+			taskMonitor.setStatusMessage("User cancelled Task");
+			return;
+		}
+		
+		taskMonitor.setStatusMessage("Iterate over nodes in hierarchy");
 		// iterate through memberlist for each node in 
 		// hierarchy get fast look up set of node names
+		int nodeCount = _hierarchyNetwork.getNodeCount();
+		int counter = 0;
 		for (CyNode node : _hierarchyNetwork.getNodeList()) {
+			taskMonitor.setProgress((double)counter/(double)nodeCount);
+			counter++;
+			
+			if (cancelled){
+				taskMonitor.setStatusMessage("User cancelled Task");
+				return;
+			}
+			
 			List<String> memberList = _cyNetworkUtil.getMemberListForNode(_hierarchyNetwork, node);
 			if (memberList == null){
 				continue;
@@ -66,7 +86,7 @@ public class TallyTask extends AbstractTask {
 							res = _parentNetwork.getRow(parentNode).get(tallyCol.getNamespace(),
 									tallyCol.getName(), tallyCol.getType());
 							if (res != null && (boolean)res == true){
-								curVal = 1;
+								curVal = ONE;
 							}
 						} else {
 							
@@ -78,12 +98,12 @@ public class TallyTask extends AbstractTask {
 						}
 						if (curVal > 0){
 							unMatched = false;
-							addToValueInHierarchy(node, tallyCol.getName(), curVal);
+							addToValueInHierarchy(node, tallyCol.getName(), ONE);
 						}
 					}
 				}
 				if (unMatched == true){
-					addToValueInHierarchy(node, AppUtils.COLUMN_CD_UNMATCHED, 1);
+					addToValueInHierarchy(node, AppUtils.COLUMN_CD_UNMATCHED, ONE);
 				}				
 			}
 		}
@@ -91,36 +111,35 @@ public class TallyTask extends AbstractTask {
 	}
 	
 	private void addToValueInHierarchy(CyNode node, final String name, int valueToAdd){
-		LOGGER.debug("Attempting to update value in " + name + " column");
-		int curVal = _hierarchyNetwork.getRow(node).get(AppUtils.COLUMN_NAMESPACE,
+		int curVal = _hierarchyNetwork.getRow(node).get(AppUtils.COLUMN_CD_TALLY_NAMESPACE,
 				name, Integer.class);
-		_hierarchyNetwork.getRow(node).set(AppUtils.COLUMN_NAMESPACE,
+		_hierarchyNetwork.getRow(node).set(AppUtils.COLUMN_CD_TALLY_NAMESPACE,
 				name, curVal+valueToAdd);
 	}
 	
+	private void removeExistingTallyColumns() throws Exception {
+		Collection<CyColumn> oldTallyCols = _hierarchyNetwork.getDefaultNodeTable().getColumns(AppUtils.COLUMN_CD_TALLY_NAMESPACE);
+		if (oldTallyCols == null){
+			LOGGER.debug("No columns with namespace: "
+					+ AppUtils.COLUMN_CD_TALLY_NAMESPACE
+					+ " found. Skipping delete.");
+			return;
+		}
+		for (CyColumn col : oldTallyCols){
+			LOGGER.debug("Removing old tally column: " + col.getNamespace() + "::" + col.getNameOnly());
+			_hierarchyNetwork.getDefaultNodeTable().deleteColumn(col.getNamespace(),
+				col.getNameOnly());
+		}
+	}
+	
 	private void createTallyColumnsInHierarchyNetwork() throws Exception {
-		CyColumn existingCol = null;
 		for (CyColumn col : _tallyColumns){
-			LOGGER.debug("Deleting and creating column: " + col.getName());
-			existingCol = _hierarchyNetwork.getDefaultNodeTable().getColumn(AppUtils.COLUMN_NAMESPACE,
-					col.getName());
-			if (existingCol != null){
-				_hierarchyNetwork.getDefaultNodeTable().deleteColumn(AppUtils.COLUMN_NAMESPACE,
-					col.getName());
-			}
+			LOGGER.debug("Creating column: " + col.getName());
 			_cyNetworkUtil.createTableColumn(_hierarchyNetwork.getDefaultNodeTable(),
-					AppUtils.COLUMN_NAMESPACE, col.getName(), Integer.class, false, 0);
+					AppUtils.COLUMN_CD_TALLY_NAMESPACE, col.getName(), Integer.class, false, 0);
 		}
-		
-		existingCol = _hierarchyNetwork.getDefaultNodeTable().getColumn(AppUtils.COLUMN_NAMESPACE,
-					AppUtils.COLUMN_CD_UNMATCHED);
-		if (existingCol != null){
-			_hierarchyNetwork.getDefaultNodeTable().deleteColumn(AppUtils.COLUMN_NAMESPACE,
-				AppUtils.COLUMN_CD_UNMATCHED);
-		}
-		
 		_cyNetworkUtil.createTableColumn(_hierarchyNetwork.getDefaultNodeTable(),
-					AppUtils.COLUMN_NAMESPACE, AppUtils.COLUMN_CD_UNMATCHED,
+					AppUtils.COLUMN_CD_TALLY_NAMESPACE, AppUtils.COLUMN_CD_UNMATCHED,
 					Integer.class, false, 0);
 	}
 
