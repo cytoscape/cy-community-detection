@@ -1,5 +1,9 @@
 package org.cytoscape.app.communitydetection.tally;
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +14,8 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import org.cytoscape.app.communitydetection.util.AppUtils;
+import org.cytoscape.app.communitydetection.util.IconJLabelDialogFactory;
 import org.cytoscape.app.communitydetection.util.ShowDialogUtil;
 import org.cytoscape.model.CyColumn;
 import org.slf4j.Logger;
@@ -31,10 +37,25 @@ public class TallyDialog extends JPanel {
 	private DefaultListModel _listModel;
 	private Map<String, CyColumn> _columnMap;
 	private JList _jList;
+	private IconJLabelDialogFactory _iconFactory;
+
+	final static String DESC_MESSAGE = "Tally Attributes on hierarchy provides a way<br/>"
+			+ "to count the number of nodes in each hierarchy cluster node that have<br/>"
+			+ "a <b><i>true</i></b> or <b><i>positive</i></b> value for a user specified set of attributes/columns<br/>"
+			+ "in the parent network.<br/><br/>These counts are stored as new columns/attributes<br/>"
+			+ "on the hierarchy with the same name as seen in the parent network, but prefixed<br/>"
+			+ "with <b><i>" + AppUtils.COLUMN_CD_TALLY_NAMESPACE + "</i></b> namespace.<br/><br/>"
+			+ "In addition, any nodes in the cluster that does <b>NOT</b> match any of the user specified<br/>"
+			+ "set of attributes/columns are counted in the <b><i>" + AppUtils.COLUMN_CD_UNMATCHED + "</i></b><br/>"
+			+ "column/attribute.<br/><br/>"
+			+ "<a href=\"https://cdaps.readthedocs.io\">Click here for information about Tally Attributes on hierarchy</a><br/><br/>";
+			
 	
-	public TallyDialog(ShowDialogUtil dialogUtil){
+	public TallyDialog(ShowDialogUtil dialogUtil,
+			IconJLabelDialogFactory iconFactory){
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		_dialogUtil = dialogUtil;
+		_iconFactory = iconFactory;
 	}
 	
 	/**
@@ -89,13 +110,49 @@ public class TallyDialog extends JPanel {
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		
-		mainPanel.add(new JLabel("Select Attributes/Columns(s) from parent network"
-				+ "to tally on hierarchy network."));
+		JPanel descriptionPanel = new JPanel();
+		descriptionPanel.setLayout(new GridBagLayout());
+		
+		GridBagConstraints descConstraints = new GridBagConstraints();
+		descConstraints.gridy = 0;
+		descConstraints.gridx = 0;
+		descConstraints.anchor = GridBagConstraints.LINE_START;
+		descConstraints.fill = GridBagConstraints.NONE;
+		descConstraints.insets = new Insets(20, 5, 20, 10);
+		descriptionPanel.add(new JLabel("Select Attributes/Columns(s) to tally"),
+				descConstraints);
+		
+		GridBagConstraints infoConstraints = new GridBagConstraints();
+		infoConstraints.gridy = 0;
+		infoConstraints.gridx = 1;
+		infoConstraints.insets = new Insets(30, 10, 20, 10);
+		descriptionPanel.add(getInfoIcon());
+		mainPanel.add(descriptionPanel);
 		
 		_jList = new JList(_listModel);
 		_jList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		_jList.setToolTipText("Attributes/Column(s) from parent network");
 		JScrollPane listScrollPane = new JScrollPane(_jList);
 		mainPanel.add(listScrollPane);
 		return mainPanel;
+	}
+	
+	/**
+	 * Creates a {@link javax.swing.JLabel} with an info icon that when clicked
+	 * displays a small dialog that displays information about the parameter
+	 * passed in
+	 * @param parameter The parameter
+	 * @return 
+	 * @throws IOException 
+	 */
+	private JLabel getInfoIcon(){
+		JLabel restUrlLabel = _iconFactory.getJLabelIcon(this,"info_icon", "png",
+				"Tally Attributes on hierarchy description", 
+				DESC_MESSAGE, 20, 40);
+		restUrlLabel.setName("infoIcon");
+		restUrlLabel.setToolTipText("Click here for more information about "
+				+ "Tallying Attributes on Hierarchy");
+	
+		return restUrlLabel;
 	}
 }
