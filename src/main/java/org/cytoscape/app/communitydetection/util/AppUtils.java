@@ -53,7 +53,7 @@ public class AppUtils {
 	public final static String COLUMN_CD_ANNOTATED_SOURCE = "CD_AnnotatedMembers_SourceDB";
 	public final static String COLUMN_CD_ANNOTATED_SOURCE_TERM = "CD_AnnotatedMembers_SourceTerm";
 	public final static String COLUMN_CD_UNMATCHED = "Unmatched";
-	public final static String COLUMN_NAMESPACE = "CDAPS";
+	public final static String COLUMN_CD_TALLY_NAMESPACE = "CommunityDetectionTally";
 	
 	public final static String COLUMN_CD_LABELED = "CD_Labeled";
 
