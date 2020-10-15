@@ -25,9 +25,12 @@ import org.cytoscape.app.communitydetection.rest.CDRestClient;
 import org.cytoscape.app.communitydetection.subnetwork.ParentNetworkChooserDialog;
 import org.cytoscape.app.communitydetection.subnetwork.ParentNetworkFinder;
 import org.cytoscape.app.communitydetection.subnetwork.SubNetworkTaskFactoryImpl;
+import org.cytoscape.app.communitydetection.tally.TallyAttributesTaskFactoryImpl;
+import org.cytoscape.app.communitydetection.tally.TallyDialog;
 import org.cytoscape.app.communitydetection.termmap.NetworkTermMappingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.termmap.NodeTermMapppingTaskFactoryImpl;
 import org.cytoscape.app.communitydetection.util.AppUtils;
+import org.cytoscape.app.communitydetection.util.CyNetworkUtil;
 import org.cytoscape.app.communitydetection.util.IconJLabelDialogFactory;
 import org.cytoscape.app.communitydetection.util.ImageIconHolderFactory;
 import org.cytoscape.app.communitydetection.util.ShowDialogUtil;
@@ -127,10 +130,27 @@ public class CyActivator extends AbstractCyActivator {
 		NetworkTermMappingTaskFactoryImpl termFac = new NetworkTermMappingTaskFactoryImpl(swingApplication, tmAlgoDialog); 
 		registerAllServices(bc, termFac, tmExecProps);
 
+		ParentNetworkFinder parentNetworkFinder = new ParentNetworkFinder();
+		ParentNetworkChooserDialog parentNetworkDialog = new ParentNetworkChooserDialog(iconJLabelFactory);
+
+		CyNetworkUtil cyNetworkUtil = new CyNetworkUtil();
+		// add Tally Columns/Attributes under Apps => Community Detection
+		// menu
+		Properties tallyProps = new Properties();
+		tallyProps.setProperty(MENU_GRAVITY, "3.0");
+		tallyProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
+		tallyProps.setProperty(TITLE, "Tally Attributes on Hierarchy");
+		TallyDialog tallyDialog = new TallyDialog(dialogUtil);
+		TallyAttributesTaskFactoryImpl tallyFac = new TallyAttributesTaskFactoryImpl(swingApplication,
+				dialogUtil, tallyDialog, parentNetworkFinder, parentNetworkDialog, cyNetworkUtil,
+		networkManager);
+		registerAllServices(bc, tallyFac, tallyProps);
+		
+		
 		// add Settings under Apps => Community Detection
 		// menu
 		Properties settingsProps = new Properties();
-		settingsProps.setProperty(MENU_GRAVITY, "3.0");
+		settingsProps.setProperty(MENU_GRAVITY, "4.0");
 		settingsProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
 		settingsProps.setProperty(TITLE, "Settings");
 		SettingsDialog settingsDialog = new SettingsDialog(iconJLabelFactory,
@@ -140,14 +160,12 @@ public class CyActivator extends AbstractCyActivator {
 		// add About undern Apps => Community Detection
 		// menu
 		Properties aboutProps = new Properties();
-		aboutProps.setProperty(MENU_GRAVITY, "4.0");
+		aboutProps.setProperty(MENU_GRAVITY, "5.0");
 		aboutProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
 		aboutProps.setProperty(TITLE, "About");
 		registerAllServices(bc, new AboutTaskFactoryImpl(swingApplication, editorPaneFac, dialogUtil), aboutProps);
 		
-		ParentNetworkFinder parentNetworkFinder = new ParentNetworkFinder();
-		ParentNetworkChooserDialog parentNetworkDialog = new ParentNetworkChooserDialog(iconJLabelFactory);
-        // add View Interactions for this Community in context menu
+		// add View Interactions for this Community in context menu
 		// displayed when user right clicks on a node
 		Properties contextMenuProps = new Properties();
 		contextMenuProps.setProperty(PREFERRED_MENU, AppUtils.CONTEXT_MENU_CD);
