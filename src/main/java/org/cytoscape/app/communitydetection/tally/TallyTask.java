@@ -82,18 +82,20 @@ public class TallyTask extends AbstractTask {
 					
 					if (parentNode != null){
 						curVal = 0;
-						if (tallyCol.getType() == Boolean.class){
-							res = _parentNetwork.getRow(parentNode).get(tallyCol.getNamespace(),
+						res = _parentNetwork.getRow(parentNode).get(tallyCol.getNamespace(),
 									tallyCol.getName(), tallyCol.getType());
+						if (tallyCol.getType() == Boolean.class){
 							if (res != null && (boolean)res == true){
 								curVal = ONE;
 							}
-						} else {
-							
-							res = _parentNetwork.getRow(parentNode).get(tallyCol.getNamespace(),
-									     tallyCol.getName(), tallyCol.getType());
+						} else if (tallyCol.getType() == Integer.class) {
 							if (res != null){
 								curVal = (int)res;
+							}
+						} else if (tallyCol.getType() == Double.class){
+							if (res != null){
+								Long lVal = Math.round((double)res);
+								curVal =  lVal.intValue();
 							}
 						}
 						if (curVal > 0){
