@@ -22,7 +22,9 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- *
+ * Creates task to take column(s) from parent network that are of type Integer or 
+ * Boolean and uses them to tally number of nodes in member list of hierarchy
+ * where those given column(s) have value of {@code true} or non zero number. 
  * @author churas
  */
 public class TallyAttributesTaskFactoryImpl implements NetworkTaskFactory {
@@ -37,6 +39,17 @@ public class TallyAttributesTaskFactoryImpl implements NetworkTaskFactory {
 	private CyNetworkUtil _cyNetworkUtil;
 	private final CyNetworkManager _networkManager;
 
+	/**
+	 * Constructor
+	 * 
+	 * @param swingApplication
+	 * @param dialogUtil
+	 * @param dialog
+	 * @param parentNetworkFinder
+	 * @param parentNetworkDialog
+	 * @param cyNetworkUtil
+	 * @param networkManager 
+	 */
 	public TallyAttributesTaskFactoryImpl(CySwingApplication swingApplication,
 		ShowDialogUtil dialogUtil,
 		TallyDialog dialog, 
@@ -53,6 +66,12 @@ public class TallyAttributesTaskFactoryImpl implements NetworkTaskFactory {
 		this._networkManager = networkManager;
 	}
 	
+	/**
+	 * Gets the parent network by first checking the network attribute on the
+	 * hierarchy and if that fails, displays a dialog to the user
+	 * @param hierarchyNetwork 
+	 * @return parent network or {@code null} if none selected or found
+	 */
 	protected CyNetwork getParentNetwork(CyNetwork hierarchyNetwork){
 		try {
 			List<CyNetwork> parentNetworks =  _parentNetworkFinder.findParentNetworks(_networkManager.getNetworkSet(), 
@@ -116,6 +135,14 @@ public class TallyAttributesTaskFactoryImpl implements NetworkTaskFactory {
 		return cyColumns;
 	}
 
+	/**
+	 * Creates the task to tally columns(s) from parent network on hierarchy network
+	 * If 'network' is not a hierarchy network or is missing AppUtils.COLUMN_CD_MEMBER_LIST
+	 * a dialog will be displayed and a no op task will be returned.
+	 * 
+	 * @param network hierarchy network
+	 * @return Task to run
+	 */
 	@Override
 	public TaskIterator createTaskIterator(CyNetwork network) {
 	    if (network == null){
@@ -174,6 +201,11 @@ public class TallyAttributesTaskFactoryImpl implements NetworkTaskFactory {
 	    return new TaskIterator(new DoNothingTask());
 	}
 
+	/**
+	 * Will always return true to denote this task can be run
+	 * @param network
+	 * @return 
+	 */
 	@Override
 	public boolean isReady(CyNetwork network) {
 	    return true;
