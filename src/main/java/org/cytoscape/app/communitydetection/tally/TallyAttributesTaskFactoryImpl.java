@@ -1,0 +1,181 @@
+package org.cytoscape.app.communitydetection.tally;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.swing.JOptionPane;
+import org.cytoscape.app.communitydetection.DoNothingTask;
+import org.cytoscape.app.communitydetection.subnetwork.ParentNetworkChooserDialog;
+import org.cytoscape.app.communitydetection.subnetwork.ParentNetworkFinder;
+import org.cytoscape.app.communitydetection.subnetwork.ParentNetworkFinderException;
+import org.cytoscape.app.communitydetection.util.AppUtils;
+import org.cytoscape.app.communitydetection.util.CyNetworkUtil;
+import org.cytoscape.app.communitydetection.util.ShowDialogUtil;
+import org.cytoscape.application.swing.CySwingApplication;
+import org.cytoscape.model.CyColumn;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.task.NetworkTaskFactory;
+import org.cytoscape.work.TaskIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+/**
+ *
+ * @author churas
+ */
+public class TallyAttributesTaskFactoryImpl implements NetworkTaskFactory {
+	
+	private final static Logger LOGGER = LoggerFactory.getLogger(TallyAttributesTaskFactoryImpl.class);
+
+	private TallyDialog _dialog;
+	private CySwingApplication _swingApplication;
+	private ParentNetworkFinder _parentNetworkFinder;
+	private ParentNetworkChooserDialog _parentNetworkDialog;
+	private ShowDialogUtil _dialogUtil;
+	private CyNetworkUtil _cyNetworkUtil;
+	private final CyNetworkManager _networkManager;
+
+	public TallyAttributesTaskFactoryImpl(CySwingApplication swingApplication,
+		ShowDialogUtil dialogUtil,
+		TallyDialog dialog, 
+		ParentNetworkFinder parentNetworkFinder,
+		ParentNetworkChooserDialog parentNetworkDialog,
+		CyNetworkUtil cyNetworkUtil,
+		CyNetworkManager networkManager) {
+		this._dialog = dialog;
+		this._dialogUtil = dialogUtil;
+		this._swingApplication = swingApplication;
+		this._parentNetworkFinder = parentNetworkFinder;
+		this._parentNetworkDialog = parentNetworkDialog;
+		this._cyNetworkUtil = cyNetworkUtil;
+		this._networkManager = networkManager;
+	}
+	
+	protected CyNetwork getParentNetwork(CyNetwork hierarchyNetwork){
+		try {
+			List<CyNetwork> parentNetworks =  _parentNetworkFinder.findParentNetworks(_networkManager.getNetworkSet(), 
+			                                                                          hierarchyNetwork);
+			if (parentNetworks != null && parentNetworks.size() == 1){
+				return parentNetworks.get(0);
+			} 
+
+			if (_parentNetworkDialog.createGUI(parentNetworks) == false){
+				LOGGER.error("No parent network selected via GUI");
+				return null;
+			}
+			Object[] options = {AppUtils.UPDATE, AppUtils.CANCEL};
+			int res = _dialogUtil.showOptionDialog(_swingApplication.getJFrame(),
+				                               this._parentNetworkDialog,
+									"Parent Network Chooser",
+									JOptionPane.YES_NO_OPTION,
+									JOptionPane.PLAIN_MESSAGE, 
+									null, 
+									options,
+									options[0]);
+			if (res == 0){
+				CyNetwork selectedParentNetwork = _parentNetworkDialog.getSelection();
+				if (_parentNetworkDialog.rememberChoice() == true){
+					_cyNetworkUtil.updateHierarchySUID(hierarchyNetwork, selectedParentNetwork);
+				}
+				return selectedParentNetwork;
+			}
+			return null;
+		}
+		catch(ParentNetworkFinderException pe){
+			LOGGER.error("Caught exception trying to find parent network", pe);
+			return null;
+		}
+	}
+	
+	/**
+	 * Gets the columns that can be tallied. These are columns that
+	 * must be of type Integer
+	 * @param parentNetwork 
+	 */
+	public Map<String, CyColumn> getColumnsThatCanBeTallied(CyNetwork parentNetwork){
+		Map<String, CyColumn> cyColumns = new HashMap<>();
+		for (CyColumn col : parentNetwork.getDefaultNodeTable().getColumns()){
+			if (col.getName() == null || 
+					col.getName().equals("selected")){
+				continue;
+			}
+
+			LOGGER.debug("Checking type for column: " + col.getName());
+			if (col.getType() == null){
+				continue;
+			}
+			if (col.getType() == Integer.class || 
+				col.getType() == Boolean.class){
+				LOGGER.debug("Found attribute/column that can be tallied: "
+						+ col.getName());
+				cyColumns.put(col.getName(), col);
+			}
+		}
+		return cyColumns;
+	}
+
+	@Override
+	public TaskIterator createTaskIterator(CyNetwork network) {
+	    if (network == null){
+		JOptionPane.showMessageDialog(_swingApplication.getJFrame(),
+			"A network must be selected in Cytoscape to run "
+				+ "Tailly Attributes.\n"
+				+ "For more information visit About menu item under Apps => Community Detection",
+			AppUtils.APP_NAME, JOptionPane.ERROR_MESSAGE);
+		 return new TaskIterator(new DoNothingTask());
+	    }
+		
+	    if (network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_MEMBER_LIST) == null){
+		JOptionPane.showMessageDialog(_swingApplication.getJFrame(),
+			"A node column named " + AppUtils.COLUMN_CD_MEMBER_LIST + " ("
+				+ "type String with genes delimited by spaces)\n" 
+				+ "needs to exist on network to run "
+				+ "Tally Attributes on hierarchy.\n"
+				+ "For more information click About menu item under Apps => Community Detection",
+			AppUtils.APP_NAME, JOptionPane.ERROR_MESSAGE);
+		 return new TaskIterator(new DoNothingTask());
+	    }
+	    
+		CyNetwork selectedParentNetwork = this.getParentNetwork(network);
+		if (selectedParentNetwork == null){
+			LOGGER.error("No parent network selected/found");
+			return new TaskIterator(new DoNothingTask());
+		}
+		
+		Map<String, CyColumn> columnsThatCanBeTallied = getColumnsThatCanBeTallied(selectedParentNetwork);
+		
+	    if (_dialog.createGUI(columnsThatCanBeTallied) == false){
+			return new TaskIterator(new DoNothingTask());
+		}
+	    Object[] options = {AppUtils.TALLY, AppUtils.CANCEL};
+	    int res = JOptionPane.showOptionDialog(_swingApplication.getJFrame(),
+		                                   this._dialog,
+					           "Tally Attributes",
+						   JOptionPane.YES_NO_OPTION,
+						   JOptionPane.PLAIN_MESSAGE, 
+						   null, 
+						   options,
+						   options[0]);
+	    if (res == 0){
+			// user wants to run job
+			LOGGER.info("User wants to run task");
+			List<CyColumn> tallyCols = _dialog.getColumnsToTally();
+			if (tallyCols == null || tallyCols.isEmpty()){
+				LOGGER.error("No columns selected to tally");
+			    return new TaskIterator(new DoNothingTask());
+			}
+			return new TaskIterator(new TallyTask(_cyNetworkUtil,
+					selectedParentNetwork, network, tallyCols));
+		} else {
+		   LOGGER.error("User canceled operation");
+		}
+	    return new TaskIterator(new DoNothingTask());
+	}
+
+	@Override
+	public boolean isReady(CyNetwork network) {
+	    return true;
+	}
+}
