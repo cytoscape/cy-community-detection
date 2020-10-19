@@ -37,7 +37,7 @@ public class TallyTask extends AbstractTask {
 	
 	@Override
 	public void run(TaskMonitor taskMonitor) throws Exception {
-		taskMonitor.setTitle("Community Detection: Tally Attributes on hierarchy network");
+		taskMonitor.setTitle("Community Detection: Tally columns on hierarchy network");
 		taskMonitor.setProgress(0.0);
 		if (cancelled){
 			taskMonitor.setStatusMessage("User cancelled Task");
@@ -57,7 +57,8 @@ public class TallyTask extends AbstractTask {
 			return;
 		}
 		
-		taskMonitor.setStatusMessage("Iterate over nodes in hierarchy");
+		taskMonitor.setStatusMessage("Iterate over cluster nodes in "
+				+ "hierarchy to generate tally columns");
 		// iterate through memberlist for each node in 
 		// hierarchy get fast look up set of node names
 		int nodeCount = _hierarchyNetwork.getNodeCount();
@@ -112,6 +113,13 @@ public class TallyTask extends AbstractTask {
 		
 	}
 	
+	/**
+	 * Adds value to column in hierarchy by adding {@code valueToAdd} to existing value
+	 * 
+	 * @param node node to modify
+	 * @param name column to modify
+	 * @param valueToAdd value to add to existing value
+	 */
 	private void addToValueInHierarchy(CyNode node, final String name, int valueToAdd){
 		int curVal = _hierarchyNetwork.getRow(node).get(AppUtils.COLUMN_CD_TALLY_NAMESPACE,
 				name, Integer.class);
@@ -119,6 +127,10 @@ public class TallyTask extends AbstractTask {
 				name, curVal+valueToAdd);
 	}
 	
+	/**
+	 * Removes any columns in hierarchy with AppUtils.COLUMN_CD_TALLY_NAMESPACE namespace
+	 * @throws Exception 
+	 */
 	private void removeExistingTallyColumns() throws Exception {
 		Collection<CyColumn> oldTallyCols = _hierarchyNetwork.getDefaultNodeTable().getColumns(AppUtils.COLUMN_CD_TALLY_NAMESPACE);
 		if (oldTallyCols == null){
@@ -134,6 +146,12 @@ public class TallyTask extends AbstractTask {
 		}
 	}
 	
+	/**
+	 * Creates the tally columns in hierarchy setting type to {@code Integer.class} and 
+	 * default value to {@code 0}. The columns are added to AppUtils.COLUMN_CD_TALLY_NAMESPACE
+	 * namespace.
+	 * @throws Exception 
+	 */
 	private void createTallyColumnsInHierarchyNetwork() throws Exception {
 		for (CyColumn col : _tallyColumns){
 			LOGGER.debug("Creating column: " + col.getName());

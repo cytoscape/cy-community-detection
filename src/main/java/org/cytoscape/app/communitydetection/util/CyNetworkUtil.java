@@ -71,14 +71,38 @@ public class CyNetworkUtil {
 	 * @param selectedParentNetwork parent network
 	 */
 	public void updateHierarchySUID(CyNetwork hierarchyNetwork,
-			CyNetwork selectedParentNetwork){
+			CyNetwork selectedParentNetwork) throws CommunityDetectionException {
+		if (hierarchyNetwork == null){
+			throw new CommunityDetectionException("hierarchy network is null");
+		}
+		if (selectedParentNetwork == null){
+			throw new CommunityDetectionException("parent network is null");
+		}
 		hierarchyNetwork.getRow(hierarchyNetwork).set(AppUtils.COLUMN_CD_ORIGINAL_NETWORK,
 				selectedParentNetwork.getSUID());
 	}
 	
-	
+	/**
+	 * This method extracts the list of node names from the 
+	 * AppUtils.COLUMN_CD_MEMBER_LIST column for the selected node. This is
+	 * assumed to be a string that has AppUtils.CD_MEMBER_LIST_DELIMITER as
+	 * a delimiter
+	 * 
+	 * @param hierarchyNetwork The hierarchy network
+	 * @param selectedNode The node to examine
+	 * @return List of node members for selected node
+	 * @throws Exception 
+	 * @throws CommunityDetectionException if hierarchy, or node is {@code null}
+	 */
 	public List<String> getMemberListForNode(CyNetwork hierarchyNetwork,
 			CyNode selectedNode) throws Exception {
+		if (hierarchyNetwork == null){
+			throw new CommunityDetectionException("hierarchy network is null");
+		}
+		if (selectedNode == null){
+			throw new CommunityDetectionException("selected node is null");
+		}
+		
 		return Arrays.asList(hierarchyNetwork.getRow(selectedNode)
 				.get(AppUtils.COLUMN_CD_MEMBER_LIST, String.class).split(AppUtils.CD_MEMBER_LIST_DELIMITER));
 	}

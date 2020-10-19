@@ -56,6 +56,39 @@ public class CyNetworkUtilTest {
 		assertEquals(5, col.getDefaultValue());
 		assertFalse(col.isImmutable());
 		assertEquals(Integer.class, col.getType());
-		
 	}
+	
+	@Test
+	public void testupdateHierarchySUIDWithNullArgs(){
+		CyNetworkUtil util = new CyNetworkUtil();
+		try {
+			util.updateHierarchySUID(null, null);
+			fail("Expected CommunityDetectionException");
+		} catch(CommunityDetectionException cde){
+			assertEquals("hierarchy network is null", cde.getMessage());
+		}
+		CyNetwork network = _nts.getNetwork();
+		try {
+			util.updateHierarchySUID(network, null);
+			fail("Expected CommunityDetectionException");
+		} catch(CommunityDetectionException cde){
+			assertEquals("parent network is null", cde.getMessage());
+		}
+	}
+	
+	@Test
+	public void testupdateHierarchySUID() throws CommunityDetectionException {
+		CyNetworkUtil util = new CyNetworkUtil();
+		
+		CyNetwork parentNetwork = _nts.getNetwork();
+		CyNetwork hierNetwork = _nts.getNetwork();	
+		util.createTableColumn(hierNetwork.getDefaultNetworkTable(),
+				AppUtils.COLUMN_CD_ORIGINAL_NETWORK, Long.class, false, 0L);
+		util.updateHierarchySUID(hierNetwork, parentNetwork);
+		Long val = hierNetwork.getRow(hierNetwork).get(AppUtils.COLUMN_CD_ORIGINAL_NETWORK,
+				Long.class);
+		assertEquals(val, parentNetwork.getSUID());
+	}
+	
+	
 }

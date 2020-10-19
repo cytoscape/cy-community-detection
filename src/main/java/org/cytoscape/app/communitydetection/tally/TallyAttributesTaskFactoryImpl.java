@@ -17,6 +17,7 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.task.NetworkTaskFactory;
 import org.cytoscape.work.TaskIterator;
+import org.ndexbio.communitydetection.rest.model.exceptions.CommunityDetectionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +97,13 @@ public class TallyAttributesTaskFactoryImpl implements NetworkTaskFactory {
 			if (res == 0){
 				CyNetwork selectedParentNetwork = _parentNetworkDialog.getSelection();
 				if (_parentNetworkDialog.rememberChoice() == true){
-					_cyNetworkUtil.updateHierarchySUID(hierarchyNetwork, selectedParentNetwork);
+					try {
+						_cyNetworkUtil.updateHierarchySUID(hierarchyNetwork,
+								selectedParentNetwork);
+					} catch(CommunityDetectionException cde){
+						LOGGER.error("Error updating parent "
+								+ "network id on hierarchy network: " + cde.getMessage());
+					}
 				}
 				return selectedParentNetwork;
 			}
