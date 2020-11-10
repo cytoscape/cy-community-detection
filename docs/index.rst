@@ -43,7 +43,7 @@ To Report a bug:
 Cite CDAPS
 -----------
 
-Manuscript in preparation
+Singhal A, Cao S, Churas C, Pratt D, Fortunato S, Zheng F, et al. (2020) Multiscale community detection in Cytoscape. PLoS Comput Biol 16(10): e1008239. https://doi.org/10.1371/journal.pcbi.1008239
 
 .. toctree::
    :maxdepth: 2
