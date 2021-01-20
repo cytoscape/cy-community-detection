@@ -47,7 +47,7 @@ public class TallyDialog extends JPanel {
 			+ "In addition, any nodes in the hierarchy cluster that do <b>NOT</b> match any of the specified<br/>"
 			+ "set of attributes/columns are counted in the <b><i>" + AppUtils.COLUMN_CD_UNMATCHED + "</i></b><br/>"
 			+ "column/attribute.<br/><br/>"
-			+ "<b>NOTE:</b>For attribute(s)/column(s) of type <b><i>Double</i></b>, the value<br/>"
+			+ "<b>WARNING:</b> For attribute(s)/column(s) of type <b><i>Double</i></b>, the value<br/>"
 			+ "is rounded to nearest integer before checking to see if the value is <b><i>positive</i></b><br/><br/>"
 			+ "<a href=\"https://cdaps.readthedocs.io\">Click here for information about Tally Attributes on Hierarchy</a><br/><br/>";
 			
