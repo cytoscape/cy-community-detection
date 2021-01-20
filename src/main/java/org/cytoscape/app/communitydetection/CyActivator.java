@@ -140,7 +140,7 @@ public class CyActivator extends AbstractCyActivator {
 		tallyProps.setProperty(MENU_GRAVITY, "3.0");
 		tallyProps.setProperty(PREFERRED_MENU, AppUtils.TOP_MENU);
 		tallyProps.setProperty(TITLE, "Tally Attributes on Hierarchy");
-		TallyDialog tallyDialog = new TallyDialog(dialogUtil, iconJLabelFactory);
+		TallyDialog tallyDialog = new TallyDialog(iconJLabelFactory);
 		TallyAttributesTaskFactoryImpl tallyFac = new TallyAttributesTaskFactoryImpl(swingApplication,
 				dialogUtil, tallyDialog, parentNetworkFinder, parentNetworkDialog, cyNetworkUtil,
 		networkManager);

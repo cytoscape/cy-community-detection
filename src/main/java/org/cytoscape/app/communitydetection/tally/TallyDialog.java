@@ -32,7 +32,6 @@ public class TallyDialog extends JPanel {
 	
 	private final static Logger LOGGER = LoggerFactory.getLogger(TallyDialog.class);
 
-	private ShowDialogUtil _dialogUtil;
 	private boolean _guiLoaded = false;
 	private DefaultListModel _listModel;
 	private Map<String, CyColumn> _columnMap;
@@ -53,10 +52,8 @@ public class TallyDialog extends JPanel {
 			+ "<a href=\"https://cdaps.readthedocs.io\">Click here for information about Tally Attributes on Hierarchy</a><br/><br/>";
 			
 	
-	public TallyDialog(ShowDialogUtil dialogUtil,
-			IconJLabelDialogFactory iconFactory){
+	public TallyDialog(IconJLabelDialogFactory iconFactory){
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		_dialogUtil = dialogUtil;
 		_iconFactory = iconFactory;
 	}
 	
@@ -110,6 +107,7 @@ public class TallyDialog extends JPanel {
 	 */
 	private JPanel getListPanel(){
 		JPanel mainPanel = new JPanel();
+		mainPanel.setName("mainPanel");
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		
 		JPanel descriptionPanel = new JPanel();
@@ -132,9 +130,11 @@ public class TallyDialog extends JPanel {
 		mainPanel.add(descriptionPanel);
 		
 		_jList = new JList(_listModel);
+		_jList.setName("columnList");
 		_jList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		_jList.setToolTipText("Attributes/Column(s) from parent network");
 		JScrollPane listScrollPane = new JScrollPane(_jList);
+		listScrollPane.setName("columnListScrollPane");
 		mainPanel.add(listScrollPane);
 		return mainPanel;
 	}
