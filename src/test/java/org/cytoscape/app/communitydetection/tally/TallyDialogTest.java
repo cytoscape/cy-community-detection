@@ -74,7 +74,6 @@ public class TallyDialogTest {
 				eq("png"), eq("Tally Attributes on hierarchy description"),
 				eq(TallyDialog.DESC_MESSAGE), eq(20), eq(40));
 		
-		System.err.println("About to list components for td.....\n\n\n\n");
 		JScrollPane listScrollPane = null;
 		JList jList = null;
 		JPanel mainPanel = (JPanel)td.getComponents()[0];
