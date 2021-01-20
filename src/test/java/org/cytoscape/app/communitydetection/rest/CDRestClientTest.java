@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -253,7 +254,7 @@ public class CDRestClientTest {
 		CommunityDetectionAlgorithms cdAlgos = new CommunityDetectionAlgorithms();
 		CommunityDetectionAlgorithm cd = new CommunityDetectionAlgorithm();
 		cd.setName("hello");
-		HashMap<String, CommunityDetectionAlgorithm> algoMap = new HashMap<>();
+		LinkedHashMap<String, CommunityDetectionAlgorithm> algoMap = new LinkedHashMap<>();
 		algoMap.put(cd.getName(), cd);
 		cdAlgos.setAlgorithms(algoMap);
 

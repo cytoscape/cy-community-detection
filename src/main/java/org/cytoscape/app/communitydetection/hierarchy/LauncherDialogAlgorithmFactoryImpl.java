@@ -57,9 +57,11 @@ public class LauncherDialogAlgorithmFactoryImpl implements LauncherDialogAlgorit
 				return null;
 			}
 			ArrayList<CommunityDetectionAlgorithm> algorithms = new ArrayList<>();
-			for (CommunityDetectionAlgorithm algo : result.getAlgorithms().values()) {
+			for (String algoKey : result.getAlgorithms().keySet()){
+				CommunityDetectionAlgorithm algo = result.getAlgorithms().get(algoKey);
 				if (algorithmTypes == null || algorithmTypes.isEmpty() ||
-						algorithmTypes.contains(algo.getInputDataFormat())){
+							algorithmTypes.contains(algo.getInputDataFormat())){
+					LOGGER.info("Adding algorithm: " + algoKey + " full name: " + algo.getDisplayName());
 					algorithms.add(algo);
 				}
 			}

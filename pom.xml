@@ -10,13 +10,13 @@
 		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
 		<maven-bundle-plugin.version>4.2.1</maven-bundle-plugin.version>
 		<junit.version>4.12</junit.version>
-                <mockito.version>3.2.4</mockito.version>
+         <mockito.version>3.2.4</mockito.version>
 		<cytoscape.api.version>3.7.1</cytoscape.api.version>
 		<osgi.api.version>6.0.0</osgi.api.version>
 		<jackson.version>2.10.1</jackson.version>
-		<jackson-databind.version>2.10.1</jackson-databind.version>
-                <communitydetection-rest-model.version>0.8.1</communitydetection-rest-model.version>
-                <ndex-object-model.version>2.5.0-20200508.163437-2</ndex-object-model.version>
+		<jackson-databind.version>2.10.5.1</jackson-databind.version>
+         <communitydetection-rest-model.version>1.0.0</communitydetection-rest-model.version>
+         <ndex-object-model.version>2.5.0-20200508.163437-2</ndex-object-model.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 

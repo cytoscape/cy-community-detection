@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import org.cytoscape.app.communitydetection.rest.CDRestClient;
 import org.cytoscape.app.communitydetection.rest.CDRestClientException;
@@ -66,7 +67,7 @@ public class LauncherDialogAlgorithmFactoryImplTest {
 		ShowDialogUtil mockDialog = mock(ShowDialogUtil.class);
 		CDRestClient mockClient = mock(CDRestClient.class);
 		CommunityDetectionAlgorithms cda = new CommunityDetectionAlgorithms();
-		HashMap<String, CommunityDetectionAlgorithm> cMap = new HashMap<>();
+		LinkedHashMap<String, CommunityDetectionAlgorithm> cMap = new LinkedHashMap<>();
 		CommunityDetectionAlgorithm algoOne = new CommunityDetectionAlgorithm();
 		algoOne.setName("algo1");
 		algoOne.setInputDataFormat("fooey");
@@ -92,7 +93,7 @@ public class LauncherDialogAlgorithmFactoryImplTest {
 		ShowDialogUtil mockDialog = mock(ShowDialogUtil.class);
 		CDRestClient mockClient = mock(CDRestClient.class);
 		CommunityDetectionAlgorithms cda = new CommunityDetectionAlgorithms();
-		HashMap<String, CommunityDetectionAlgorithm> cMap = new HashMap<>();
+		LinkedHashMap<String, CommunityDetectionAlgorithm> cMap = new LinkedHashMap<>();
 		CommunityDetectionAlgorithm algoOne = new CommunityDetectionAlgorithm();
 		algoOne.setName("algo1");
 		algoOne.setInputDataFormat("fooey");
