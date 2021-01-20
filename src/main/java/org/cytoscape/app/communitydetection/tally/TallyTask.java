@@ -165,7 +165,7 @@ public class TallyTask extends AbstractTask {
 
 	@Override
 	public void cancel() {
-		super.cancel(); //To change body of generated methods, choose Tools | Templates.
+		super.cancel();
 	}
 	
 	
