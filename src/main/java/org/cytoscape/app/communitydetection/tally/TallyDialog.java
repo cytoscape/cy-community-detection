@@ -39,16 +39,18 @@ public class TallyDialog extends JPanel {
 	private JList _jList;
 	private IconJLabelDialogFactory _iconFactory;
 
-	final static String DESC_MESSAGE = "Tally Attributes on hierarchy provides a way<br/>"
-			+ "to count the number of nodes in each hierarchy cluster node that have<br/>"
-			+ "a <b><i>true</i></b> or <b><i>positive</i></b> value for a user specified set of attributes/columns<br/>"
+	final static String DESC_MESSAGE = "<b>Tally Attributes on Hierarchy</b> provides a way<br/>"
+			+ "to count the number of nodes in each hierarchy cluster that have<br/>"
+			+ "a <b><i>true</i></b> or <b><i>positive</i></b> value for a specified set of attributes/columns<br/>"
 			+ "in the parent network.<br/><br/>These counts are stored as new columns/attributes<br/>"
 			+ "on the hierarchy with the same name as seen in the parent network, but prefixed<br/>"
 			+ "with <b><i>" + AppUtils.COLUMN_CD_TALLY_NAMESPACE + "</i></b> namespace.<br/><br/>"
-			+ "In addition, any nodes in the cluster that does <b>NOT</b> match any of the user specified<br/>"
+			+ "In addition, any nodes in the hierarchy cluster that do <b>NOT</b> match any of the specified<br/>"
 			+ "set of attributes/columns are counted in the <b><i>" + AppUtils.COLUMN_CD_UNMATCHED + "</i></b><br/>"
 			+ "column/attribute.<br/><br/>"
-			+ "<a href=\"https://cdaps.readthedocs.io\">Click here for information about Tally Attributes on hierarchy</a><br/><br/>";
+			+ "<b>NOTE:</b>For attribute(s)/column(s) of type <b><i>Double</i></b>, the value<br/>"
+			+ "is rounded to nearest integer before checking to see if the value is <b><i>positive</i></b><br/><br/>"
+			+ "<a href=\"https://cdaps.readthedocs.io\">Click here for information about Tally Attributes on Hierarchy</a><br/><br/>";
 			
 	
 	public TallyDialog(ShowDialogUtil dialogUtil,
@@ -119,7 +121,7 @@ public class TallyDialog extends JPanel {
 		descConstraints.anchor = GridBagConstraints.LINE_START;
 		descConstraints.fill = GridBagConstraints.NONE;
 		descConstraints.insets = new Insets(20, 5, 20, 10);
-		descriptionPanel.add(new JLabel("Select Attributes/Columns(s) to tally"),
+		descriptionPanel.add(new JLabel("Select Attribute(s)/Columns(s) to tally"),
 				descConstraints);
 		
 		GridBagConstraints infoConstraints = new GridBagConstraints();
