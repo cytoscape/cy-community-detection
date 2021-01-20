@@ -13,7 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Tallies members in hierarchy clusters that have positive or true value for
+ * selected columns in parent network
+ * 
  * @author churas
  */
 public class TallyTask extends AbstractTask {
@@ -26,6 +28,13 @@ public class TallyTask extends AbstractTask {
 	private List<CyColumn> _tallyColumns;
 	private CyNetworkUtil _cyNetworkUtil;
 
+	/**
+	 * Constructor
+	 * @param cyNetworkUtil CyNetwork utilities
+	 * @param parentNetwork Parent network containing tallyColumns
+	 * @param hierarchyNetwork Hierarchy network
+	 * @param tallyColumns Columns to tally in parent network
+	 */
 	public TallyTask(CyNetworkUtil cyNetworkUtil,
 			CyNetwork parentNetwork, CyNetwork hierarchyNetwork,
 			List<CyColumn> tallyColumns){
@@ -35,6 +44,15 @@ public class TallyTask extends AbstractTask {
 		_tallyColumns = tallyColumns;
 	}
 	
+	/**
+	 * This task iterates over every cluster node in the hierarchyNetwork
+	 * passed in via the constructor and checks if value in tallyColumns on nodes
+	 * in parent network are positive or true. If so the tally for that column on the
+	 * given cluster is incremented by one. 
+	 * 
+	 * @param taskMonitor
+	 * @throws Exception 
+	 */
 	@Override
 	public void run(TaskMonitor taskMonitor) throws Exception {
 		taskMonitor.setTitle("Community Detection: Tally columns on hierarchy network");
@@ -77,6 +95,12 @@ public class TallyTask extends AbstractTask {
 				continue;
 			}
 			for (String member : memberList){
+				// handles case where node is empty string
+				// most likely means user set CD_MemberList column to
+				// empty string
+				if (member == null || member.isBlank()){
+					continue;
+				}
 				unMatched = true;
 				for (CyColumn tallyCol : this._tallyColumns){
 					CyNode parentNode = _cyNetworkUtil.getNodeMatchingName(_parentNetwork, member);
