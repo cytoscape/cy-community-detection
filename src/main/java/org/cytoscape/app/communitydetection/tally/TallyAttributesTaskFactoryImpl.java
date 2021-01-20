@@ -156,7 +156,7 @@ public class TallyAttributesTaskFactoryImpl implements NetworkTaskFactory {
 	    if (network == null){
 		JOptionPane.showMessageDialog(_swingApplication.getJFrame(),
 			"A network must be selected in Cytoscape to run "
-				+ "Tailly Attributes.\n"
+				+ "Tally Attributes.\n\n"
 				+ "For more information visit About menu item under Apps => Community Detection",
 			AppUtils.APP_NAME, JOptionPane.ERROR_MESSAGE);
 		 return new TaskIterator(new DoNothingTask());
@@ -164,10 +164,11 @@ public class TallyAttributesTaskFactoryImpl implements NetworkTaskFactory {
 		
 	    if (network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_MEMBER_LIST) == null){
 		JOptionPane.showMessageDialog(_swingApplication.getJFrame(),
-			"A node column named " + AppUtils.COLUMN_CD_MEMBER_LIST + " ("
-				+ "type String with genes delimited by spaces)\n" 
+			"A Community Detection hierarchy with a node column named\n" 
+					+ AppUtils.COLUMN_CD_MEMBER_LIST + " ("
+				+ "type String with node names delimited by spaces)\n" 
 				+ "needs to exist on network to run "
-				+ "Tally Attributes on hierarchy.\n"
+				+ "Tally Attributes on hierarchy.\n\n"
 				+ "For more information click About menu item under Apps => Community Detection",
 			AppUtils.APP_NAME, JOptionPane.ERROR_MESSAGE);
 		 return new TaskIterator(new DoNothingTask());
@@ -199,6 +200,9 @@ public class TallyAttributesTaskFactoryImpl implements NetworkTaskFactory {
 			List<CyColumn> tallyCols = _dialog.getColumnsToTally();
 			if (tallyCols == null || tallyCols.isEmpty()){
 				LOGGER.error("No columns selected to tally");
+				JOptionPane.showMessageDialog(_swingApplication.getJFrame(),
+			"No columns selected to tally",  
+			AppUtils.APP_NAME, JOptionPane.ERROR_MESSAGE);
 			    return new TaskIterator(new DoNothingTask());
 			}
 			return new TaskIterator(new TallyTask(_cyNetworkUtil,
