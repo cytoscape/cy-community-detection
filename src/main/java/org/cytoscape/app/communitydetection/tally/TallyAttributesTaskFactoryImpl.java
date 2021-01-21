@@ -73,7 +73,7 @@ public class TallyAttributesTaskFactoryImpl implements NetworkTaskFactory {
 	 * @param hierarchyNetwork 
 	 * @return parent network or {@code null} if none selected or found
 	 */
-	protected CyNetwork getParentNetwork(CyNetwork hierarchyNetwork){
+	private CyNetwork getParentNetwork(CyNetwork hierarchyNetwork){
 		try {
 			List<CyNetwork> parentNetworks =  _parentNetworkFinder.findParentNetworks(_networkManager.getNetworkSet(), 
 			                                                                          hierarchyNetwork);
@@ -120,7 +120,7 @@ public class TallyAttributesTaskFactoryImpl implements NetworkTaskFactory {
 	 * must be of type Integer
 	 * @param parentNetwork 
 	 */
-	public Map<String, CyColumn> getColumnsThatCanBeTallied(CyNetwork parentNetwork){
+	private Map<String, CyColumn> getColumnsThatCanBeTallied(CyNetwork parentNetwork){
 		Map<String, CyColumn> cyColumns = new HashMap<>();
 		for (CyColumn col : parentNetwork.getDefaultNodeTable().getColumns()){
 			if (col.getName() == null || 
@@ -154,7 +154,7 @@ public class TallyAttributesTaskFactoryImpl implements NetworkTaskFactory {
 	@Override
 	public TaskIterator createTaskIterator(CyNetwork network) {
 	    if (network == null){
-		JOptionPane.showMessageDialog(_swingApplication.getJFrame(),
+		_dialogUtil.showMessageDialog(_swingApplication.getJFrame(),
 			"A network must be selected in Cytoscape to run "
 				+ "Tally Attributes.\n\n"
 				+ "For more information visit About menu item under Apps => Community Detection",
@@ -163,7 +163,7 @@ public class TallyAttributesTaskFactoryImpl implements NetworkTaskFactory {
 	    }
 		
 	    if (network.getDefaultNodeTable().getColumn(AppUtils.COLUMN_CD_MEMBER_LIST) == null){
-		JOptionPane.showMessageDialog(_swingApplication.getJFrame(),
+		_dialogUtil.showMessageDialog(_swingApplication.getJFrame(),
 			"A Community Detection hierarchy with a node column named\n" 
 					+ AppUtils.COLUMN_CD_MEMBER_LIST + " ("
 				+ "type String with node names delimited by spaces)\n" 
@@ -183,10 +183,11 @@ public class TallyAttributesTaskFactoryImpl implements NetworkTaskFactory {
 		Map<String, CyColumn> columnsThatCanBeTallied = getColumnsThatCanBeTallied(selectedParentNetwork);
 		
 	    if (_dialog.createGUI(columnsThatCanBeTallied) == false){
+			LOGGER.error("Unable to create tally GUI");
 			return new TaskIterator(new DoNothingTask());
 		}
 	    Object[] options = {AppUtils.TALLY, AppUtils.CANCEL};
-	    int res = JOptionPane.showOptionDialog(_swingApplication.getJFrame(),
+	    int res = _dialogUtil.showOptionDialog(_swingApplication.getJFrame(),
 		                                   this._dialog,
 					           "Tally Attributes",
 						   JOptionPane.YES_NO_OPTION,
@@ -200,7 +201,7 @@ public class TallyAttributesTaskFactoryImpl implements NetworkTaskFactory {
 			List<CyColumn> tallyCols = _dialog.getColumnsToTally();
 			if (tallyCols == null || tallyCols.isEmpty()){
 				LOGGER.error("No columns selected to tally");
-				JOptionPane.showMessageDialog(_swingApplication.getJFrame(),
+				_dialogUtil.showMessageDialog(_swingApplication.getJFrame(),
 			"No columns selected to tally",  
 			AppUtils.APP_NAME, JOptionPane.ERROR_MESSAGE);
 			    return new TaskIterator(new DoNothingTask());
@@ -208,7 +209,7 @@ public class TallyAttributesTaskFactoryImpl implements NetworkTaskFactory {
 			return new TaskIterator(new TallyTask(_cyNetworkUtil,
 					selectedParentNetwork, network, tallyCols));
 		} else {
-		   LOGGER.error("User canceled operation");
+		   LOGGER.info("User canceled operation");
 		}
 	    return new TaskIterator(new DoNothingTask());
 	}
