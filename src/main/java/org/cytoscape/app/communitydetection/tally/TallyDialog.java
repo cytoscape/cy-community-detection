@@ -39,12 +39,12 @@ public class TallyDialog extends JPanel {
 	private IconJLabelDialogFactory _iconFactory;
 
 	final static String DESC_MESSAGE = "<b>Tally Attributes on Hierarchy</b> provides a way<br/>"
-			+ "to count the number of nodes in each hierarchy cluster that have<br/>"
-			+ "a <b><i>true</i></b> or <b><i>positive</i></b> value for a specified set of attributes/columns<br/>"
+			+ "to count the number of members in each hierarchy cluster that have<br/>"
+			+ "a <b><i>true</i></b>/<b><i>positive</i></b> value for a specified set of attributes/columns<br/>"
 			+ "in the parent network.<br/><br/>These counts are stored as new columns/attributes<br/>"
 			+ "on the hierarchy with the same name as seen in the parent network, but prefixed<br/>"
 			+ "with <b><i>" + AppUtils.COLUMN_CD_TALLY_NAMESPACE + "</i></b> namespace.<br/><br/>"
-			+ "In addition, any nodes in the hierarchy cluster that do <b>NOT</b> match any of the specified<br/>"
+			+ "In addition, any members in the hierarchy cluster that do <b>NOT</b> match any of the specified<br/>"
 			+ "set of attributes/columns are counted in the <b><i>" + AppUtils.COLUMN_CD_UNMATCHED + "</i></b><br/>"
 			+ "column/attribute.<br/><br/>"
 			+ "<b>WARNING:</b> For attribute(s)/column(s) of type <b><i>Double</i></b>, the value<br/>"
