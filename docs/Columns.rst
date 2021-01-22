@@ -114,3 +114,18 @@ prefixed with ``CD_``
  * ``CD_AnnotatedMembers_SourceDB`` Source database used by algorithm to set mapped term in ``CD_CommunityName``
 
  * ``CD_AnnotatedMembers_SourceTerm`` Id of mapped term set in ``CD_CommunityName``
+
+* Columns created in node table when invoking **Tally Attributes on Hierarchy**
+
+ .. image:: images/columns/resultingtallycols.png
+   :class: with-border with-shadow
+
+ * ``CommunityDetectionTally::<TALLY SELECTED COLUMNS>`` - Each column selected in the tally will have an entry and the value is the count of members that did have a positive or **true** value in the column on the parent network
+
+ * ``CommunityDetectionTally::Unmatched`` - Count of members in hierarchy cluster node that did **NOT** have a positive or **true** value in any of the tally columns
+
+ .. note::
+
+    **CommunityDetectionTally** is the namespace prefixed onto columns created when invoking **Tally Attributes on Hierarchy**
+
+ For more information click: :ref:`Tally Attributes on Hierarchy <tally-attributes-on-hierarchy>`
