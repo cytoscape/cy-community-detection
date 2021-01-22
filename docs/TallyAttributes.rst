@@ -44,3 +44,7 @@ To Run
 Select a hierarchy network created by CDAPS in Cytoscape and click on 
 `Apps -> Community Detection -> Tally Attributes on Hierarchy` menu option.
 
+.. note::
+
+     When run, any existing columns in **CommunityDetectionTally** namespace will
+     be removed from the hierarchy network. 
