@@ -6,6 +6,15 @@ Tally Attributes on Hierarchy
 **Tally Attributes on Hierarchy** provides a way to annotate the hierarchy network created
 when running a Community Detection algorithm from this App. 
 
+Example image of columns added by **Tally Attributes on Hierarchy** used in 
+conjunction with `node charts <http://manual.cytoscape.org/en/stable/Styles.html?highlight=pie%20chart#tutorial-6-creating-node-charts>`_
+as seen below.
+
+.. image:: images/quicktutorial/resultingtallypiechart.png
+   :class: with-border with-shadow
+
+
+
 More specifically, this menu option provides a way to count the number of members 
 in each hierarchy cluster node that have a 
 **true** or positive value for a specified set of attributes/columns in 
@@ -24,4 +33,5 @@ To invoke select a hierarchy network created by CDAPS in Cytoscape and click on
 
 .. warning::
 
-      For attribute(s)/column(s) of type **Double**, the value is rounded to nearest integer before checking to see if the value is positive
+      For attribute(s)/column(s) of type **Double**, the value is rounded to nearest 
+      integer before checking to see if the value is positive
