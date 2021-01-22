@@ -1,3 +1,5 @@
+.. _quick-tutorial:
+
 Quick Tutorial
 ==============
 
@@ -84,5 +86,45 @@ in the parent network like as seen here:
 .. image:: images/quicktutorial/view_interactions.png
    :class: with-border with-shadow
 
-Send terms in cluster to iQuery
+Tally Attributes on Hierarchy
 -------------------------------
+
+With a CDAPS hierarchy network (as generated via `Run Community Detection`_ step above) 
+click on **Apps -> Community Detection -> Tally Attributes on Hierarchy** menu option.
+
+.. image:: images/quicktutorial/runtallyattribs.png
+   :class: with-border with-shadow
+
+The above step will display a dialog seen below.
+
+Select one or more columns from parent network to tally on hierarchy network and
+click **OK** button.
+
+.. image:: images/quicktutorial/runtallyattribsdialog.png
+   :class: with-border with-shadow
+
+New corresponding columns will be added to the hierarchy network node table as seen
+below.
+
+.. image:: images/quicktutorial/resultingtallycols.png
+   :class: with-border with-shadow
+
+These new columns match the names of the columns selected in the dialog, but with the
+namespace **CommunityDetectionTally** prefixed.
+
+In addition, a **CommunityDetection** > **Unmatched** column will also be added.
+
+.. note::
+
+   These columns can then be used to create charts on each node as described in
+   `Creating Node Charts <http://manual.cytoscape.org/en/stable/Styles.html?highlight=pie%20chart#tutorial-6-creating-node-charts>`_
+
+Example image of columns added by **Tally Attributes on Hierarchy** used in conjunction
+with `node charts <http://manual.cytoscape.org/en/stable/Styles.html?highlight=pie%20chart#tutorial-6-creating-node-charts>`_
+
+.. image:: images/quicktutorial/resultingtallypiechart.png
+   :class: with-border with-shadow
+
+For more information click: :ref:`Tally Attributes on Hierarchy <tally-attributes-on-hierarchy>`
+
+
