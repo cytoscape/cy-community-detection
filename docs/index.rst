@@ -53,6 +53,7 @@ Singhal A, Cao S, Churas C, Pratt D, Fortunato S, Zheng F, et al. (2020) Multisc
    Installation
    WhatsNew
    QuickTutorial
+   TallyAttributes
    Columns
    Settings
 
