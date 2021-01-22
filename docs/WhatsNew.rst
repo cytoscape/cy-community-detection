@@ -8,8 +8,8 @@ Version 1.12.0
 ---------------------------
 
 * Added **Tally Attributes in Hierarchy** menu option that provides a way to count 
-  the number of nodes in each hierarchy cluster that have a true or 
-  positive value for a specified set of attributes/columns in the parent network.
+  the number of members in each hierarchy cluster that have a **true**/positive value 
+  for a specified set of attributes/columns in the parent network.
 
 * Order of algorithms displayed in **Run Community Detection** and **Run Functional Enrichment**
   dialogs now match what is returned from the CDAPS REST server. UD-1573
