@@ -7,12 +7,13 @@ What's New
 Version 1.12.0
 ---------------------------
 
-* Added **Tally Attributes in Hierarchy** menu option that provides a way to count 
-  the number of members in each hierarchy cluster that have a **true**/positive value 
-  for a specified set of attributes/columns in the parent network.
+* Added new menu option `Apps -> Community Detection -> Tally Attributes in Hierarchy`
+  that annotates the hierarchy network by adding columns using values tallied
+  from a set of attributes/columns in the parent network.
 
-* Order of algorithms displayed in **Run Community Detection** and **Run Functional Enrichment**
-  dialogs now match what is returned from the CDAPS REST server. UD-1573
+* Order of algorithms displayed in **Run Community Detection** and 
+  **Run Functional Enrichment** dialogs are now consistent with what is returned
+  from CDAPS REST server. UD-1573
 
 Version 1.11.0
 ---------------------------
@@ -32,7 +33,7 @@ Bug fixes
 Version 1.10.0
 ---------------------------
 
-* Added new menu option `App -> Community Detection -> Settings`
+* Added new menu option `Apps -> Community Detection -> Settings`
   that lets caller easily change CDAPS REST server. UD-1066
 
 * Added message letting user know using weight
