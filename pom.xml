@@ -14,7 +14,7 @@
 		<cytoscape.api.version>3.7.1</cytoscape.api.version>
 		<osgi.api.version>6.0.0</osgi.api.version>
 		<jackson.version>2.10.1</jackson.version>
-		<jackson-databind.version>2.10.5.1</jackson-databind.version>
+		<jackson-databind.version>2.12.7.1</jackson-databind.version>
          <communitydetection-rest-model.version>1.0.0</communitydetection-rest-model.version>
          <ndex-object-model.version>2.5.0-20200508.163437-2</ndex-object-model.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
