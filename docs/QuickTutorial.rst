@@ -46,6 +46,8 @@ A new network/hierarchy should be generated as seen here (The current default la
    Each node in the network/hierarchy above represents a cluster
    with the members of that cluster set in the **CD_MemberList** node column
 
+.. _perform-term-mapping:
+
 Perform Term Mapping
 --------------------
 
@@ -70,6 +72,9 @@ colored according to overlap as seen here:
 
 .. image:: images/quicktutorial/mapped_terms.png
    :class: with-border with-shadow
+
+
+.. _view-interactions:
 
 View Interactions
 -----------------
