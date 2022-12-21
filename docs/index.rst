@@ -56,6 +56,7 @@ Singhal A, Cao S, Churas C, Pratt D, Fortunato S, Zheng F, et al. (2020) Multisc
    TallyAttributes
    Columns
    Settings
+   faq
 
 .. toctree::
    :maxdepth: 2
