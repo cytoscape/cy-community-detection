@@ -32,6 +32,10 @@ Network Columns
    parent network a dialog will be displayed to the user letting
    them select the correct parent network.
 
+	.. note::
+
+	   Setting the value of ``__CD_OriginalNetwork`` network attribute to a negative value will display the Parent network dialog chooser the next time :ref:`View Interactions <view-interactions>` is invoked
+
  * ``description`` - Contains string in this format:
 
    .. code-block::
