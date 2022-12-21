@@ -9,6 +9,7 @@
 [appstore]: http://apps.cytoscape.org/apps/cycommunitydetection
 [directcytoscapeinstall]: https://cdaps.readthedocs.io/en/latest/Installation.html
 [cdservice]: https://github.com/cytoscape/communitydetection-rest-server
+[imagemagick]: https://imagemagick.org/index.php
 
 Community Detection App for Cytoscape
 =======================================
@@ -98,6 +99,15 @@ make docs
 Once `make docs` is run the documentation should automatically
 be displayed in default browser, but if not open `docs/_build/html/index.html` in
 a web browser
+
+To add dropshadow and border to images, [Image Magick][imagemagick] has been used with the following
+command:
+
+```Bash
+convert foo.png -shave 1x1 -bordercolor black -border 1 \
+        ( +clone -background gray -shadow 80x3+5+5 ) +swap \
+        -background none -layers merge +repage foo_fixed.png
+```
  
 COPYRIGHT AND LICENSE
 ========================
