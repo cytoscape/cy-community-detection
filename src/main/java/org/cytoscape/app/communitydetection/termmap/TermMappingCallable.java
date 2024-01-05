@@ -101,8 +101,11 @@ public class TermMappingCallable implements Callable<Boolean> {
 		String name = AppUtils.TYPE_NONE_VALUE;
 		StringBuilder annotatedList = new StringBuilder();
 		int counter = 0;
-		double pvalue = Double.NaN;
-		double jaccard = Double.NaN;
+		
+		// Set default to 1.0 since NaNs are not allowed in CX or CX2 
+		// Fix for UD-2650
+		double pvalue = 1.0;
+		double jaccard = 1.0;
 		boolean jaccardSet = false;
 		String sourcedb = null;
 		String sourceterm = null;
